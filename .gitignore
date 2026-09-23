@@ -1,0 +1,26 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+.DS_Store
+*.log
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# RepoLens output when dogfooding
+/repolens.md
+/.repolens/
+
+# Fixtures deliberately contain env files with fake values
+!test/fixtures/**/.env
+!test/fixtures/**/.env.*
+
+# Local launch drafts (not published)
+/launch/
+
+# Claude Code: only the shared project settings are committed
+/.claude/*
+!/.claude/settings.json

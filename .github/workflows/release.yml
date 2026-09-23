@@ -1,0 +1,112 @@
+name: Release
+
+# Publishes to npm when a version tag (v1.2.3) is pushed.
+# Uses npm trusted publishing (OIDC): no long-lived NPM_TOKEN is stored.
+# One-time setup on npmjs.com: package settings → Trusted publisher →
+# GitHub Actions, repository Douglas-Strey/repolens-cli, workflow release.yml.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # npm trusted publishing (OIDC) and provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          # No dependency cache in the publishing job, to rule out cache poisoning.
+          package-manager-cache: false
+
+      - name: Check that the tag matches package.json
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+      - name: Ensure npm supports trusted publishing
+        run: npm install --global npm@^11.5.1
+
+      - name: Publish to npm
+        # The first version is published by hand (trusted publishing needs the package to
+        # exist); its tag then only creates the GitHub release and updates the tap.
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "repolens-cli@$version" version >/dev/null 2>&1; then
+            echo "::notice::repolens-cli@$version is already on npm; skipping publish"
+          else
+            npm publish --access public
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="$(node scripts/changelog-section.ts "$GITHUB_REF_NAME")"
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "$notes"
+
+  homebrew:
+    # Updates Formula/repolens.rb in the Douglas-Strey/homebrew-tap repository so
+    # `brew install douglas-strey/tap/repolens` gets the new version.
+    # Needs the HOMEBREW_TAP_TOKEN secret: a fine-grained token limited to the tap
+    # repository with "Contents: read and write". Without it the job is skipped.
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - name: Skip without a tap token
+        if: env.HOMEBREW_TAP_TOKEN == ''
+        run: echo "::notice::HOMEBREW_TAP_TOKEN is not set; skipping the Homebrew tap update"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.HOMEBREW_TAP_TOKEN != ''
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        with:
+          repository: Douglas-Strey/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Update the formula
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        run: node scripts/homebrew-formula.ts "${GITHUB_REF_NAME#v}" --output homebrew-tap/Formula/repolens.rb
+
+      - name: Commit and push
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        working-directory: homebrew-tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/repolens.rb
+          git diff --cached --quiet && { echo "Formula already up to date"; exit 0; }
+          git commit -m "repolens ${GITHUB_REF_NAME#v}"
+          git push

@@ -1,0 +1,5 @@
+# Local development overrides (merged automatically by `docker compose up`)
+services:
+  app:
+    ports:
+      - "9229:9229"

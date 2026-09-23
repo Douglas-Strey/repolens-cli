@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">RepoLens</title>
+  <style>
+    .ink { stroke: #1f2328 } .muted { stroke: #59636e } .dot { fill: #59636e } .accent { stroke: #0969da }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #f0f6fc } .muted { stroke: #9198a1 } .dot { fill: #9198a1 } .accent { stroke: #4493f8 }
+    }
+  </style>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle class="ink" cx="58" cy="58" r="40" stroke-width="8"/>
+    <path class="ink" d="M87 87 L112 112" stroke-width="12"/>
+    <path class="ink" d="M42 44 H68" stroke-width="6"/>
+    <path class="accent" d="M52 58 H76" stroke-width="6"/>
+    <path class="muted" d="M52 72 H70" stroke-width="6"/>
+  </g>
+  <circle class="dot" cx="33" cy="44" r="3.5"/>
+  <circle class="dot" cx="43" cy="58" r="3.5"/>
+  <circle class="dot" cx="43" cy="72" r="3.5"/>
+</svg>

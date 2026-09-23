@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "title": "RepoLens configuration",
+  "description": "Settings for RepoLens, in repolens.config.json, the \"repolens\" key of package.json, or the user config file. See https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/configuration.md",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "ignore": {
+      "description": "Paths to leave out of the scan, in .gitignore syntax, relative to the scanned directory.",
+      "type": "array",
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "examples": [["legacy/", "examples/", "*.generated.ts"]]
+    },
+    "maxFiles": {
+      "description": "Stop indexing after this many files. --max-files takes precedence. Default: 100000.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "doctor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "failOn": {
+          "description": "Default for --fail-on: the lowest severity that makes `repolens doctor` exit with 1.",
+          "enum": ["error", "warning", "info", "never"]
+        },
+        "rules": {
+          "description": "Per-check settings by code: \"off\" turns a check off, a severity replaces the severity of what it finds. A project's own config file can't turn off or lower security checks.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "additionalProperties": {
+            "enum": ["off", "info", "warning", "error"]
+          },
+          "examples": [{ "ENV_UNUSED": "off", "LOCKFILE_MISSING": "error" }]
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provided": {
+          "description": "Variables your platform or tooling provides; the doctor never expects them in an env file. `*` matches any characters.",
+          "type": "array",
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_*]{1,128}$"
+          },
+          "examples": [["FLY_*", "RENDER_EXTERNAL_URL"]]
+        }
+      }
+    },
+    "output": {
+      "description": "Terminal preferences. Only read from the user config file.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "description": "Colors in terminal output. NO_COLOR, FORCE_COLOR, --color and --no-color take precedence.",
+          "enum": ["auto", "always", "never"]
+        },
+        "ascii": {
+          "description": "Use ASCII status symbols (+, !, x) instead of Unicode ones.",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

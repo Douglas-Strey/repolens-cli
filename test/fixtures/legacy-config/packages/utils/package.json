@@ -1,0 +1,14 @@
+{
+  "name": "@legacy/utils",
+  "version": "1.2.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc src/index.ts --outDir dist --declaration",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

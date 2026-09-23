@@ -1,0 +1,16 @@
+{
+  "name": "@acme/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --outDir dist --declaration src/index.ts",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit src/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

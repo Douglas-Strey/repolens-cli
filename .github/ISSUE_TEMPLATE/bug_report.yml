@@ -1,0 +1,50 @@
+name: Bug report
+description: RepoLens crashed, missed something, or reported something wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. **Never paste secrets.** RepoLens output
+        never contains secret values, but your own files might.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did RepoLens report, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can we reproduce it?
+      description: |
+        The command you ran and a minimal repository layout that triggers the problem
+        (file names and relevant snippets, e.g. the `package.json` or `docker-compose.yml`).
+      placeholder: |
+        repolens doctor --verbose
+
+        package.json:
+        { "packageManager": "pnpm@10.17.1" }
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Output of the command with `--verbose` (review it before pasting).
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: RepoLens version
+      description: Output of `repolens --version`
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Node.js version
+      placeholder: macOS 26, Node.js 24.8.0
+    validations:
+      required: true

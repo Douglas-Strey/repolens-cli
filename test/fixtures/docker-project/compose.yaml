@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgres://app:REPOLENS_FIXTURE_SECRET_pw@db:5432/app
+      - NODE_ENV=production
+      - SESSION_SECRET=REPOLENS_FIXTURE_SECRET_session
+    env_file: .env
+
+  db:
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: REPOLENS_FIXTURE_SECRET_pg
+      POSTGRES_DB: app
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cache:
+    image: redis:8-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  mail:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  worker:
+    build: .
+    command: node worker.js
+    depends_on:
+      - db
+      - cache
+    profiles:
+      - workers
+    ports:
+      - target: 9229
+        published: "9230"
+        protocol: tcp
+
+volumes:
+  db-data: {}

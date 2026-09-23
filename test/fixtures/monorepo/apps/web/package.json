@@ -1,0 +1,18 @@
+{
+  "name": "@acme/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --port 3000",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "biome check .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@acme/ui": "workspace:*",
+    "nuxt": "^4.1.2",
+    "vue": "catalog:"
+  }
+}

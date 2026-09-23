@@ -1,0 +1,17 @@
+{
+  "name": "legacy-config",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "eslint": "^9.36.0",
+    "turbo": "^2.5.8"
+  }
+}

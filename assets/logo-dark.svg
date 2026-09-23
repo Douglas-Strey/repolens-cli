@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="416" height="128" viewBox="0 0 416 128" role="img" aria-labelledby="title">
+  <title id="title">RepoLens</title>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Lens -->
+    <circle cx="58" cy="58" r="40" stroke="#f0f6fc" stroke-width="8"/>
+    <path d="M87 87 L112 112" stroke="#f0f6fc" stroke-width="12"/>
+    <!-- An indented file tree seen through the lens -->
+    <path d="M42 44 H68" stroke="#f0f6fc" stroke-width="6"/>
+    <path d="M52 58 H76" stroke="#4493f8" stroke-width="6"/>
+    <path d="M52 72 H70" stroke="#9198a1" stroke-width="6"/>
+  </g>
+  <g fill="#9198a1">
+    <circle cx="33" cy="44" r="3.5"/>
+    <circle cx="43" cy="58" r="3.5"/>
+    <circle cx="43" cy="72" r="3.5"/>
+  </g>
+  <text x="136" y="82" fill="#f0f6fc" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="60" font-weight="700" letter-spacing="-1.5">Repo<tspan fill="#9198a1" font-weight="600">Lens</tspan></text>
+</svg>

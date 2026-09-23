@@ -1,0 +1,608 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderDoctor > hides passing categories and hints in quiet mode 1`] = `
+"RepoLens Doctor · acme-api
+
+✗ Security
+    ✗ TRACKED_ENV_FILE       .env is tracked by Git
+⚠ Runtime
+    ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+    ℹ ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
+
+Summary  ✗ 1 error · ⚠ 2 warnings · ℹ 1 info · ✓ 18 passed
+"
+`;
+
+exports[`renderDoctor > lists passing checks, skipped counts, files and scan notes in verbose mode 1`] = `
+"RepoLens Doctor · acme-api
+
+✗ Security
+    ✗ TRACKED_ENV_FILE       .env is tracked by Git
+                             → Run \`git rm --cached .env\` and add .env to .gitignore
+                             Files: .env
+⚠ Runtime
+    ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+                             → Use the same major version everywhere (22)
+                             Files: .nvmrc, apps/api/Dockerfile
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+                             → Add STRIPE_SECRET_KEY= to .env.example
+                             Files: apps/api/src/billing.ts
+    ℹ ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
+                             Files: .env.example
+✓ Tooling  1 skipped
+    ✓ Passing check 0
+    ✓ Passing check 1
+    ✓ Passing check 2
+    ✓ Passing check 3
+    ✓ Passing check 4
+    ✓ Passing check 5
+    ✓ Passing check 6
+    ✓ Passing check 7
+    ✓ Passing check 8
+    ✓ Passing check 9
+    ✓ Passing check 10
+    ✓ Passing check 11
+    ✓ Passing check 12
+    ✓ Passing check 13
+    ✓ Passing check 14
+    ✓ Passing check 15
+    ✓ Passing check 16
+    ✓ Passing check 17
+
+Notes
+  • RepoLens couldn't parse apps/legacy/docker-compose.yml
+    Nested mappings are not allowed in compact mappings at line 4, column 8
+
+Summary  ✗ 1 error · ⚠ 2 warnings · ℹ 1 info · ✓ 18 passed · 1 skipped
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`renderDoctor > renders the sample diagnostics by category 1`] = `
+"RepoLens Doctor · acme-api
+
+✗ Security
+    ✗ TRACKED_ENV_FILE       .env is tracked by Git
+                             → Run \`git rm --cached .env\` and add .env to .gitignore
+⚠ Runtime
+    ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+                             → Use the same major version everywhere (22)
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+                             → Add STRIPE_SECRET_KEY= to .env.example
+    ℹ ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
+✓ Tooling
+
+ℹ 1 scan warning; some checks may be incomplete. Run with --verbose for details.
+
+Summary  ✗ 1 error · ⚠ 2 warnings · ℹ 1 info · ✓ 18 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`renderDoctor > renders with ASCII symbols 1`] = `
+"RepoLens Doctor - acme-api
+
+x Security
+    x TRACKED_ENV_FILE       .env is tracked by Git
+                             -> Run \`git rm --cached .env\` and add .env to .gitignore
+! Runtime
+    ! NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+                             -> Use the same major version everywhere (22)
+! Environment
+    ! ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+                             -> Add STRIPE_SECRET_KEY= to .env.example
+    i ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
++ Tooling
+
+i 1 scan warning; some checks may be incomplete. Run with --verbose for details.
+
+Summary  x 1 error, ! 2 warnings, i 1 info, + 18 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`renderDoctor > says so when there are no problems 1`] = `
+"RepoLens Doctor · project
+
+✓ Runtime
+
+✓ No problems found
+
+Summary  ✓ 1 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`renderDoctor > wraps messages and hints within a narrow terminal 1`] = `
+"RepoLens Doctor · acme-api
+
+✗ Security
+    ✗ TRACKED_ENV_FILE       .env is tracked by Git
+                             → Run \`git rm --cached .env\`
+                               and add .env to .gitignore
+⚠ Runtime
+    ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree:
+                             .nvmrc pins 22, Dockerfile uses
+                             20
+                             → Use the same major version
+                               everywhere (22)
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in
+                             code but missing from
+                             .env.example
+                             → Add STRIPE_SECRET_KEY= to
+                               .env.example
+    ℹ ENV_UNUSED             LEGACY_FLAG is documented in
+                             .env.example but never
+                             referenced
+✓ Tooling
+
+ℹ 1 scan warning; some checks may be incomplete. Run with
+  --verbose for details.
+
+Summary  ✗ 1 error · ⚠ 2 warnings · ℹ 1 info · ✓ 18 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`renderScan > keeps every line within a narrow terminal 1`] = `
+"RepoLens · acme-api
+Acme storefront and API
+
+Project
+  Type             Monorepo · 4 packages
+  Languages        TypeScript 74% · Vue 14% · Go 9% · CSS 3%
+  Package manager  pnpm 10.17.1
+  Runtimes         Node.js 22 · Go 1.25
+  Entry points     services/billing · acme (bin)
+  Git              main @ 3f2a1c9 · github.com/acme/acme-api
+
+Frameworks
+  Nuxt 4.1.2       apps/web
+  Vue 3.5.22       apps/web, packages/ui
+  Fastify 5.6.1    apps/api
+  net/http         services/billing
+
+Workspace
+  apps/api          @acme/api                Fastify
+  apps/web          @acme/web                Nuxt, Vue
+  packages/ui       @acme/ui                 Vue
+  services/billing  github.com/acme/billing  net/http
+
+Quick start
+  1. pnpm db:up    start local services
+  2. pnpm install  install dependencies
+  3. pnpm dev      start the development server
+
+Services  docker-compose.yml
+  postgres    postgres:17  :5432        PostgreSQL
+  redis       redis:8      :6379        Redis
+  minio       minio/minio  :9000 :9001  MinIO
+
+Dockerfiles
+  apps/api/Dockerfile  node:20-alpine  expose 4000
+
+Databases
+  PostgreSQL       via Docker, config, env
+  Redis            via Docker, env
+  ORM              Prisma 6.16.2
+
+Environment  5 variables · .env, .env.example
+                     local  example  code
+  STRIPE_SECRET_KEY    ✗       ✗      ✓
+  LEGACY_FLAG          ✗       ✓      ✗
+  API_URL              ✓       ✓      ✓
+  DATABASE_URL         ✓       ✓      ✓
+  REDIS_URL            ✓       ✓      ✓
+
+Scripts
+  pnpm dev         turbo dev
+  pnpm build       turbo build
+  pnpm test        turbo test
+  pnpm lint        biome check .
+  pnpm db:up       docker compose up -d
+  … 1 script in a workspace package (use --verbose)
+
+Routes  5 API · 2 pages
+  GET     /api/users       apps/api/src/routes/users.ts:12
+  POST    /api/auth/login  apps/api/src/routes/auth.ts:8
+  POST    /api/orders ?    apps/api/src/routes/orders.ts:21
+  GET     /api/stats       apps/web/server/api/stats.get.ts
+  ANY     /invoices        services/billing/main.go:14
+  … 2 pages not listed (use --verbose)
+  +1 low-confidence route (use --verbose)
+  ? prefix may apply
+
+CI  GitHub Actions
+  ci.yml           lint · typecheck · test · build
+
+Tooling
+  Testing          Vitest, Playwright  (23 test files)
+  Linting          Biome
+  Types            TypeScript
+  Build            Turborepo, Vite
+
+Potential issues
+  ✗ TRACKED_ENV_FILE       .env is tracked by Git
+  ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code
+                           but missing from .env.example
+  ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc
+                           pins 22, Dockerfile uses 20
+
+Notes
+  • RepoLens couldn't parse apps/legacy/docker-compose.yml
+  Run with --verbose to see technical details.
+
+Summary
+  ✗ 1 error   ⚠ 2 warnings   ℹ 1 info   ✓ 18 checks passed
+  Run repolens doctor for details and fixes.
+"
+`;
+
+exports[`renderScan > renders a generic repository with Makefile targets, CI and key files 1`] = `
+"RepoLens · data-tools
+
+Project
+  Languages        Python 80% · Shell 18% · Markdown <1%
+
+Quick start
+  1. make install  install dependencies
+  2. make run      run the project
+
+Scripts
+  make install     pip install -r requirements.txt
+  make test        pytest -q
+  make run         python -m app
+
+CI  GitHub Actions
+  ci.yml           test
+
+Key files
+  .editorconfig             EditorConfig
+  .github/workflows/ci.yml  GitHub Actions workflow
+  Makefile                  Make targets
+  pyproject.toml            Python project metadata
+
+Summary
+  ✓ No problems found
+"
+`;
+
+exports[`renderScan > renders an empty result without crashing 1`] = `
+"RepoLens · project
+
+RepoLens found no recognizable project files here.
+
+Summary
+  ✓ No problems found
+"
+`;
+
+exports[`renderScan > renders only problems and the summary in quiet mode 1`] = `
+"Potential issues
+  ✗ TRACKED_ENV_FILE       .env is tracked by Git
+  ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+  ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+
+Summary
+  ✗ 1 error   ⚠ 2 warnings   ℹ 1 info   ✓ 18 checks passed
+  Run repolens doctor for details and fixes.
+"
+`;
+
+exports[`renderScan > renders the sample monorepo 1`] = `
+"RepoLens · acme-api
+Acme storefront and API
+
+Project
+  Type             Monorepo · 4 packages (pnpm workspaces, Turborepo)
+  Languages        TypeScript 74% · Vue 14% · Go 9% · CSS 3%
+  Package manager  pnpm 10.17.1
+  Runtimes         Node.js 22 · Go 1.25
+  Entry points     services/billing · acme (bin)
+  Git              main @ 3f2a1c9 · github.com/acme/acme-api
+
+Frameworks
+  Nuxt 4.1.2       apps/web
+  Vue 3.5.22       apps/web, packages/ui
+  Fastify 5.6.1    apps/api
+  net/http         services/billing
+
+Workspace
+  apps/api          @acme/api                Fastify
+  apps/web          @acme/web                Nuxt, Vue
+  packages/ui       @acme/ui                 Vue
+  services/billing  github.com/acme/billing  net/http
+
+Quick start
+  1. pnpm db:up    start local services
+  2. pnpm install  install dependencies
+  3. pnpm dev      start the development server
+
+Services  docker-compose.yml
+  postgres    postgres:17  :5432        PostgreSQL
+  redis       redis:8      :6379        Redis
+  minio       minio/minio  :9000 :9001  MinIO
+
+Dockerfiles
+  apps/api/Dockerfile  node:20-alpine  expose 4000
+
+Databases
+  PostgreSQL       via Docker, config, env
+  Redis            via Docker, env
+  ORM              Prisma 6.16.2
+
+Environment  5 variables · .env, .env.example
+                     local  example  code
+  STRIPE_SECRET_KEY    ✗       ✗      ✓
+  LEGACY_FLAG          ✗       ✓      ✗
+  API_URL              ✓       ✓      ✓
+  DATABASE_URL         ✓       ✓      ✓
+  REDIS_URL            ✓       ✓      ✓
+
+Scripts
+  pnpm dev         turbo dev
+  pnpm build       turbo build
+  pnpm test        turbo test
+  pnpm lint        biome check .
+  pnpm db:up       docker compose up -d
+  … 1 script in a workspace package (use --verbose)
+
+Routes  5 API · 2 pages
+  GET     /api/users       apps/api/src/routes/users.ts:12
+  POST    /api/auth/login  apps/api/src/routes/auth.ts:8
+  POST    /api/orders ?    apps/api/src/routes/orders.ts:21
+  GET     /api/stats       apps/web/server/api/stats.get.ts
+  ANY     /invoices        services/billing/main.go:14
+  … 2 pages not listed (use --verbose)
+  +1 low-confidence route (use --verbose)
+  ? prefix may apply
+
+CI  GitHub Actions
+  ci.yml           lint · typecheck · test · build
+
+Tooling
+  Testing          Vitest, Playwright  (23 test files)
+  Linting          Biome
+  Types            TypeScript
+  Build            Turborepo, Vite
+
+Potential issues
+  ✗ TRACKED_ENV_FILE       .env is tracked by Git
+  ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+  ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+
+Notes
+  • RepoLens couldn't parse apps/legacy/docker-compose.yml
+  Run with --verbose to see technical details.
+
+Summary
+  ✗ 1 error   ⚠ 2 warnings   ℹ 1 info   ✓ 18 checks passed
+  Run repolens doctor for details and fixes.
+"
+`;
+
+exports[`renderScan > renders the sample monorepo with ASCII symbols 1`] = `
+"RepoLens - acme-api
+Acme storefront and API
+
+Project
+  Type             Monorepo - 4 packages (pnpm workspaces, Turborepo)
+  Languages        TypeScript 74% - Vue 14% - Go 9% - CSS 3%
+  Package manager  pnpm 10.17.1
+  Runtimes         Node.js 22 - Go 1.25
+  Entry points     services/billing - acme (bin)
+  Git              main @ 3f2a1c9 - github.com/acme/acme-api
+
+Frameworks
+  Nuxt 4.1.2       apps/web
+  Vue 3.5.22       apps/web, packages/ui
+  Fastify 5.6.1    apps/api
+  net/http         services/billing
+
+Workspace
+  apps/api          @acme/api                Fastify
+  apps/web          @acme/web                Nuxt, Vue
+  packages/ui       @acme/ui                 Vue
+  services/billing  github.com/acme/billing  net/http
+
+Quick start
+  1. pnpm db:up    start local services
+  2. pnpm install  install dependencies
+  3. pnpm dev      start the development server
+
+Services  docker-compose.yml
+  postgres    postgres:17  :5432        PostgreSQL
+  redis       redis:8      :6379        Redis
+  minio       minio/minio  :9000 :9001  MinIO
+
+Dockerfiles
+  apps/api/Dockerfile  node:20-alpine  expose 4000
+
+Databases
+  PostgreSQL       via Docker, config, env
+  Redis            via Docker, env
+  ORM              Prisma 6.16.2
+
+Environment  5 variables - .env, .env.example
+                     local  example  code
+  STRIPE_SECRET_KEY    x       x      +
+  LEGACY_FLAG          x       +      x
+  API_URL              +       +      +
+  DATABASE_URL         +       +      +
+  REDIS_URL            +       +      +
+
+Scripts
+  pnpm dev         turbo dev
+  pnpm build       turbo build
+  pnpm test        turbo test
+  pnpm lint        biome check .
+  pnpm db:up       docker compose up -d
+  ... 1 script in a workspace package (use --verbose)
+
+Routes  5 API - 2 pages
+  GET     /api/users       apps/api/src/routes/users.ts:12
+  POST    /api/auth/login  apps/api/src/routes/auth.ts:8
+  POST    /api/orders ?    apps/api/src/routes/orders.ts:21
+  GET     /api/stats       apps/web/server/api/stats.get.ts
+  ANY     /invoices        services/billing/main.go:14
+  ... 2 pages not listed (use --verbose)
+  +1 low-confidence route (use --verbose)
+  ? prefix may apply
+
+CI  GitHub Actions
+  ci.yml           lint - typecheck - test - build
+
+Tooling
+  Testing          Vitest, Playwright  (23 test files)
+  Linting          Biome
+  Types            TypeScript
+  Build            Turborepo, Vite
+
+Potential issues
+  x TRACKED_ENV_FILE       .env is tracked by Git
+  ! ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+  ! NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+
+Notes
+  * RepoLens couldn't parse apps/legacy/docker-compose.yml
+  Run with --verbose to see technical details.
+
+Summary
+  x 1 error   ! 2 warnings   i 1 info   + 18 checks passed
+  Run repolens doctor for details and fixes.
+"
+`;
+
+exports[`renderScan > renders verbose output with evidence, confidence and every list expanded 1`] = `
+"RepoLens · acme-api
+Acme storefront and API
+
+Project
+  Type             Monorepo · 4 packages (pnpm workspaces, Turborepo)
+  Languages        TypeScript 74% · Vue 14% · Go 9% · CSS 3%
+  Package manager  pnpm 10.17.1
+                   packageManager field in package.json
+                   pnpm-lock.yaml
+  Runtimes         Node.js 22 · Go 1.25
+                   Node.js 22 in .nvmrc
+                   Node.js >=22 in package.json (engines.node)
+                   Node.js 20 in apps/api/Dockerfile (FROM)
+                   Go 1.25 in services/billing/go.mod (go directive)
+  Entry points     services/billing · acme (bin)
+  Git              main @ 3f2a1c9 · github.com/acme/acme-api
+  Structure        apps/ 84 · packages/ 41 · services/ 12 · .github/ 3
+
+Frameworks
+  Nuxt 4.1.2       apps/web
+                   dependency nuxt@^4.1.2 in apps/web/package.json
+                   config file apps/web/nuxt.config.ts
+  Vue 3.5.22       apps/web, packages/ui
+                   dependency vue@^3.5.22 in apps/web/package.json
+  Fastify 5.6.1    apps/api
+                   dependency fastify@^5.6.1 in apps/api/package.json
+  net/http         services/billing  medium confidence
+                   net/http handlers in services/billing/main.go
+
+Workspace
+  apps/api          @acme/api                Fastify
+  apps/web          @acme/web                Nuxt, Vue
+  packages/ui       @acme/ui                 Vue
+  services/billing  github.com/acme/billing  net/http
+
+Quick start
+  1. pnpm db:up    start local services
+  2. pnpm install  install dependencies
+  3. pnpm dev      start the development server
+
+Services  docker-compose.yml
+  postgres    postgres:17  :5432        PostgreSQL
+  redis       redis:8      :6379        Redis
+  minio       minio/minio  :9000 :9001  MinIO
+
+Dockerfiles
+  apps/api/Dockerfile  node:20-alpine  expose 4000
+
+Databases
+  PostgreSQL       via Docker, config, env
+                   postgres service (postgres:17) in docker-compose.yml
+                   Prisma provider "postgresql"
+  Redis            via Docker, env
+                   redis service (redis:8) in docker-compose.yml
+  ORM              Prisma 6.16.2
+                   Prisma: dependency @prisma/client in apps/api/package.json
+
+Environment  5 variables · .env, .env.example
+                     local  example  code
+  STRIPE_SECRET_KEY    ✗       ✗      ✓    secret
+  LEGACY_FLAG          ✗       ✓      ✗
+  API_URL              ✓       ✓      ✓    http :4000 (local)
+  DATABASE_URL         ✓       ✓      ✓    postgres :5432 (local)
+  REDIS_URL            ✓       ✓      ✓    redis :6379 (local)
+
+Scripts
+  pnpm dev         turbo dev
+  pnpm build       turbo build
+  pnpm test        turbo test
+  pnpm lint        biome check .
+  pnpm db:up       docker compose up -d
+  apps/web
+    pnpm --filter @acme/web dev  nuxt dev
+
+Routes  6 API · 2 pages
+  GET     /api/users       apps/api/src/routes/users.ts:12
+  POST    /api/auth/login  apps/api/src/routes/auth.ts:8
+  POST    /api/orders ?    apps/api/src/routes/orders.ts:21
+          registered inside a plugin; a prefix may apply
+  GET     /api/stats       apps/web/server/api/stats.get.ts
+  ANY     /invoices        services/billing/main.go:14
+  GET     /internal/debug  scripts/debug-server.js:3
+  page    /                apps/web/app/pages/index.vue
+  page    /products/:id    apps/web/app/pages/products/[id].vue
+
+CI  GitHub Actions
+  ci.yml           lint · typecheck · test · build
+                   on push, pull_request · 3 jobs · ubuntu-latest, windows-latest
+
+Tooling
+  Testing          Vitest 3.2.4, Playwright  (23 test files)
+                   Vitest: dependency vitest in apps/api/package.json
+                   Playwright: config file apps/web/playwright.config.ts
+  Linting          Biome 2.2.4
+                   Biome: biome.json
+  Types            TypeScript 5.9.2
+                   TypeScript: tsconfig.json
+  Build            Turborepo 2.5.8, Vite (medium)
+                   Turborepo: turbo.json
+                   Vite: bundled by Nuxt
+
+Configuration files
+  .env.example              Environment variable template
+  .github/workflows/ci.yml  GitHub Actions workflow
+  .nvmrc                    Node.js version (nvm)
+  apps/web/nuxt.config.ts   Nuxt configuration
+  biome.json                Biome configuration
+  docker-compose.yml        Docker Compose services
+  package.json              npm package manifest
+  pnpm-workspace.yaml       pnpm workspace
+  turbo.json                Turborepo configuration
+
+Potential issues
+  ✗ TRACKED_ENV_FILE       .env is tracked by Git
+  ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
+  ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
+  ℹ ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
+
+Notes
+  • RepoLens couldn't parse apps/legacy/docker-compose.yml
+    Nested mappings are not allowed in compact mappings at line 4, column 8
+
+Summary
+  ✗ 1 error   ⚠ 2 warnings   ℹ 1 info   ✓ 18 checks passed
+  Run repolens doctor for details and fixes.
+"
+`;

@@ -1,0 +1,84 @@
+{
+  "name": "repolens-cli",
+  "version": "0.1.0",
+  "description": "Understand any repository in seconds: stack, services, env vars, scripts, routes and setup problems. Static, local, no telemetry.",
+  "keywords": [
+    "cli",
+    "developer-tools",
+    "devtools",
+    "repository-analysis",
+    "codebase",
+    "onboarding",
+    "monorepo",
+    "doctor",
+    "dotenv",
+    "docker-compose"
+  ],
+  "homepage": "https://github.com/Douglas-Strey/repolens-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Douglas-Strey/repolens-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Douglas-Strey/repolens-cli.git"
+  },
+  "license": "MIT",
+  "author": "Douglas Strey",
+  "type": "module",
+  "bin": {
+    "repolens": "dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./schema/config.schema.json": "./schema/config.schema.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "schema",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.21.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "node src/cli.ts",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "bench": "node scripts/bench.ts",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "prepack": "pnpm run build",
+    "screenshots": "node scripts/screenshot.ts"
+  },
+  "dependencies": {
+    "ignore": "^7.0.10",
+    "semver": "^7.8.5",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^22.20.4",
+    "@types/semver": "^7.8.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

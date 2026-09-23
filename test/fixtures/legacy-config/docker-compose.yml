@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+
+  admin:
+    image: nginx:1.29
+    ports:
+      - "8080:8080"

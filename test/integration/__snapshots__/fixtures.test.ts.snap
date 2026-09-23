@@ -1,0 +1,1104 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`terminal output per fixture > broken-config 1`] = `
+"RepoLens · broken-config
+
+Project
+  Type             Workspace (pnpm workspaces, Turborepo)
+  Languages        TypeScript 100%
+  Package manager  pnpm
+  Runtimes         Node.js · Go
+
+Quick start
+  1. pnpm install  install dependencies
+
+Scripts
+  pnpm build       tsc
+
+CI  GitHub Actions
+  ci.yml           not analyzed
+
+Tooling
+  Types            TypeScript
+  Build            Turborepo, tsc
+
+Potential issues
+  ⚠ CONFIG_PARSE_ERROR  Couldn't parse .github/workflows/ci.yml
+  ⚠ CONFIG_PARSE_ERROR  Couldn't parse docker-compose.yml
+  ⚠ CONFIG_PARSE_ERROR  Couldn't parse go.mod
+  ⚠ CONFIG_PARSE_ERROR  Couldn't parse pnpm-workspace.yaml
+  ⚠ CONFIG_PARSE_ERROR  Couldn't parse turbo.json
+
+Summary
+  ⚠ 5 warnings   ℹ 1 info   ✓ 1 check passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · broken-config
+
+ℹ Package manager
+    ℹ LOCKFILE_MISSING    package.json declares dependencies but there is no lockfile
+                          → Run \`pnpm install\` and commit pnpm-lock.yaml so installs are
+                            reproducible
+⚠ Configuration
+    ⚠ CONFIG_PARSE_ERROR  Couldn't parse .github/workflows/ci.yml
+                          → Fix the syntax error in .github/workflows/ci.yml; RepoLens skipped it
+                            (run with --verbose to see the parser message)
+    ⚠ CONFIG_PARSE_ERROR  Couldn't parse docker-compose.yml
+                          → Fix the syntax error in docker-compose.yml; RepoLens skipped it (run
+                            with --verbose to see the parser message)
+    ⚠ CONFIG_PARSE_ERROR  Couldn't parse go.mod
+                          → Fix the syntax error in go.mod; RepoLens skipped it (run with --verbose
+                            to see the parser message)
+    ⚠ CONFIG_PARSE_ERROR  Couldn't parse pnpm-workspace.yaml
+                          → Fix the syntax error in pnpm-workspace.yaml; RepoLens skipped it (run
+                            with --verbose to see the parser message)
+    ⚠ CONFIG_PARSE_ERROR  Couldn't parse turbo.json
+                          → Fix the syntax error in turbo.json; RepoLens skipped it (run with
+                            --verbose to see the parser message)
+
+Summary  ⚠ 5 warnings · ℹ 1 info · ✓ 1 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > broken-env 1`] = `
+"RepoLens · broken-env
+
+Project
+  Type             Application
+  Languages        TypeScript 60% · HTML 20% · JavaScript 20%
+  Package manager  npm
+  Runtime          Node.js
+
+Frameworks
+  React 19.2.0     frontend
+
+Quick start
+  1. npm install  install dependencies
+  2. npm run dev  start the development server
+
+Environment  10 variables · .env, .env.example
+                      local  example  code
+  ANALYTICS_KEY         ✗       ✗      ✓
+  LEGACY_TOKEN          ✗       ✗      ✓
+  VITE_FEATURE_FLAGS    ✗       ✗      ✓    public, default
+  VITE_SENTRY_DSN       ✓       ✗      ✓    public
+  APP_TITLE             ✓       ✗      ✗
+  EXPORTED_VAR          ✓       ✗      ✗
+  SECRET_TOKEN          ✓       ✗      ✗
+  LEGACY_FLAG           ✗       ✓      ✗
+  API_URL               ✓       ✓      ✓
+  VITE_API_URL          ✓       ✓      ✓    public
+
+Scripts
+  npm run dev      vite
+  npm run build    vite build
+  npm test         echo "Error: no test specified" && exit 1
+
+Tooling
+  Types            TypeScript
+  Build            Vite
+
+Potential issues
+  ⚠ ENV_LOCAL_ONLY    APP_TITLE is set in .env but missing from .env.example
+  ⚠ ENV_LOCAL_ONLY    EXPORTED_VAR is set in .env but missing from .env.example
+  ⚠ ENV_LOCAL_ONLY    SECRET_TOKEN is set in .env but missing from .env.example
+  ⚠ ENV_UNDOCUMENTED  ANALYTICS_KEY is used in code but missing from .env.example
+  ⚠ ENV_UNDOCUMENTED  LEGACY_TOKEN is used in code but missing from .env.example
+  ⚠ ENV_UNDOCUMENTED  VITE_SENTRY_DSN is used in code but missing from .env.example
+
+Summary
+  ⚠ 6 warnings   ℹ 4 info   ✓ 10 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · broken-env
+
+✓ Security
+ℹ Package manager
+    ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
+                                  package-lock.json)
+                                  → Run \`npm pkg set packageManager=npm@$(npm --version)\` to record
+                                    it in package.json (Corepack, if you use it, then runs that
+                                    version)
+⚠ Environment
+    ⚠ ENV_LOCAL_ONLY              APP_TITLE is set in .env but missing from .env.example
+                                  → Add APP_TITLE= to .env.example so other developers know to set
+                                    it, or remove it from .env
+    ⚠ ENV_LOCAL_ONLY              EXPORTED_VAR is set in .env but missing from .env.example
+                                  → Add EXPORTED_VAR= to .env.example so other developers know to
+                                    set it, or remove it from .env
+    ⚠ ENV_LOCAL_ONLY              SECRET_TOKEN is set in .env but missing from .env.example
+                                  → Add SECRET_TOKEN= to .env.example so other developers know to
+                                    set it, or remove it from .env
+    ⚠ ENV_UNDOCUMENTED            ANALYTICS_KEY is used in code but missing from .env.example
+                                  → Add ANALYTICS_KEY= to .env.example
+    ⚠ ENV_UNDOCUMENTED            LEGACY_TOKEN is used in code but missing from .env.example
+                                  → Add LEGACY_TOKEN= to .env.example
+    ⚠ ENV_UNDOCUMENTED            VITE_SENTRY_DSN is used in code but missing from .env.example
+                                  → Add VITE_SENTRY_DSN= to .env.example
+    ℹ ENV_UNDOCUMENTED            VITE_FEATURE_FLAGS is used in code (with a default) but missing
+                                  from .env.example
+                                  → Add VITE_FEATURE_FLAGS= to .env.example
+    ℹ ENV_UNUSED                  LEGACY_FLAG is documented in .env.example but never referenced in
+                                  code
+                                  → Remove LEGACY_FLAG from .env.example if nothing reads it any
+                                    more
+ℹ Scripts
+    ℹ SCRIPT_TEST_PLACEHOLDER     The "test" script in package.json is the npm placeholder that
+                                  always fails
+                                  → Replace it with a real test command or remove it
+✓ Git
+✓ Configuration
+
+Summary  ⚠ 6 warnings · ℹ 4 info · ✓ 10 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > broken-manifest 1`] = `
+"RepoLens · broken-manifest
+
+Project
+  Languages        JavaScript 100%
+  Package manager  npm
+  Runtime          Node.js
+
+Potential issues
+  ✗ PACKAGE_JSON_INVALID  package.json is not valid JSON
+
+Summary
+  ✗ 1 error   ✓ 1 check passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · broken-manifest
+
+✗ Configuration
+    ✗ PACKAGE_JSON_INVALID  package.json is not valid JSON
+                            → Fix the syntax error (often a trailing comma or a missing quote);
+                              until then RepoLens and your package manager cannot read scripts or
+                              dependencies
+
+Summary  ✗ 1 error · ✓ 1 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > bun-app 1`] = `
+"RepoLens · bun-app
+
+Project
+  Type             Application
+  Languages        TypeScript 100%
+  Package manager  Bun
+  Runtime          Bun
+
+Frameworks
+  Hono 4.10.2      backend
+
+Quick start
+  1. bun install  install dependencies
+  2. bun run dev  start the development server
+
+Environment  2 variables
+                   local  example  code
+  PORT               –       –      ✓    default
+  WEBHOOK_SECRET     –       –      ✓
+  – file not present (.env, .env.example)
+
+Scripts
+  bun run dev      bun --watch src/index.ts
+  bun run test     bun test
+
+Routes  2 API
+  GET     /              src/index.ts:9
+  POST    /webhooks/:id  src/index.ts:11
+
+Tooling
+  Testing          Bun test  (1 test file)
+
+Potential issues
+  ⚠ ENV_EXAMPLE_MISSING  No .env.example documents the 1 environment variable used in code
+
+Summary
+  ⚠ 1 warning   ℹ 1 info   ✓ 8 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · bun-app
+
+ℹ Package manager
+    ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
+                                  bun.lock)
+                                  → Run \`npm pkg set packageManager=bun@$(bun --version)\` to record
+                                    it in package.json
+⚠ Environment
+    ⚠ ENV_EXAMPLE_MISSING         No .env.example documents the 1 environment variable used in code
+                                  → Create .env.example with the variable names and empty values:
+                                    WEBHOOK_SECRET=
+✓ Scripts
+✓ Git
+✓ Configuration
+
+Summary  ⚠ 1 warning · ℹ 1 info · ✓ 8 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > docker-project 1`] = `
+"RepoLens · docker-project
+
+Project
+  Type             Application
+  Languages        JavaScript 100%
+  Package manager  npm
+  Runtime          Node.js 22
+
+Frameworks
+  Express 5.1.0    backend
+
+Quick start
+  1. cp .env.example .env                create your local environment file
+  2. docker compose up -d cache db mail  start the backing services
+  3. npm install                         install dependencies
+  4. npm run dev                         start the development server
+
+Services  compose.yaml, docker-compose.override.yml
+  app         build . → node:22-alpine (3 stages)  :3000 :9229     app
+  cache       redis:8-alpine                       127.0.0.1:6379  Redis
+  db          postgres:17-alpine                   :5432           PostgreSQL
+  mail        axllent/mailpit:v1.27                :8025 :1025     Mailpit
+  worker      build . → node:22-alpine (3 stages)  :9230           app  profile workers
+
+Databases
+  PostgreSQL       via Docker, dependency, env
+  Redis            via Docker, dependency, env
+
+Environment  3 variables · .env.example
+                   local  example  code
+  DATABASE_URL       –       ✓      ✓
+  REDIS_URL          –       ✓      ✓
+  SESSION_SECRET     –       ✓      ✓
+  – file not present (.env)
+
+Scripts
+  npm run dev      node --watch src/server.js
+  npm start        node src/server.js
+  npm run worker   node worker.js
+
+Routes  2 API
+  GET     /         src/server.js:21
+  GET     /healthz  src/server.js:11
+
+Potential issues
+  ⚠ COMPOSE_ENV_FILE_MISSING  Service app in compose.yaml loads env_file .env, which does not exist
+  ⚠ ENV_PORT_MISMATCH         DATABASE_URL in .env.example uses port 5433, but the db service
+                              publishes 5432
+
+Summary
+  ⚠ 2 warnings   ℹ 2 info   ✓ 12 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · docker-project
+
+✓ Security
+✓ Runtime
+ℹ Package manager
+    ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
+                                  package-lock.json)
+                                  → Run \`npm pkg set packageManager=npm@$(npm --version)\` to record
+                                    it in package.json (Corepack, if you use it, then runs that
+                                    version)
+✓ Environment
+⚠ Docker
+    ⚠ COMPOSE_ENV_FILE_MISSING    Service app in compose.yaml loads env_file .env, which does not
+                                  exist
+                                  → Run \`cp .env.example .env\` and fill in the values, or mark the
+                                    entry optional with required: false
+    ⚠ ENV_PORT_MISMATCH           DATABASE_URL in .env.example uses port 5433, but the db service
+                                  publishes 5432
+                                  → Use port 5432 in .env.example, or publish 5433 from the db
+                                    service in compose.yaml
+    ℹ COMPOSE_VERSION_OBSOLETE    compose.yaml sets the obsolete top-level "version" key
+                                  → Remove the "version" line; Docker Compose ignores it and prints
+                                    a warning on every run
+✓ Git
+✓ Configuration
+
+Summary  ⚠ 2 warnings · ℹ 2 info · ✓ 12 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > express-api 1`] = `
+"RepoLens · express-api
+Inventory items REST API
+
+Project
+  Type             Application
+  Languages        JavaScript 100%
+  Package manager  npm
+  Runtime          Node.js
+
+Frameworks
+  Express 5.1.0    backend
+
+Quick start
+  1. cp .env.example .env  create your local environment file
+  2. npm install           install dependencies
+  3. npm run dev           start the development server
+
+Databases
+  MongoDB          via dependency, env
+  ORM              Mongoose 8.18.2
+
+Environment  2 variables · .env.example
+                   local  example  code
+  MONGODB_URI        –       ✓      ✓
+  PORT               –       ✓      ✓    default
+  – file not present (.env)
+
+Scripts
+  npm run dev      node --watch src/index.js
+  npm start        node src/index.js
+  npm test         node --test
+
+Routes  7 API
+  GET     /               src/index.js:12
+  GET     /api/items      src/routes/items.js:6
+  POST    /api/items      src/routes/items.js:11
+  PUT     /api/items/:id  src/routes/items.js:16
+  DELETE  /api/items/:id  src/routes/items.js:22
+  GET     /health         src/routes/health.js:7
+  POST    /health         src/routes/health.js:7
+
+Tooling
+  Testing          node:test  (1 test file)
+
+Summary
+  ℹ 1 info   ✓ 12 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · express-api
+
+✓ Security
+ℹ Package manager
+    ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
+                                  package-lock.json)
+                                  → Run \`npm pkg set packageManager=npm@$(npm --version)\` to record
+                                    it in package.json (Corepack, if you use it, then runs that
+                                    version)
+✓ Environment
+✓ Scripts
+✓ Git
+✓ Configuration
+
+Summary  ℹ 1 info · ✓ 12 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > fastify-api 1`] = `
+"RepoLens · orders-api
+
+Project
+  Type             Application
+  Languages        TypeScript 100%
+  Package manager  Yarn 4.10.3
+  Runtime          Node.js 22
+
+Frameworks
+  Fastify 5.6.1    backend
+
+Quick start
+  1. cp .env.example .env  create your local environment file
+  2. yarn install          install dependencies
+  3. yarn dev              start the development server
+
+Dockerfiles
+  Dockerfile  node:22-alpine  expose 3000
+
+Databases
+  PostgreSQL       via dependency, config
+  Redis            via dependency, env
+  ORM              Drizzle 0.44.5
+
+Environment  4 variables · .env.example
+                   local  example  code
+  DATABASE_URL       –       ✓      ✓
+  JWT_SECRET         –       ✓      ✓
+  PORT               –       ✓      ✓    default
+  REDIS_URL          –       ✓      ✓    default
+  – file not present (.env)
+
+Scripts
+  yarn dev         tsx watch src/server.ts
+  yarn start       node dist/server.js
+  yarn build       tsc -p tsconfig.build.json
+  yarn test        vitest run
+  yarn lint        biome check .
+  yarn format      biome format --write .
+
+Routes  8 API
+  GET     /health      src/server.ts:11
+  POST    /orders      src/routes/orders.ts:9
+  GET     /orders/:id  src/routes/orders.ts:19
+  HEAD    /orders/:id  src/routes/orders.ts:19
+  GET     /users       src/routes/users.ts:7
+  POST    /users       src/routes/users.ts:11
+  GET     /users/:id   src/routes/users.ts:16
+  DELETE  /users/:id   src/routes/users.ts:22
+
+CI  GitHub Actions
+  ci.yml           lint · test · build
+
+Tooling
+  Testing          Vitest  (1 test file)
+  Linting          Biome
+  Types            TypeScript
+  Build            tsc
+
+Summary
+  ✓ 16 checks passed
+
+────────────────────────────────────────
+
+RepoLens Doctor · orders-api
+
+✓ Security
+✓ Runtime
+✓ Package manager
+✓ Environment
+✓ Scripts
+✓ Git
+✓ Configuration
+
+✓ No problems found
+
+Summary  ✓ 16 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > go-api 1`] = `
+"RepoLens · go-api
+
+Project
+  Type             Application
+  Languages        Go 100%
+  Package manager  Go modules
+  Runtime          Go 1.25.1
+  Entry points     cmd/api · cmd/worker
+
+Frameworks
+  Gin 1.11.0       backend
+
+Quick start
+  1. cp .env.example .env  create your local environment file
+  2. go mod download       install dependencies
+  3. make run              run the project
+
+Dockerfiles
+  Dockerfile  gcr.io/distroless/static-debian12  2 stages  expose 8080
+
+Databases
+  PostgreSQL       via dependency
+  Redis            via dependency, env
+
+Environment  3 variables · .env.example
+                   local  example  code
+  DATABASE_URL       –       ✓      ✓
+  PORT               –       ✓      ✓
+  REDIS_ADDR         –       ✓      ✓
+  – file not present (.env)
+
+Scripts
+  make build         go build -o $(BINARY) ./cmd/api
+  make test          go test -race ./...
+  make lint          golangci-lint run ./...
+  make run           go run ./cmd/api
+  make docker-build  docker build -t $(IMAGE) .
+
+Routes  6 API
+  GET     /api/v1/users      cmd/api/main.go:35
+  POST    /api/v1/users      cmd/api/main.go:36
+  GET     /api/v1/users/:id  cmd/api/main.go:37
+  ANY     /debug/vars        internal/metrics/metrics.go:22
+  GET     /health            cmd/api/main.go:29
+  GET     /metrics           internal/metrics/metrics.go:17
+
+CI  GitHub Actions
+  go.yml           lint · test · build
+
+Tooling
+  Testing          go test  (1 test file)
+  Linting          golangci-lint
+  Build            Make
+
+Summary
+  ✓ 8 checks passed
+
+────────────────────────────────────────
+
+RepoLens Doctor · go-api
+
+✓ Security
+✓ Runtime
+✓ Environment
+✓ Scripts
+✓ Tooling
+✓ Configuration
+
+✓ No problems found
+
+Summary  ✓ 8 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > legacy-config 1`] = `
+"RepoLens · legacy-config
+
+Project
+  Type             Monorepo · 2 packages (pnpm workspaces, npm workspaces, Turborepo)
+  Languages        TypeScript 67% · JavaScript 33%
+  Package manager  pnpm 10.17.1
+  Runtime          Node.js
+
+Workspace
+  packages/core    @legacy/core
+  packages/utils   @legacy/utils
+
+Quick start
+  1. docker compose up -d admin  start the backing services
+  2. pnpm install                install dependencies
+
+Services  docker-compose.yml
+  admin       nginx:1.29                   :8080  nginx
+  web         build . → nginx:1.29-alpine  :8080  app
+
+Scripts
+  pnpm build       turbo run build
+  pnpm test        turbo run test
+  pnpm lint        turbo run lint
+  … 5 scripts in workspace packages (use --verbose)
+
+Tooling
+  Testing          node:test
+  Linting          ESLint
+  Types            TypeScript
+  Build            Turborepo, tsc
+
+Potential issues
+  ✗ DOCKER_PORT_CONFLICT        Services admin and web in docker-compose.yml both publish host port
+                                8080
+  ⚠ ESLINT_LEGACY_CONFIG        .eslintrc.cjs is a legacy ESLint config, but ESLint 9 only reads
+                                eslint.config.js by default
+  ⚠ TURBO_PIPELINE_KEY          turbo.json uses "pipeline", which Turborepo 2 renamed to "tasks"
+  ⚠ WORKSPACE_DUPLICATE_CONFIG  Workspaces are declared in both pnpm-workspace.yaml and package.json
+                                with different patterns, but pnpm only reads pnpm-workspace.yaml
+  ⚠ WORKSPACE_PATTERN_EMPTY     Workspace pattern "tools/*" in pnpm-workspace.yaml matches no
+                                package
+
+Summary
+  ✗ 1 error   ⚠ 4 warnings   ℹ 1 info   ✓ 10 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · legacy-config
+
+✓ Package manager
+✗ Docker
+    ✗ DOCKER_PORT_CONFLICT        Services admin and web in docker-compose.yml both publish host
+                                  port 8080
+                                  → Give each service its own host port, e.g. "8081:80", or only one
+                                    of them can start
+    ℹ COMPOSE_VERSION_OBSOLETE    docker-compose.yml sets the obsolete top-level "version" key
+                                  → Remove the "version" line; Docker Compose ignores it and prints
+                                    a warning on every run
+⚠ Workspace
+    ⚠ TURBO_PIPELINE_KEY          turbo.json uses "pipeline", which Turborepo 2 renamed to "tasks"
+                                  → Rename "pipeline" to "tasks" (\`npx @turbo/codemod migrate\`
+                                    upgrades the whole configuration)
+    ⚠ WORKSPACE_DUPLICATE_CONFIG  Workspaces are declared in both pnpm-workspace.yaml and
+                                  package.json with different patterns, but pnpm only reads
+                                  pnpm-workspace.yaml
+                                  → Remove "workspaces" from package.json and keep the patterns in
+                                    pnpm-workspace.yaml
+    ⚠ WORKSPACE_PATTERN_EMPTY     Workspace pattern "tools/*" in pnpm-workspace.yaml matches no
+                                  package
+                                  → Remove "tools/*" from pnpm-workspace.yaml, or add a package.json
+                                    in a matching directory
+✓ Scripts
+✓ Git
+⚠ Tooling
+    ⚠ ESLINT_LEGACY_CONFIG        .eslintrc.cjs is a legacy ESLint config, but ESLint 9 only reads
+                                  eslint.config.js by default
+                                  → Migrate to eslint.config.js with
+                                    \`npx @eslint/migrate-config .eslintrc.cjs\`
+✓ Configuration
+
+Summary  ✗ 1 error · ⚠ 4 warnings · ℹ 1 info · ✓ 10 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > mixed-lockfiles 1`] = `
+"RepoLens · mixed-lockfiles
+
+Project
+  Languages        JavaScript 100%
+  Package manager  pnpm 9.15.9
+  Runtime          Node.js 20
+
+Frameworks
+  Vue 3.5.22       frontend
+
+Quick start
+  1. pnpm install  install dependencies
+  2. pnpm dev      start the development server
+
+Scripts
+  pnpm dev         vite
+  pnpm build       vite build
+  pnpm lint        eslint .
+
+Tooling
+  Linting          ESLint
+  Build            Vite
+
+Potential issues
+  ⚠ MULTIPLE_LOCKFILES         Found lockfiles for npm and pnpm: package-lock.json and
+                               pnpm-lock.yaml
+  ⚠ NODE_VERSION_CONFLICT      Node.js versions disagree (.node-version: 18.20.4, .nvmrc: 20)
+  ⚠ NODE_VERSION_OUT_OF_RANGE  .node-version pins Node.js 18.20.4, which does not satisfy
+                               engines.node ">=22" in package.json
+  ⚠ NODE_VERSION_OUT_OF_RANGE  .nvmrc pins Node.js 20, which does not satisfy engines.node ">=22" in
+                               package.json
+  ⚠ RUNTIME_EOL                Node.js 18 reached end-of-life on 2025-04-30 (pinned in
+                               .node-version)
+  ⚠ RUNTIME_EOL                Node.js 20 reached end-of-life on 2026-04-30 (pinned in .nvmrc)
+  ⚠ ESLINT_LEGACY_CONFIG       .eslintrc.json is a legacy ESLint config, but ESLint 9 only reads
+                               eslint.config.js by default
+
+Summary
+  ⚠ 7 warnings   ✓ 6 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · mixed-lockfiles
+
+⚠ Runtime
+    ⚠ NODE_VERSION_CONFLICT      Node.js versions disagree (.node-version: 18.20.4, .nvmrc: 20)
+                                 → Pin the same Node.js major version in every file, e.g. 22
+    ⚠ NODE_VERSION_OUT_OF_RANGE  .node-version pins Node.js 18.20.4, which does not satisfy
+                                 engines.node ">=22" in package.json
+                                 → Use a version matching ">=22" in .node-version, or update
+                                   engines.node
+    ⚠ NODE_VERSION_OUT_OF_RANGE  .nvmrc pins Node.js 20, which does not satisfy engines.node ">=22"
+                                 in package.json
+                                 → Use a version matching ">=22" in .nvmrc, or update engines.node
+    ⚠ RUNTIME_EOL                Node.js 18 reached end-of-life on 2025-04-30 (pinned in
+                                 .node-version)
+                                 → Upgrade to a supported LTS release (Node.js 22 or 24)
+    ⚠ RUNTIME_EOL                Node.js 20 reached end-of-life on 2026-04-30 (pinned in .nvmrc)
+                                 → Upgrade to a supported LTS release (Node.js 22 or 24)
+⚠ Package manager
+    ⚠ MULTIPLE_LOCKFILES         Found lockfiles for npm and pnpm: package-lock.json and
+                                 pnpm-lock.yaml
+                                 → Delete package-lock.json and keep pnpm-lock.yaml, since
+                                   package.json declares pnpm
+✓ Scripts
+⚠ Tooling
+    ⚠ ESLINT_LEGACY_CONFIG       .eslintrc.json is a legacy ESLint config, but ESLint 9 only reads
+                                 eslint.config.js by default
+                                 → Migrate to eslint.config.js with
+                                   \`npx @eslint/migrate-config .eslintrc.json\`
+✓ Configuration
+
+Summary  ⚠ 7 warnings · ✓ 6 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > monorepo 1`] = `
+"RepoLens · acme
+
+Project
+  Type             Monorepo · 4 packages (pnpm workspaces, Turborepo)
+  Languages        TypeScript 63% · Vue 25% · Go 13%
+  Package manager  pnpm 10.17.1
+  Runtimes         Node.js 22 · Go 1.25
+  Entry points     services/billing
+
+Frameworks
+  Nuxt 4.1.2       apps/web
+  Vue 3.5.22       apps/web, packages/ui
+  Fastify 5.6.1    apps/api
+  net/http         services/billing
+
+Workspace
+  apps/api         @acme/api     Fastify
+  apps/web         @acme/web     Nuxt, Vue
+  packages/shared  @acme/shared
+  packages/ui      @acme/ui      Vue
+
+Quick start
+  1. pnpm db:up    start local services
+  2. pnpm install  install dependencies
+  3. pnpm dev      start the development server
+
+Services  docker-compose.yml
+  minio       minio/minio  :9000 :9001  MinIO
+  postgres    postgres:17  :5432        PostgreSQL
+  redis       redis:8      :6379        Redis
+
+Databases
+  PostgreSQL       via Docker, config, env
+  Redis            via Docker, env
+  ORM              Prisma 6.16.2
+
+Environment  4 variables · .env, .env.example
+                     local  example  code
+  STRIPE_SECRET_KEY    ✗       ✗      ✓
+  API_URL              ✓       ✓      ✓    default
+  DATABASE_URL         ✓       ✓      ✓
+  REDIS_URL            ✓       ✓      ✓
+
+Scripts
+  pnpm dev         turbo dev
+  pnpm build       turbo build
+  pnpm test        turbo test
+  pnpm lint        turbo lint
+  pnpm typecheck   turbo typecheck
+  pnpm db:up       docker compose up -d
+  … 18 scripts in workspace packages (use --verbose)
+
+Routes  5 API · 1 page
+  POST    /api/auth/login  apps/api/src/index.ts:17
+  POST    /api/orders      apps/api/src/index.ts:23
+  GET     /api/users       apps/api/src/index.ts:13
+  GET     /api/stats       apps/web/server/api/stats.get.ts
+  ANY     /invoices        services/billing/main.go:19
+  … 1 page not listed (use --verbose)
+
+CI  GitHub Actions
+  ci.yml           lint · test · build
+
+Tooling
+  Testing          Vitest
+  Linting          Biome
+  Types            TypeScript
+  Build            Turborepo, tsc
+
+Potential issues
+  ⚠ ENV_UNDOCUMENTED  STRIPE_SECRET_KEY is used in code but missing from .env.example
+
+Summary
+  ⚠ 1 warning   ✓ 24 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · acme
+
+✓ Security
+✓ Runtime
+✓ Package manager
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED  STRIPE_SECRET_KEY is used in code but missing from .env.example
+                        → Add STRIPE_SECRET_KEY= to .env.example
+✓ Docker
+✓ Workspace
+✓ Scripts
+✓ Git
+✓ Tooling
+✓ Configuration
+
+Summary  ⚠ 1 warning · ✓ 24 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > nest-api 1`] = `
+"RepoLens · nest-api
+
+Project
+  Type             Application
+  Languages        TypeScript 88% · JavaScript 13%
+  Package manager  pnpm 10.17.1
+  Runtime          Node.js
+
+Frameworks
+  NestJS 11.1.6    backend
+
+Quick start
+  1. cp .env.example .env  create your local environment file
+  2. pnpm install          install dependencies
+  3. pnpm start:dev        start the development server
+
+Databases
+  MySQL            via dependency, config
+  ORM              TypeORM 0.3.27
+
+Environment  4 variables · .env.example
+                   local  example  code
+  DB_HOST            –       ✓      ✓
+  DB_PASSWORD        –       ✓      ✓
+  DB_PORT            –       ✓      ✓    default
+  DB_USER            –       ✓      ✓
+  – file not present (.env)
+
+Scripts
+  pnpm start:dev   nest start --watch
+  pnpm start       nest start
+  pnpm start:prod  node dist/main
+  pnpm build       nest build
+  pnpm test        jest
+  pnpm test:e2e    jest --config ./test/jest-e2e.json
+  pnpm lint        eslint "{src,test}/**/*.ts" --fix
+
+Routes  6 API
+  GET     /health     src/health/health.controller.ts:5
+  GET     /users      src/users/users.controller.ts:9
+  POST    /users      src/users/users.controller.ts:19
+  GET     /users/:id  src/users/users.controller.ts:14
+  PATCH   /users/:id  src/users/users.controller.ts:24
+  DELETE  /users/:id  src/users/users.controller.ts:29
+
+Tooling
+  Testing          Jest  (1 test file)
+  Linting          ESLint
+  Types            TypeScript
+
+Summary
+  ✓ 14 checks passed
+
+────────────────────────────────────────
+
+RepoLens Doctor · nest-api
+
+✓ Security
+✓ Package manager
+✓ Environment
+✓ Scripts
+✓ Git
+✓ Configuration
+
+✓ No problems found
+
+Summary  ✓ 14 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > next-app 1`] = `
+"RepoLens · next-dashboard
+
+Project
+  Type             Application
+  Languages        TypeScript 93% · JavaScript 7%
+  Package manager  npm
+  Runtime          Node.js 22.20.0
+
+Frameworks
+  Next.js 16.0.1   full-stack
+  React 19.2.0     frontend
+
+Quick start
+  1. npm install  install dependencies
+  2. npm run dev  start the development server
+
+Databases
+  PostgreSQL       via config, env
+  ORM              Prisma 6.16.2
+
+Environment  3 variables · .env.example, .env.local
+                        local  example  code
+  AUTH_SECRET             ✗       ✗      ✓
+  DATABASE_URL            ✓       ✓      ✓
+  NEXT_PUBLIC_SITE_URL    ✓       ✓      ✓    public
+
+Scripts
+  npm run dev      next dev --turbopack
+  npm start        next start
+  npm run build    next build
+  npm test         jest
+  npm run lint     eslint .
+
+Routes  5 API · 4 pages
+  ANY     /api/legacy     pages/api/legacy.ts
+  GET     /api/users      app/api/users/route.ts:4
+  POST    /api/users      app/api/users/route.ts:9
+  GET     /api/users/:id  app/api/users/[id]/route.ts:6
+  DELETE  /api/users/:id  app/api/users/[id]/route.ts:15
+  … 4 pages not listed (use --verbose)
+
+Tooling
+  Testing          Jest, Testing Library  (1 test file)
+  Linting          ESLint
+  Types            TypeScript
+
+Potential issues
+  ⚠ ENV_UNDOCUMENTED  AUTH_SECRET is used in code but missing from .env.example
+
+Summary
+  ⚠ 1 warning   ℹ 2 info   ✓ 17 checks passed
+  Run repolens doctor for details and fixes.
+
+────────────────────────────────────────
+
+RepoLens Doctor · next-dashboard
+
+✓ Security
+✓ Runtime
+ℹ Package manager
+    ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
+                                  package-lock.json)
+                                  → Run \`npm pkg set packageManager=npm@$(npm --version)\` to record
+                                    it in package.json (Corepack, if you use it, then runs that
+                                    version)
+⚠ Environment
+    ⚠ ENV_UNDOCUMENTED            AUTH_SECRET is used in code but missing from .env.example
+                                  → Add AUTH_SECRET= to .env.example
+✓ Scripts
+✓ Git
+ℹ Tooling
+    ℹ NEXT_MIDDLEWARE_DEPRECATED  middleware.ts uses the middleware convention, which Next.js 16
+                                  renamed to proxy
+                                  → Rename it to proxy.ts and rename the exported middleware
+                                    function to proxy
+✓ Configuration
+
+Summary  ⚠ 1 warning · ℹ 2 info · ✓ 17 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > nuxt-app 1`] = `
+"RepoLens · nuxt-shop
+
+Project
+  Type             Application
+  Languages        TypeScript 56% · Vue 38% · JavaScript 6%
+  Package manager  pnpm 10.17.1
+  Runtime          Node.js 22
+
+Frameworks
+  Nuxt 4.1.2       full-stack
+  Vue 3.5.22       frontend
+
+Quick start
+  1. cp .env.example .env  create your local environment file
+  2. pnpm install          install dependencies
+  3. pnpm dev              start the development server
+
+Environment  2 variables · .env.example
+                        local  example  code
+  NUXT_PUBLIC_API_BASE    –       ✓      ✓    public, default
+  STRIPE_SECRET_KEY       –       ✓      ✓
+  – file not present (.env)
+
+Scripts
+  pnpm dev          nuxt dev
+  pnpm preview      nuxt preview
+  pnpm build        nuxt build
+  pnpm generate     nuxt generate
+  pnpm test         vitest run
+  pnpm lint         eslint .
+  pnpm typecheck    nuxt typecheck
+  pnpm postinstall  nuxt prepare
+
+Routes  5 API · 4 pages
+  POST    /api/cart          server/api/cart.post.ts
+  ANY     /api/health        server/api/health.ts
+  GET     /api/products      server/api/products.get.ts
+  GET     /api/products/:id  server/api/products/[id].get.ts
+  ANY     /sitemap.xml       server/routes/sitemap.xml.ts
+  … 4 pages not listed (use --verbose)
+
+Tooling
+  Testing          Vitest  (1 test file)
+  Linting          ESLint
+  Types            TypeScript
+
+Summary
+  ✓ 16 checks passed
+
+────────────────────────────────────────
+
+RepoLens Doctor · nuxt-shop
+
+✓ Security
+✓ Runtime
+✓ Package manager
+✓ Environment
+✓ Scripts
+✓ Git
+✓ Configuration
+
+✓ No problems found
+
+Summary  ✓ 16 passed
+Run with --json for machine-readable output.
+"
+`;
+
+exports[`terminal output per fixture > plain-repo 1`] = `
+"RepoLens · plain-repo
+
+Project
+  Languages        Python 67% · Shell 33%
+
+Quick start
+  1. make install  install dependencies
+
+Scripts
+  make install     $(PYTHON) -m venv $(VENV)
+  make test        $(VENV)/bin/python -m pytest -q tests
+  make lint        $(VENV)/bin/ruff check app tests
+  make clean       rm -rf $(VENV) .pytest_cache .ruff_cache
+
+CI  GitHub Actions
+  test.yml         test
+
+Tooling
+  Testing          pytest  (1 test file)
+  Linting          Ruff
+  Build            Make
+
+Key files
+  .editorconfig               EditorConfig
+  .github/workflows/test.yml  GitHub Actions workflow
+  .gitignore                  Git ignore rules
+  Makefile                    Make targets
+  requirements.txt            Python requirements
+
+Summary
+  ✓ 2 checks passed
+
+────────────────────────────────────────
+
+RepoLens Doctor · plain-repo
+
+✓ Scripts
+✓ Configuration
+
+✓ No problems found
+
+Summary  ✓ 2 passed
+Run with --json for machine-readable output.
+"
+`;

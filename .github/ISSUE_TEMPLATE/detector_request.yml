@@ -1,0 +1,34 @@
+name: Detector request
+description: Ask RepoLens to recognize a framework, tool, service or config file.
+labels: [detector]
+body:
+  - type: input
+    id: technology
+    attributes:
+      label: Technology
+      placeholder: e.g. SvelteKit routes, Laravel, Rust/Cargo, Drizzle migrations
+    validations:
+      required: true
+  - type: textarea
+    id: signals
+    attributes:
+      label: How can it be recognized statically?
+      description: |
+        Which files, dependencies or config keys reliably indicate it? What should RepoLens
+        report (framework, routes, services, env vars, doctor checks)?
+      placeholder: |
+        - dependency `@sveltejs/kit` in package.json
+        - routes live in src/routes/**/+page.svelte and +server.ts
+    validations:
+      required: true
+  - type: input
+    id: example
+    attributes:
+      label: Example public repository
+      description: A public repo that uses it (helps build a test fixture).
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to implement this detector myself (see docs/creating-a-detector.md).

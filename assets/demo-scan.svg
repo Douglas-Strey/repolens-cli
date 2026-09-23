@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="813" height="1624" viewBox="0 0 813 1624" role="img" aria-label="Terminal output of repolens">
+  <rect width="813" height="1624" rx="10" fill="#0d1117" stroke="#30363d"/>
+  <rect width="813" height="32" rx="10" fill="#161b22"/>
+  <rect y="22" width="813" height="10" fill="#161b22"/>
+  <circle cx="20" cy="16" r="6" fill="#ff5f57"/>
+  <circle cx="40" cy="16" r="6" fill="#febc2e"/>
+  <circle cx="60" cy="16" r="6" fill="#28c840"/>
+  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="14">
+    <text x="20" y="62" xml:space="preserve"><tspan fill="#8b949e">$ </tspan><tspan fill="#e6edf3" font-weight="700">repolens</tspan></text>
+    <text x="20" y="82" xml:space="preserve"></text>
+    <text x="20" y="102" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">RepoLens</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> acme</tspan></text>
+    <text x="20" y="122" xml:space="preserve"></text>
+    <text x="20" y="142" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Project</tspan></text>
+    <text x="20" y="162" xml:space="preserve"><tspan fill="#e6edf3">  Type             Monorepo · 4 packages (pnpm workspaces, Turborepo)</tspan></text>
+    <text x="20" y="182" xml:space="preserve"><tspan fill="#e6edf3">  Languages        TypeScript 63% </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> Vue 25% </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> Go 13%</tspan></text>
+    <text x="20" y="202" xml:space="preserve"><tspan fill="#e6edf3">  Package manager  pnpm 10.17.1</tspan></text>
+    <text x="20" y="222" xml:space="preserve"><tspan fill="#e6edf3">  Runtimes         Node.js 22 </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> Go 1.25</tspan></text>
+    <text x="20" y="242" xml:space="preserve"><tspan fill="#e6edf3">  Entry points     services/billing</tspan></text>
+    <text x="20" y="262" xml:space="preserve"><tspan fill="#e6edf3">  Git              main @ cd03add </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> github.com/acme/acme</tspan></text>
+    <text x="20" y="282" xml:space="preserve"></text>
+    <text x="20" y="302" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Frameworks</tspan></text>
+    <text x="20" y="322" xml:space="preserve"><tspan fill="#e6edf3">  Nuxt 4.1.2       apps/web</tspan></text>
+    <text x="20" y="342" xml:space="preserve"><tspan fill="#e6edf3">  Vue 3.5.22       apps/web, packages/ui</tspan></text>
+    <text x="20" y="362" xml:space="preserve"><tspan fill="#e6edf3">  Fastify 5.6.1    apps/api</tspan></text>
+    <text x="20" y="382" xml:space="preserve"><tspan fill="#e6edf3">  net/http         services/billing</tspan></text>
+    <text x="20" y="402" xml:space="preserve"></text>
+    <text x="20" y="422" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Workspace</tspan></text>
+    <text x="20" y="442" xml:space="preserve"><tspan fill="#e6edf3">  apps/api         @acme/api     Fastify</tspan></text>
+    <text x="20" y="462" xml:space="preserve"><tspan fill="#e6edf3">  apps/web         @acme/web     Nuxt, Vue</tspan></text>
+    <text x="20" y="482" xml:space="preserve"><tspan fill="#e6edf3">  packages/shared  @acme/shared</tspan></text>
+    <text x="20" y="502" xml:space="preserve"><tspan fill="#e6edf3">  packages/ui      @acme/ui      Vue</tspan></text>
+    <text x="20" y="522" xml:space="preserve"></text>
+    <text x="20" y="542" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Quick start</tspan></text>
+    <text x="20" y="562" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">1.</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#39c5cf">pnpm db:up</tspan><tspan fill="#e6edf3">    </tspan><tspan fill="#8b949e">start local services</tspan></text>
+    <text x="20" y="582" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">2.</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#39c5cf">pnpm install</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">install dependencies</tspan></text>
+    <text x="20" y="602" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">3.</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#39c5cf">pnpm dev</tspan><tspan fill="#e6edf3">      </tspan><tspan fill="#8b949e">start the development server</tspan></text>
+    <text x="20" y="622" xml:space="preserve"></text>
+    <text x="20" y="642" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Services</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">docker-compose.yml</tspan></text>
+    <text x="20" y="662" xml:space="preserve"><tspan fill="#e6edf3">  minio       minio/minio  :9000 :9001  MinIO</tspan></text>
+    <text x="20" y="682" xml:space="preserve"><tspan fill="#e6edf3">  postgres    postgres:17  :5432        PostgreSQL</tspan></text>
+    <text x="20" y="702" xml:space="preserve"><tspan fill="#e6edf3">  redis       redis:8      :6379        Redis</tspan></text>
+    <text x="20" y="722" xml:space="preserve"></text>
+    <text x="20" y="742" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Databases</tspan></text>
+    <text x="20" y="762" xml:space="preserve"><tspan fill="#e6edf3">  PostgreSQL       </tspan><tspan fill="#8b949e">via Docker, config, env</tspan></text>
+    <text x="20" y="782" xml:space="preserve"><tspan fill="#e6edf3">  Redis            </tspan><tspan fill="#8b949e">via Docker, env</tspan></text>
+    <text x="20" y="802" xml:space="preserve"><tspan fill="#e6edf3">  ORM              Prisma 6.16.2</tspan></text>
+    <text x="20" y="822" xml:space="preserve"></text>
+    <text x="20" y="842" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Environment</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">4 variables </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#8b949e">.env</tspan><tspan fill="#8b949e">, </tspan><tspan fill="#8b949e">.env.example</tspan></text>
+    <text x="20" y="862" xml:space="preserve"><tspan fill="#e6edf3">                     </tspan><tspan fill="#8b949e">local</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">example</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">code</tspan></text>
+    <text x="20" y="882" xml:space="preserve"><tspan fill="#e6edf3">  STRIPE_SECRET_KEY    </tspan><tspan fill="#8b949e">✗</tspan><tspan fill="#e6edf3">       </tspan><tspan fill="#d29922">✗</tspan><tspan fill="#e6edf3">      </tspan><tspan fill="#3fb950">✓</tspan></text>
+    <text x="20" y="902" xml:space="preserve"><tspan fill="#e6edf3">  API_URL              </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">       </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">      </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">    </tspan><tspan fill="#8b949e">default</tspan></text>
+    <text x="20" y="922" xml:space="preserve"><tspan fill="#e6edf3">  DATABASE_URL         </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">       </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">      </tspan><tspan fill="#3fb950">✓</tspan></text>
+    <text x="20" y="942" xml:space="preserve"><tspan fill="#e6edf3">  REDIS_URL            </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">       </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3">      </tspan><tspan fill="#3fb950">✓</tspan></text>
+    <text x="20" y="962" xml:space="preserve"></text>
+    <text x="20" y="982" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Scripts</tspan></text>
+    <text x="20" y="1002" xml:space="preserve"><tspan fill="#e6edf3">  pnpm dev         </tspan><tspan fill="#8b949e">turbo dev</tspan></text>
+    <text x="20" y="1022" xml:space="preserve"><tspan fill="#e6edf3">  pnpm build       </tspan><tspan fill="#8b949e">turbo build</tspan></text>
+    <text x="20" y="1042" xml:space="preserve"><tspan fill="#e6edf3">  pnpm test        </tspan><tspan fill="#8b949e">turbo test</tspan></text>
+    <text x="20" y="1062" xml:space="preserve"><tspan fill="#e6edf3">  pnpm lint        </tspan><tspan fill="#8b949e">turbo lint</tspan></text>
+    <text x="20" y="1082" xml:space="preserve"><tspan fill="#e6edf3">  pnpm typecheck   </tspan><tspan fill="#8b949e">turbo typecheck</tspan></text>
+    <text x="20" y="1102" xml:space="preserve"><tspan fill="#e6edf3">  pnpm db:up       </tspan><tspan fill="#8b949e">docker compose up -d</tspan></text>
+    <text x="20" y="1122" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">… 18 scripts in workspace packages (use --verbose)</tspan></text>
+    <text x="20" y="1142" xml:space="preserve"></text>
+    <text x="20" y="1162" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Routes</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">5 API · 1 page</tspan></text>
+    <text x="20" y="1182" xml:space="preserve"><tspan fill="#e6edf3">  POST    /api/auth/login  </tspan><tspan fill="#8b949e">apps/api/src/index.ts:17</tspan></text>
+    <text x="20" y="1202" xml:space="preserve"><tspan fill="#e6edf3">  POST    /api/orders      </tspan><tspan fill="#8b949e">apps/api/src/index.ts:23</tspan></text>
+    <text x="20" y="1222" xml:space="preserve"><tspan fill="#e6edf3">  GET     /api/users       </tspan><tspan fill="#8b949e">apps/api/src/index.ts:13</tspan></text>
+    <text x="20" y="1242" xml:space="preserve"><tspan fill="#e6edf3">  GET     /api/stats       </tspan><tspan fill="#8b949e">apps/web/server/api/stats.get.ts</tspan></text>
+    <text x="20" y="1262" xml:space="preserve"><tspan fill="#e6edf3">  ANY     /invoices        </tspan><tspan fill="#8b949e">services/billing/main.go:19</tspan></text>
+    <text x="20" y="1282" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">… 1 page not listed (use --verbose)</tspan></text>
+    <text x="20" y="1302" xml:space="preserve"></text>
+    <text x="20" y="1322" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">CI</tspan><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">GitHub Actions</tspan></text>
+    <text x="20" y="1342" xml:space="preserve"><tspan fill="#e6edf3">  ci.yml           lint </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> test </tspan><tspan fill="#8b949e">·</tspan><tspan fill="#e6edf3"> build</tspan></text>
+    <text x="20" y="1362" xml:space="preserve"></text>
+    <text x="20" y="1382" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Tooling</tspan></text>
+    <text x="20" y="1402" xml:space="preserve"><tspan fill="#e6edf3">  Testing          Vitest</tspan></text>
+    <text x="20" y="1422" xml:space="preserve"><tspan fill="#e6edf3">  Linting          Biome</tspan></text>
+    <text x="20" y="1442" xml:space="preserve"><tspan fill="#e6edf3">  Types            TypeScript</tspan></text>
+    <text x="20" y="1462" xml:space="preserve"><tspan fill="#e6edf3">  Build            Turborepo, tsc</tspan></text>
+    <text x="20" y="1482" xml:space="preserve"></text>
+    <text x="20" y="1502" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Potential issues</tspan></text>
+    <text x="20" y="1522" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#d29922">⚠</tspan><tspan fill="#e6edf3"> ENV_UNDOCUMENTED  STRIPE_SECRET_KEY is used in code but missing from .env.example</tspan></text>
+    <text x="20" y="1542" xml:space="preserve"></text>
+    <text x="20" y="1562" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">Summary</tspan></text>
+    <text x="20" y="1582" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#d29922">⚠</tspan><tspan fill="#e6edf3"> 1 warning   </tspan><tspan fill="#3fb950">✓</tspan><tspan fill="#e6edf3"> 27 checks passed</tspan></text>
+    <text x="20" y="1602" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#8b949e">Run repolens doctor for details and fixes.</tspan></text>
+  </g>
+</svg>

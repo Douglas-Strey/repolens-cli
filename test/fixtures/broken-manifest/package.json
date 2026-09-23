@@ -1,0 +1,11 @@
+{
+  "name": "broken-manifest",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+  },
+  "dependencies": {
+    "chalk": "^5.6.2"
+  },

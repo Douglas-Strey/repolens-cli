@@ -1,0 +1,7 @@
+[install]
+# Keep the text-based bun.lock (default since Bun 1.2)
+saveTextLockfile = true
+
+[test]
+coverage = true
+coverageSkipTestFiles = true

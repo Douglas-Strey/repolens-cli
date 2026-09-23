@@ -1,0 +1,19 @@
+#!/bin/sh
+# Strip AI attribution from commit messages (co-author trailers and
+# "Generated with …" lines added by coding agents). Commits in this
+# repository are authored by humans only; see AGENTS.md.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+
+msg_file="$1"
+tmp_file="$msg_file.tmp.$$"
+
+grep -v -i -E \
+  -e '^[[:space:]]*co-authored-by:.*(claude|anthropic|openai|codex|copilot|cursor|gemini|devin|aider)' \
+  -e 'generated (with|by) .*(claude|codex|copilot|cursor|gemini|devin|aider)' \
+  -e '^[[:space:]]*🤖' \
+  "$msg_file" > "$tmp_file"
+
+# Drop trailing blank lines left behind by removed trailers.
+awk 'NF { for (i = 0; i < blank; i++) print ""; blank = 0; print; next } { blank++ }' "$tmp_file" > "$msg_file"
+rm -f "$tmp_file"
