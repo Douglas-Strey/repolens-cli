@@ -2,6 +2,9 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    # Sample projects RepoLens scans, some broken on purpose (an invalid package.json).
+    exclude-paths:
+      - "test/fixtures/**"
     schedule:
       interval: weekly
     groups:
