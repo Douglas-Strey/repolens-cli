@@ -33,7 +33,9 @@ export function packageManagerRule(result: ScanResult): string | null {
 
 /** "packageManager field in package.json (pnpm@10.17.1)" → "packageManager field in package.json", avoiding nested parentheses. */
 function withoutTrailingParenthetical(value: string): string {
-  return value.replace(/\s*\([^()]*\)\s*$/, '') || value
+  // No leading \s* in the pattern: it backtracks quadratically on long runs of spaces.
+  const stripped = value.replace(/\([^()]*\)\s*$/, '')
+  return stripped === value ? value : stripped.trimEnd() || value
 }
 
 /** Doctor codes saying the files that pin this runtime disagree, e.g. NODE_VERSION_CONFLICT. */

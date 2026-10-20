@@ -17,6 +17,7 @@ import { createStyle, defaultRenderOptions, stripAnsi } from '../../src/output/s
 import { renderScan } from '../../src/output/terminal.ts'
 import type { EnvFile, ScanResult, Script, Service } from '../../src/types.ts'
 import { makeResult, sampleScanResult } from '../factories.ts'
+import { timeBudget } from '../helpers.ts'
 
 function script(overrides: Partial<Script> & Pick<Script, 'name'>): Script {
   return {
@@ -401,6 +402,14 @@ describe('workspaceScriptExample', () => {
     expect(isDestructiveCommand('rm -fr dist')).toBe(true)
     expect(isDestructiveCommand('rimraf dist')).toBe(true)
     expect(isDestructiveCommand('rm dist/a.js')).toBe(false)
+    expect(isDestructiveCommand('rm -Rf dist')).toBe(true)
+    expect(isDestructiveCommand('rm -r dist && rm -f x')).toBe(false)
+  })
+
+  it('stays linear on a long run of rm flags (no regex backtracking)', () => {
+    const started = performance.now()
+    expect(isDestructiveCommand(`rm -${'r'.repeat(200_000)}1`)).toBe(false)
+    expect(performance.now() - started).toBeLessThan(timeBudget(1000))
   })
 })
 

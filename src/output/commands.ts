@@ -122,11 +122,14 @@ export function isNpmTestPlaceholder(command: string): boolean {
   return /^echo\s+(["']?)Error: no test specified\1\s*&&\s*exit\s+1\s*;?$/i.test(command.trim())
 }
 
+const DELETES_FILES = /\brimraf\b|\bgit\s+clean\b|\bgit\s+reset\s+--hard\b/i
+const RM_FLAGS = /\brm\s+-([a-z]+)\b/gi
+
 /** A script body that deletes files wholesale (`rm -rf`, `git clean`): never offered as an example to run. */
 export function isDestructiveCommand(command: string): boolean {
-  return /\brm\s+-(?:[a-z]*r[a-z]*f|[a-z]*f[a-z]*r)[a-z]*\b|\brimraf\b|\bgit\s+clean\b|\bgit\s+reset\s+--hard\b/i.test(
-    command,
-  )
+  if (DELETES_FILES.test(command)) return true
+  // r and f are checked apart: one pattern for "both, in any order" backtracks quadratically on `rm -rrrr…`.
+  return [...command.matchAll(RM_FLAGS)].some(([, flags = '']) => /r/i.test(flags) && /f/i.test(flags))
 }
 
 function pickScript(
