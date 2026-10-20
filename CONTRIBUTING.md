@@ -38,7 +38,9 @@ merged, however useful they are otherwise.
 
 1. **Static analysis only.** Never execute project code, config files, scripts, `git`,
    Docker or shell commands. Read files through `ctx.readText` / `readJson` / `readJsonc`
-   / `readYaml`.
+   / `readYaml`. The one exception is `repolens setup` (`src/setup/`, `src/cli/setup.ts`),
+   which runs only commands it builds and shows first, after asking; changes there must
+   keep the rules in [docs/security.md](docs/security.md#7-repolens-setup-runs-only-what-it-shows-you).
 2. **Never output secret values.** Environment variables are reported by name. Anything
    echoed from committed files goes through the helpers in `src/utils/redact.ts`.
 3. **Prefer a miss over a false positive.** Use `confidence` honestly and fill `evidence`.
@@ -47,6 +49,21 @@ merged, however useful they are otherwise.
 5. **No new runtime dependencies** without discussing it in an issue first.
 
 ## Pull requests
+
+`main` is the only long-lived branch, and every change reaches it through a pull request:
+
+1. Fork the repository and create a branch from `main`: `feat/sveltekit-routes`,
+   `fix/compose-ports`, `docs/setup-guide`.
+2. Open a pull request against `main`. Its title becomes the commit subject, so write it
+   the same way (see below).
+3. CI must pass: lint and typecheck, the tests on Linux, macOS and Windows with Node.js 22,
+   24 and 26, and the package smoke test. For a first-time contributor, a maintainer
+   approves the CI run first.
+4. Resolve review conversations. The pull request is squash-merged into one commit on
+   `main`, and the branch is deleted.
+
+Releases are tags (`v1.2.3`) that only maintainers can create; pushing one publishes to npm
+and updates the Homebrew tap (see [docs/development.md](docs/development.md)).
 
 - Keep PRs focused: one detector, one check or one fix per PR is ideal.
 - Add tests. Detection logic needs a fixture or an inline test project, and output changes

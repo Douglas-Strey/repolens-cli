@@ -38,7 +38,10 @@ ser mergeados, por mais úteis que sejam em outros aspectos.
 
 1. **Só análise estática.** Nunca execute código do projeto, arquivos de configuração,
    scripts, `git`, Docker ou comandos de shell. Leia arquivos por meio de `ctx.readText` /
-   `readJson` / `readJsonc` / `readYaml`.
+   `readJson` / `readJsonc` / `readYaml`. A única exceção é o `repolens setup`
+   (`src/setup/`, `src/cli/setup.ts`), que executa só comandos que ele monta e mostra antes,
+   depois de perguntar; mudanças ali precisam manter as regras do
+   [docs/pt-BR/security.md](docs/pt-BR/security.md#7-o-repolens-setup-executa-só-o-que-mostra-para-você).
 2. **Nunca exiba valores de segredos.** Variáveis de ambiente são reportadas pelo nome. Tudo
    o que for reproduzido de arquivos commitados passa pelos helpers de `src/utils/redact.ts`.
 3. **Prefira deixar algo passar a gerar um falso positivo.** Use `confidence` com honestidade
@@ -47,6 +50,21 @@ ser mergeados, por mais úteis que sejam em outros aspectos.
 5. **Nenhuma dependência de runtime nova** sem antes discutir em uma issue.
 
 ## Pull requests
+
+A `main` é a única branch permanente, e toda mudança chega a ela por um pull request:
+
+1. Faça um fork do repositório e crie uma branch a partir da `main`:
+   `feat/sveltekit-routes`, `fix/compose-ports`, `docs/setup-guide`.
+2. Abra um pull request para a `main`. O título dele vira o assunto do commit, então
+   escreva-o do mesmo jeito (veja abaixo).
+3. O CI precisa passar: lint e typecheck, os testes no Linux, macOS e Windows com Node.js
+   22, 24 e 26, e o smoke test do pacote. Para quem contribui pela primeira vez, um
+   mantenedor aprova a execução do CI antes.
+4. Resolva as conversas da revisão. O pull request é mergeado com squash em um único commit
+   na `main`, e a branch é apagada.
+
+Releases são tags (`v1.2.3`) que só mantenedores podem criar; enviar uma tag publica no npm
+e atualiza o tap do Homebrew (veja [docs/pt-BR/development.md](docs/pt-BR/development.md)).
 
 - Mantenha os PRs focados: o ideal é um detector, uma verificação ou uma correção por PR.
 - Adicione testes. Lógica de detecção precisa de uma fixture ou de um projeto de teste
