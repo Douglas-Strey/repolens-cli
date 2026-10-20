@@ -147,8 +147,13 @@ const workDir = await fs.mkdtemp(path.join(os.tmpdir(), 'repolens-screenshot-'))
 const project = path.join(workDir, 'acme')
 try {
   await fs.cp(path.join(ROOT, 'test/fixtures/monorepo'), project, { recursive: true })
-  // Fixtures store their ignore rules as _gitignore (see test/fixtures/README.md).
-  await fs.rename(path.join(project, '_gitignore'), path.join(project, '.gitignore'))
+  // Fixtures store .gitignore and package.json files under other names (see test/fixtures/README.md).
+  const stored: Record<string, string> = { _gitignore: '.gitignore', '_package.json': 'package.json' }
+  for (const entry of await fs.readdir(project, { recursive: true, withFileTypes: true })) {
+    const real = stored[entry.name]
+    if (entry.isFile() && real)
+      await fs.rename(path.join(entry.parentPath, entry.name), path.join(entry.parentPath, real))
+  }
   const git = (...args: string[]) =>
     execFileSync('git', ['-c', 'user.name=demo', '-c', 'user.email=demo@repolens.invalid', ...args], {
       cwd: project,

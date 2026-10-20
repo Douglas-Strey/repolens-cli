@@ -10,9 +10,11 @@ Rules for fixtures:
   `.gitignore` would hide fixture files (for example `monorepo/.env`) from this
   repository's own Git, so they would never be committed. `copyFixture()` renames
   `_gitignore` back to `.gitignore` in the temporary copy.
-- A deliberately invalid `package.json` is stored as `_package.json` (see
-  `broken-manifest`), because tools that read every manifest in the repository,
-  like Dependabot's pnpm, stop at invalid JSON. `copyFixture()` restores the name.
+- Every `package.json` in a fixture is stored as `_package.json`. Tools that
+  read every manifest in this repository would otherwise treat the fixtures as
+  projects: Dependabot's pnpm resolves their dependencies (and stops at the
+  deliberately invalid one in `broken-manifest`), and GitHub's dependency graph
+  lists them. `copyFixture()` restores the name in the temporary copy.
 
 - Every value in a local env file (`.env`, `.env.local`) or Compose
   `environment:` block contains the sentinel `REPOLENS_FIXTURE_SECRET`. Tests
@@ -36,6 +38,6 @@ Rules for fixtures:
 | `mixed-lockfiles` | **`package-lock.json` + `pnpm-lock.yaml`** with `packageManager: pnpm@9.15.9`. **Node conflict:** `.nvmrc` 20, `.node-version` 18.20.4, engines `>=22`. **Legacy `.eslintrc.json` with ESLint 9.** |
 | `legacy-config` | **`workspaces` in package.json and `pnpm-workspace.yaml`.** **Pattern `tools/*` matches nothing.** **`turbo.json` uses `pipeline` with turbo ^2.** **Compose `version: '3.8'`.** **Two services publish host port 8080.** **Legacy `.eslintrc.cjs`.** |
 | `broken-config` | Valid package.json; invalid `docker-compose.yml`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`, `turbo.json`, `tsconfig.json`, and a `go.mod` without a module line. RepoLens must not crash. |
-| `broken-manifest` | Malformed root `package.json` (stored as `_package.json`). |
+| `broken-manifest` | Malformed root `package.json`. |
 | `plain-repo` | Python project with no JS/Go: Makefile targets, shell scripts, CI running `make test`. Output must still be useful. |
 | `bun-app` | Bun (`bun.lock` text lockfile, `bunfig.toml`), Hono routes GET `/`, POST `/webhooks/:id`. Uses `Bun.env.WEBHOOK_SECRET` and `process.env.PORT`; no `.env.example`. |

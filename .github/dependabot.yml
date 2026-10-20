@@ -7,6 +7,10 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+    ignore:
+      # The types must match the oldest supported Node.js (engines.node), not the newest.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 5
 
   - package-ecosystem: github-actions

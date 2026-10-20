@@ -111,8 +111,8 @@ export async function copyFixture(name: string): Promise<string> {
  * Files fixtures store under another name, restored in the copy:
  * - `_gitignore`, so the rules don't hide fixture files (such as a fixture's
  *   own `.env`) from this repository's Git;
- * - `_package.json` for a deliberately invalid manifest, which would otherwise
- *   break tools that read every package.json in the repository (Dependabot's pnpm).
+ * - `_package.json`, so tools that read every manifest in the repository
+ *   (Dependabot's pnpm, GitHub's dependency graph) don't treat fixtures as projects.
  */
 const STORED_NAMES: Record<string, string> = { _gitignore: '.gitignore', '_package.json': 'package.json' }
 
