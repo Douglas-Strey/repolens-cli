@@ -129,9 +129,11 @@ dele depois de cada release no npm. Configuração, feita uma única vez:
    vazio. O prefixo `homebrew-` é o que faz `douglas-strey/tap` funcionar.
 2. Crie um personal access token do tipo fine-grained, limitado a esse repositório, com
    **Contents: read and write**, e defina uma data de expiração para ele.
-3. Adicione o token a este repositório como o segredo do Actions `HOMEBREW_TAP_TOKEN`
-   (ambiente `npm`). Sem o segredo, o job é pulado e a fórmula pode ser atualizada
-   manualmente com o script acima.
+3. Adicione o token a este repositório como o segredo **de repositório** do Actions
+   `HOMEBREW_TAP_TOKEN` (Settings → Secrets and variables → Actions → Repository secrets).
+   Não use um segredo de ambiente: o job `homebrew` roda sem ambiente e não conseguiria
+   lê-lo. Sem o segredo, o job é pulado e a fórmula pode ser atualizada manualmente com o
+   script acima.
 
 Quando o projeto atender aos requisitos de notabilidade do Homebrew, a mesma fórmula poderá
 ser submetida ao `homebrew-core`.

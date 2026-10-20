@@ -126,9 +126,11 @@ pushes it after every npm release. One-time setup:
    directory. The `homebrew-` prefix is what makes `douglas-strey/tap` work.
 2. Create a fine-grained personal access token limited to that repository with
    **Contents: read and write**, and give it an expiry date.
-3. Add it to this repository as the `HOMEBREW_TAP_TOKEN` Actions secret (environment
-   `npm`). Without the secret the job is skipped and the formula can be updated by hand
-   with the script above.
+3. Add it to this repository as the `HOMEBREW_TAP_TOKEN` Actions **repository** secret
+   (Settings → Secrets and variables → Actions → Repository secrets). Not an environment
+   secret: the `homebrew` job runs without an environment, so it couldn't read one.
+   Without the secret the job is skipped and the formula can be updated by hand with the
+   script above.
 
 Once the project meets Homebrew's notability requirements, the same formula can be
 submitted to `homebrew-core`.

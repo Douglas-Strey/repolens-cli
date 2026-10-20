@@ -67,7 +67,8 @@ jobs:
   homebrew:
     # Updates Formula/repolens.rb in the Douglas-Strey/homebrew-tap repository so
     # `brew install douglas-strey/tap/repolens` gets the new version.
-    # Needs the HOMEBREW_TAP_TOKEN secret: a fine-grained token limited to the tap
+    # Needs the HOMEBREW_TAP_TOKEN repository secret (this job has no environment, so an
+    # environment secret is invisible here): a fine-grained token limited to the tap
     # repository with "Contents: read and write". Without it the job is skipped.
     needs: publish
     runs-on: ubuntu-latest
