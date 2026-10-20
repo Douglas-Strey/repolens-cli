@@ -7,6 +7,17 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `repolens setup`: sets up a freshly cloned project by creating the local env file from
+  the example, starting the backing services with Docker Compose and installing
+  dependencies (npm, pnpm, Yarn, Bun, Go modules). It shows the plan first, including the
+  install lifecycle scripts and Compose images involved, and asks before running anything.
+  `--dry-run` shows the plan only, `--yes` skips the question, and `--ignore-scripts`
+  installs without lifecycle scripts. Project scripts are left for you to run, programs
+  are never taken from the repository, and existing env files are never changed. It is
+  the only command that runs anything; see docs/security.md.
+
 ## [0.1.1] - 2026-10-20
 
 No changes to the CLI or the API.

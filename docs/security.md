@@ -4,6 +4,8 @@
 
 RepoLens is meant to be the first thing you run in a repository you don't know yet. That
 only works if running it is safe, so the rules below are hard constraints, not goals.
+They hold for every command except `repolens setup`, whose job is to run the project's
+setup and which has its own rules ([7](#7-repolens-setup-runs-only-what-it-shows-you)).
 Breaking any of them is a security bug; please [report it privately](../SECURITY.md).
 
 ## Guarantees
@@ -97,6 +99,35 @@ Warnings about configuration name settings and check codes, never the values in 
 `--output` and `repolens agent init` never write through a symlink and never open a FIFO
 at the target path, so a scanned repository can't redirect them. `agent init` also
 refuses to overwrite files it didn't generate unless you pass `--force`.
+
+### 7. `repolens setup` runs only what it shows you
+
+Setting up a project means running things: installing dependencies runs lifecycle
+scripts, and Compose pulls or builds images. `repolens setup` is the one command that
+does it, on purpose and in the open:
+
+- **Only commands RepoLens builds.** Copying the example env file, `docker compose up -d`
+  and the package manager's `install` (or `go mod download`). Project scripts (`make
+  setup`, `pnpm db:up`) are never run; setup lists them for you. A Compose file or service
+  name that isn't a plain name (it starts with `-`, or has spaces or shell characters)
+  turns that step into a suggestion too.
+- **Shown before it runs, with what else runs.** The plan lists every command, the
+  project's install lifecycle scripts with their bodies (redacted like any other echoed
+  text), and the images Compose pulls or builds. `--ignore-scripts` installs without any
+  lifecycle scripts, the project's or its dependencies'.
+- **Asked before it runs.** Setup waits for a yes in the terminal. Without a terminal it
+  refuses to run unless you pass `--yes`, so piped input can't answer for you.
+- **Programs from your PATH, never from the repository.** RepoLens finds `pnpm`, `docker`
+  and friends itself and runs them by absolute path, without a shell. PATH entries that
+  are relative (`.`, `bin`) or inside the repository (`node_modules/.bin`) are skipped, and
+  so is a program on PATH that is a link into the repository. This matters most on
+  Windows, where the current directory is otherwise searched first. Windows `.cmd` shims
+  (npm, pnpm, Yarn) only run with arguments `cmd.exe` can't reinterpret.
+- **Your env file is yours.** The example is read like any other project file (inside the
+  repository only, never through a link that leaves it) and copied to a new file that is
+  readable by you only. An existing file, or a link in its place, is never overwritten.
+- **Nothing half-checked.** Missing programs and a Node.js version outside `engines.node`
+  are found before the first step runs, and setup stops at the first step that fails.
 
 ## Privacy
 

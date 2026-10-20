@@ -59,6 +59,11 @@ npm install -g @douglas-strey/repolens    # qualquer sistema com Node.js 22+
 Funciona em macOS, Linux e Windows. O pacote npm precisa do Node.js 22 ou mais recente; o
 Homebrew instala o Node para você.
 
+Acabou de clonar? O `repolens setup` cria o arquivo de env a partir do exemplo, sobe os
+serviços de apoio e instala as dependências. Ele mostra os comandos exatos antes, inclusive
+os scripts de instalação que vão rodar, e pergunta antes de executar qualquer coisa
+([detalhes](docs/pt-BR/cli.md#repolens-setup)).
+
 > **Vai analisar um repositório em que você não confia?** Rode o RepoLens *fora* dele, por
 > exemplo `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, ou use uma instalação
 > global. Quando o `npx` roda dentro de um repositório, o próprio npm respeita o `.npmrc` e
@@ -215,7 +220,9 @@ conhece.
 - **Ele nunca executa nada do repositório.** Nem scripts, nem arquivos de configuração (ele
   lê o `nuxt.config.ts` como texto), nem Docker. Ele nem sequer roda o `git`: a configuração
   do repositório pode fazer o `git` executar comandos arbitrários, então branch, remotes e
-  arquivos rastreados são lidos direto do `.git/`.
+  arquivos rastreados são lidos direto do `.git/`. A única exceção é o `repolens setup`, que
+  você roda de propósito: ele mostra cada comando e os scripts que eles vão disparar, e
+  pergunta antes.
 - **Ele nunca exibe valores de segredos.** O parser de `.env` guarda os nomes das variáveis e
   descarta os valores. O texto commitado que ele reproduz na saída (scripts, URLs de
   dependências, remotes do Git) é mascarado. A suíte de testes verifica que segredos
@@ -288,7 +295,9 @@ de API.
 **É seguro usar em um repositório em que eu não confio?**
 Esse é o principal objetivo do design: ele nunca executa código do projeto, arquivos de
 configuração, hooks nem o `git`, e nunca lê fora do diretório analisado (exceto os metadados
-do `.git` que o contém quando você analisa um subdiretório). Veja
+do `.git` que o contém quando você analisa um subdiretório). O `repolens setup` é a exceção
+que você escolhe usar: ele instala dependências, o que roda os scripts de instalação do
+projeto, então ele os lista e pergunta antes (`--ignore-scripts` os pula). Veja
 [docs/pt-BR/security.md](docs/pt-BR/security.md).
 
 **Ele reportou algo errado ou deixou algo passar.**

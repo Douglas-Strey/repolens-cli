@@ -37,7 +37,9 @@ Run `pnpm lint`, `pnpm typecheck` and `pnpm test` before finishing a change.
 ## Hard rules
 
 1. **Never execute project code** from product code: no scripts, config files, `git`,
-   Docker or shell commands. Read project files only through `ctx.readText` /
+   Docker or shell commands. The one exception is `repolens setup` (`src/setup/`,
+   `src/cli/setup.ts`): it runs only commands it builds and printed, after confirmation,
+   through `SetupHost`, never with a shell. Keep it that way (see docs/security.md §7). Read project files only through `ctx.readText` /
    `readJson` / `readJsonc` / `readYaml` (they enforce root containment, symlink safety and
    size limits). Tests may use `node:fs` and `git`.
 2. **Never output secret values.** Environment variables are reported by name only; echoed

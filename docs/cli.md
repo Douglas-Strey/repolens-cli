@@ -7,6 +7,7 @@ repolens [path] [options]          Scan a repository (default command)
 repolens scan [path] [options]     Same as above
 repolens doctor [path] [options]   Check for setup problems and inconsistencies
 repolens report [path] [options]   Generate a Markdown report
+repolens setup [path] [options]    Set up the project: env file, services, dependencies
 repolens agent [init] [path] [options]  Generate context for coding agents (experimental)
 repolens config [path] [options]   Show the configuration files and settings in effect
 repolens help [command]            Show help for a command
@@ -106,6 +107,58 @@ repolens report --output repolens.md
 repolens report --verbose           # include low-confidence findings
 ```
 
+## `repolens setup`
+
+Sets up a project you just cloned: creates the local env file from the example, starts
+the backing services with Docker Compose, and installs dependencies. These are the steps
+of the quick start, carried out for you.
+
+```sh
+repolens setup                    # show the plan, ask, then run it
+repolens setup --dry-run          # show the plan and stop
+repolens setup --yes              # run the plan without asking (CI, scripts)
+repolens setup --ignore-scripts   # install without lifecycle scripts
+```
+
+Setup is the only command that runs anything, so it shows its plan first:
+
+```
+Setup plan for web
+
+  1. cp .env.example .env     create your local environment file
+     · Then fill in your own values: the file starts as a copy of .env.example.
+  2. docker compose up -d db  start the backing services
+     · Pulls images if needed: postgres:17
+  3. pnpm install             install dependencies
+     · Runs these scripts from the repository:
+       postinstall (package.json): node scripts/setup.js
+     · Dependencies can run their own install scripts too. Use --ignore-scripts to skip them all.
+
+Run these 3 steps? [y/N]
+```
+
+- **It runs only what the plan shows.** Each step is a command RepoLens builds itself:
+  copying the example env file, `docker compose up -d` and the package manager's
+  `install` (`npm`, `pnpm`, Yarn, Bun) or `go mod download`. Project scripts such as
+  `make setup` or `pnpm db:up` are listed under "Skipped" for you to run.
+- **It says what else runs.** Installing runs the project's lifecycle scripts
+  (`preinstall`, `postinstall`, `prepare`, …) and those of its dependencies, so the plan
+  lists the project's own; `--ignore-scripts` skips them all. Compose steps list the
+  images they pull or build.
+- **It asks first.** Without a terminal to ask in, setup refuses to run unless you pass
+  `--yes`.
+- **It never touches your values.** The env file is created only when it doesn't exist
+  (owner-only permissions on macOS and Linux), and is never overwritten or filled in.
+- **It checks Node.js first.** When the active `node` is outside `engines.node`, nothing
+  runs. A different version than `.nvmrc` (or `.node-version`, `.tool-versions`, mise)
+  pins is pointed out, not enforced.
+- **It stops at the first failing step.** Run it again once fixed: an existing env file is
+  left alone and installing again is harmless.
+
+When it finishes, setup scans again and says whether `repolens doctor` still finds
+problems, and how to start the project. See [security](security.md#7-repolens-setup-runs-only-what-it-shows-you)
+for how programs are found and run.
+
 ## `repolens agent` (experimental)
 
 Generates short, structured context about the repository for coding agents (Claude
@@ -161,7 +214,7 @@ exist) on stderr, so they never mix with `--json` output.
 | Code | Meaning |
 | --- | --- |
 | `0` | Success. For `doctor`: no finding at or above `--fail-on`. |
-| `1` | `doctor` found problems at or above the `--fail-on` level. |
+| `1` | `doctor` found problems at or above the `--fail-on` level, or `setup` didn't finish (a step failed, a tool is missing, the Node.js version doesn't fit, or you answered no). |
 | `2` | Invalid usage (unknown option, bad value), unreadable or missing directory, a user config or `--config` file that is missing or isn't valid JSON, or an output file that couldn't be written. |
 | `3` | Unexpected internal error (a bug; please report it with `--verbose` output). |
 

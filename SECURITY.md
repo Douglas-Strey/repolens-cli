@@ -24,6 +24,8 @@ Anything that breaks the guarantees in [docs/security.md](docs/security.md), for
   token, password or other secret found in a scanned repository.
 - Scanning a repository causes RepoLens to **execute** code or commands from that
   repository (scripts, config files, Git hooks, `git` itself, Docker, …).
+- `repolens setup` runs something its plan didn't show, runs without asking (and without
+  `--yes`), or runs a program from inside the repository.
 - A crafted repository makes RepoLens **read files outside** the scanned directory
   (other than the parent Git metadata described in the security model), for example
   through symlinks or path traversal.

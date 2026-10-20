@@ -154,6 +154,15 @@ Renderers are pure functions from `ScanResult` to a string: terminal (`renderSca
 - `src/utils/text.ts` `cleanUntrusted` strips control, bidi, zero-width and Unicode tag
   characters from repository text before any format escapes it.
 
+### Setup (`src/setup/`, `src/cli/setup.ts`)
+
+`repolens setup` is the only code path that runs programs. `setupPlan` (`src/setup/plan.ts`)
+is pure: it turns a `ScanResult` into steps built from the same suggestions as the quick
+start (`src/output/commands.ts`), each with a structured action (copy a file, or a program
+and its arguments) and notes on what else it runs. `src/setup/host.ts` finds programs on
+PATH (never inside the repository) and spawns them without a shell; tests replace it with
+a fake `SetupHost`. `src/cli/setup.ts` prints the plan, checks it, asks, and runs it.
+
 ## Design decisions
 
 - **No plugin loader in v1.** The detector interface is small and stable enough for

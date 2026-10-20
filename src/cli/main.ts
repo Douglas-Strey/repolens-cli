@@ -12,12 +12,14 @@ import { renderDoctorJson, renderJson } from '../output/json.ts'
 import { renderMarkdown } from '../output/markdown.ts'
 import { createStyle, type RenderOptions, type Style, supportsColor, supportsUnicode } from '../output/style.ts'
 import { renderDoctor, renderScan } from '../output/terminal.ts'
+import { type SetupHost, systemHost } from '../setup/host.ts'
 import type { LoadedConfig, RepoLensConfig, ScanResult, ScanWarning, Severity } from '../types.ts'
 import { cleanUntrusted } from '../utils/text.ts'
 import { VERSION } from '../version.ts'
 import { type CliArgs, type FailOn, parseCliArgs } from './args.ts'
 import { renderConfigInfo } from './config.ts'
 import { commandHelp, mainHelp } from './help.ts'
+import { runSetup } from './setup.ts'
 
 export const EXIT_OK = 0
 export const EXIT_DOCTOR_FAILED = 1
@@ -38,6 +40,10 @@ export interface CliIO {
   platform: NodeJS.Platform
   /** Reference time for date-based checks; tests pin it for deterministic output. */
   now?: Date
+  /** Ask a yes/no question; only given when there is a terminal to answer it (setup). */
+  confirm?: (question: string) => Promise<boolean>
+  /** Finds and runs programs for setup; tests pass a fake. Defaults to the real machine. */
+  setupHost?: SetupHost
 }
 
 const ISSUES_URL = 'https://github.com/Douglas-Strey/repolens-cli/issues'
@@ -476,13 +482,15 @@ export async function main(argv: readonly string[], io: CliIO): Promise<number> 
     const debug = debugWriter(io, err)
     const output = args.output && args.subcommand !== 'init' ? await resolveOutputFile(args.output, args, io) : null
 
-    const raw = await scan({
-      cwd: scanned.root,
-      config: config.layers,
-      ...(args.maxFiles !== undefined ? { maxFiles: args.maxFiles } : {}),
-      ...(io.now ? { now: io.now } : {}),
-      ...(debug ? { debug } : {}),
-    })
+    const runScan = () =>
+      scan({
+        cwd: scanned.root,
+        config: config.layers,
+        ...(args?.maxFiles !== undefined ? { maxFiles: args.maxFiles } : {}),
+        ...(io.now ? { now: io.now } : {}),
+        ...(debug ? { debug } : {}),
+      })
+    const raw = await runScan()
     printConfigWarnings(raw.meta.warnings, io, err)
     const result = filterByConfidence(raw, verbose ? 'low' : 'medium')
 
@@ -499,6 +507,25 @@ export async function main(argv: readonly string[], io: CliIO): Promise<number> 
       quiet: args.quiet,
       width: output ? FILE_WIDTH : outputWidth(io.stdout, io.env),
       ...(commandPath !== undefined ? { commandPath } : {}),
+    }
+
+    if (args.command === 'setup') {
+      return await runSetup({
+        result,
+        root: scanned.root,
+        realRoot: scanned.realRoot,
+        host:
+          io.setupHost ?? systemHost({ env: io.env, platform: io.platform, exclude: [scanned.root, scanned.realRoot] }),
+        style: out,
+        write: (text) => io.stdout.write(text),
+        writeError: (text) => io.stderr.write(text),
+        ...(io.confirm ? { confirm: io.confirm } : {}),
+        yes: args.yes,
+        dryRun: args.dryRun,
+        ignoreScripts: args.ignoreScripts,
+        ...(commandPath !== undefined ? { commandPath } : {}),
+        rescan: async () => filterByConfidence(await runScan(), 'medium'),
+      })
     }
 
     let content: string

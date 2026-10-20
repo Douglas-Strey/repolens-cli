@@ -7,6 +7,7 @@ repolens [path] [options]          Scan a repository (default command)
 repolens scan [path] [options]     Same as above
 repolens doctor [path] [options]   Check for setup problems and inconsistencies
 repolens report [path] [options]   Generate a Markdown report
+repolens setup [path] [options]    Set up the project: env file, services, dependencies
 repolens agent [init] [path] [options]  Generate context for coding agents (experimental)
 repolens config [path] [options]   Show the configuration files and settings in effect
 repolens help [command]            Show help for a command
@@ -107,6 +108,59 @@ repolens report --output repolens.md
 repolens report --verbose           # inclui achados de baixa confiança
 ```
 
+## `repolens setup`
+
+Prepara um projeto que você acabou de clonar: cria o arquivo de env local a partir do
+exemplo, sobe os serviços de apoio com o Docker Compose e instala as dependências. São os
+passos do início rápido, executados para você.
+
+```sh
+repolens setup                    # mostra o plano, pergunta e depois executa
+repolens setup --dry-run          # mostra o plano e para
+repolens setup --yes              # executa o plano sem perguntar (CI, scripts)
+repolens setup --ignore-scripts   # instala sem scripts de ciclo de vida
+```
+
+O setup é o único comando que executa alguma coisa, então ele mostra o plano antes:
+
+```
+Setup plan for web
+
+  1. cp .env.example .env     create your local environment file
+     · Then fill in your own values: the file starts as a copy of .env.example.
+  2. docker compose up -d db  start the backing services
+     · Pulls images if needed: postgres:17
+  3. pnpm install             install dependencies
+     · Runs these scripts from the repository:
+       postinstall (package.json): node scripts/setup.js
+     · Dependencies can run their own install scripts too. Use --ignore-scripts to skip them all.
+
+Run these 3 steps? [y/N]
+```
+
+- **Ele executa só o que o plano mostra.** Cada passo é um comando que o próprio RepoLens
+  monta: copiar o arquivo de env de exemplo, `docker compose up -d` e o `install` do
+  gerenciador de pacotes (`npm`, `pnpm`, Yarn, Bun) ou `go mod download`. Scripts do
+  projeto, como `make setup` ou `pnpm db:up`, aparecem em "Skipped" para você rodar.
+- **Ele diz o que mais vai rodar.** Instalar roda os scripts de ciclo de vida do projeto
+  (`preinstall`, `postinstall`, `prepare`, …) e os das dependências, então o plano lista os
+  do projeto; `--ignore-scripts` pula todos. Os passos do Compose listam as imagens que
+  baixam ou constroem.
+- **Ele pergunta antes.** Sem um terminal para perguntar, o setup se recusa a rodar, a
+  menos que você passe `--yes`.
+- **Ele nunca mexe nos seus valores.** O arquivo de env só é criado quando não existe (com
+  permissão só para o dono no macOS e no Linux), e nunca é sobrescrito nem preenchido.
+- **Ele confere o Node.js antes.** Quando o `node` ativo está fora do `engines.node`, nada
+  roda. Uma versão diferente da fixada no `.nvmrc` (ou `.node-version`, `.tool-versions`,
+  mise) é apontada, não imposta.
+- **Ele para no primeiro passo que falhar.** Rode de novo depois de corrigir: um arquivo de
+  env existente é preservado e instalar de novo não faz mal.
+
+Ao terminar, o setup analisa o projeto de novo e diz se o `repolens doctor` ainda encontra
+problemas e como iniciar o projeto. Veja em
+[segurança](security.md#7-o-repolens-setup-executa-só-o-que-mostra-para-você) como os
+programas são encontrados e executados.
+
 ## `repolens agent` (experimental)
 
 Gera um contexto curto e estruturado sobre o repositório para agentes de programação
@@ -163,7 +217,7 @@ verificação que não existe) em stderr, para que nunca se misturem com a saíd
 | Código | Significado |
 | --- | --- |
 | `0` | Sucesso. Para `doctor`: nenhum achado no nível de `--fail-on` ou acima. |
-| `1` | `doctor` encontrou problemas no nível de `--fail-on` ou acima. |
+| `1` | `doctor` encontrou problemas no nível de `--fail-on` ou acima, ou o `setup` não terminou (um passo falhou, falta uma ferramenta, a versão do Node.js não serve ou você respondeu não). |
 | `2` | Uso inválido (opção desconhecida, valor inválido), diretório ilegível ou inexistente, uma configuração do usuário ou um arquivo `--config` que não existe ou não é JSON válido, ou um arquivo de saída que não pôde ser gravado. |
 | `3` | Erro interno inesperado (um bug; reporte com a saída de `--verbose`, por favor). |
 

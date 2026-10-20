@@ -166,6 +166,16 @@ Eles não fazem I/O. A CLI (`src/cli/main.ts`) decide para onde a saída vai.
   zero e de tag Unicode do texto vindo do repositório, antes que qualquer formato faça o
   escape dele.
 
+### Setup (`src/setup/`, `src/cli/setup.ts`)
+
+O `repolens setup` é o único caminho do código que executa programas. O `setupPlan`
+(`src/setup/plan.ts`) é puro: transforma um `ScanResult` em passos montados a partir das
+mesmas sugestões do início rápido (`src/output/commands.ts`), cada um com uma ação
+estruturada (copiar um arquivo, ou um programa e seus argumentos) e notas sobre o que mais
+ele executa. O `src/setup/host.ts` encontra programas no PATH (nunca dentro do repositório)
+e os inicia sem shell; os testes o substituem por um `SetupHost` falso. O
+`src/cli/setup.ts` mostra o plano, verifica, pergunta e executa.
+
 ## Decisões de design
 
 - **Sem carregador de plugins na v1.** A interface de detector é pequena e estável o bastante

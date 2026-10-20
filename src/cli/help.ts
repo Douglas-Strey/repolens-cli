@@ -11,6 +11,7 @@ ${s.bold('Usage')}
   repolens [path] [options]                Scan a repository (default command)
   repolens doctor [path] [options]         Check for setup problems and inconsistencies
   repolens report [path] [options]         Generate a Markdown report
+  repolens setup [path] [options]          Set up the project: env file, services, dependencies
   repolens agent [init] [path] [options]   Generate context for coding agents ${s.dim('(experimental)')}
   repolens config [path]                   Show the configuration files and settings in effect
   repolens help [command]                  Show help for a command
@@ -43,14 +44,16 @@ ${s.bold('Examples')}
   ${s.cyan('repolens ../another-project')}
   ${s.cyan('repolens doctor --strict')}
   ${s.cyan('repolens report --output repolens.md')}
+  ${s.cyan('repolens setup --dry-run')}
 
 ${s.bold('Exit codes')}
   0  Success
-  1  doctor found problems at or above the --fail-on level
+  1  doctor found problems at or above the --fail-on level, or setup didn't finish
   2  Invalid usage, unreadable directory, or an output file that couldn't be written
   3  Unexpected internal error
 
-RepoLens never executes project code, never uploads anything, and never prints secret values.
+RepoLens never uploads anything and never prints secret values. Only setup runs commands,
+and only the ones it shows you first; every other command only reads files.
 Docs: ${REPO_URL}#readme
 `
 }
@@ -97,6 +100,25 @@ ${s.bold('Options')}
 
 For JSON, use ${s.cyan('repolens --json')}.
 `,
+  setup: (s) => `${s.bold('repolens setup')} [path] [options]
+
+Set up a freshly cloned project: create the local env file from the example,
+start the backing services with Docker Compose, and install dependencies.
+
+Setup prints the exact commands first, with what else they run (install
+lifecycle scripts, images Compose pulls or builds), and asks before running
+anything. It never overwrites an existing env file, never fills in values, and
+leaves project scripts (make setup, pnpm db:up) for you to run.
+
+${s.bold('Options')}
+      --dry-run          Show the plan and stop
+  -y, --yes              Run the plan without asking ${s.dim('(for CI and scripts)')}
+      --ignore-scripts   Install without running lifecycle scripts, the
+                         project's or its dependencies'
+
+Exits with 1 when a step fails, a tool is missing, the active Node.js version
+doesn't match the project, or you answer no.
+`,
   agent: (s) => `${s.bold('repolens agent')} [init] [path] [options]  ${s.dim('(experimental)')}
 
 Generate concise, structured context about the repository for coding agents
@@ -134,7 +156,7 @@ Docs: https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/configuration
 `,
   help: (s) => `${s.bold('repolens help')} [command]
 
-Show help for a command: scan, doctor, report, agent, config.
+Show help for a command: scan, doctor, report, setup, agent, config.
 `,
 }
 

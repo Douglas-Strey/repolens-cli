@@ -57,6 +57,11 @@ npm install -g @douglas-strey/repolens    # any OS with Node.js 22+
 Works on macOS, Linux and Windows. The npm package needs Node.js 22 or newer; Homebrew
 installs Node for you.
 
+Just cloned it? `repolens setup` creates the env file from the example, starts the backing
+services and installs dependencies. It shows the exact commands first, including the
+install scripts they will run, and asks before running anything
+([details](docs/cli.md#repolens-setup)).
+
 > **Scanning a repository you don't trust?** Run RepoLens from *outside* it, e.g.
 > `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, or use a global install. When
 > `npx` runs inside a repository, npm itself honors that repository's `.npmrc` and `node_modules`,
@@ -208,7 +213,8 @@ RepoLens is built to be the first thing you run in a repository you don't know y
 - **It never executes anything from the repository.** No scripts, no config files (it reads
   `nuxt.config.ts` as text), no Docker. It doesn't even run `git`: repository config can
   make `git` run arbitrary commands, so branch, remotes and tracked files are read straight
-  from `.git/`.
+  from `.git/`. The one exception is `repolens setup`, which you run on purpose: it shows
+  each command and the scripts it will trigger, and asks first.
 - **It never prints secret values.** The `.env` parser keeps variable names and throws the
   values away. Committed text it echoes back (scripts, dependency URLs, Git remotes) is
   redacted. The test suite checks that sentinel secrets never show up in any output format.
@@ -275,7 +281,9 @@ or API key.
 **Is it safe on a repository I don't trust?**
 That's the main design goal: it never executes project code, config files, hooks or `git`,
 and it never reads outside the directory you scan (except the enclosing `.git` metadata
-when you scan a subdirectory). See [docs/security.md](docs/security.md).
+when you scan a subdirectory). `repolens setup` is the exception you opt into: it installs
+dependencies, which runs the project's install scripts, so it lists them and asks first
+(`--ignore-scripts` skips them). See [docs/security.md](docs/security.md).
 
 **It reported something wrong or missed something.**
 Please [open an issue](https://github.com/Douglas-Strey/repolens-cli/issues/new/choose)

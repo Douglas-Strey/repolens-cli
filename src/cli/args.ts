@@ -6,7 +6,7 @@ import { closestWord } from '../utils/suggest.ts'
 export { closestWord, editDistance } from '../utils/suggest.ts'
 export type { FailOn }
 
-export const COMMANDS = ['scan', 'doctor', 'report', 'agent', 'config', 'help'] as const
+export const COMMANDS = ['scan', 'doctor', 'report', 'setup', 'agent', 'config', 'help'] as const
 export type Command = (typeof COMMANDS)[number]
 
 const FAIL_ON_VALUES: readonly FailOn[] = ['error', 'warning', 'info', 'never']
@@ -35,6 +35,12 @@ export interface CliArgs {
   help: boolean
   version: boolean
   maxFiles?: number
+  /** setup --yes: run the plan without asking. */
+  yes: boolean
+  /** setup --dry-run: show the plan and stop. */
+  dryRun: boolean
+  /** setup --ignore-scripts: install without lifecycle scripts. */
+  ignoreScripts: boolean
 }
 
 export interface ParseOptions {
@@ -61,6 +67,9 @@ const OPTIONS = {
   'max-files': { type: 'string' },
   config: { type: 'string' },
   'no-config': { type: 'boolean' },
+  yes: { type: 'boolean', short: 'y' },
+  'dry-run': { type: 'boolean' },
+  'ignore-scripts': { type: 'boolean' },
   help: { type: 'boolean', short: 'h' },
   version: { type: 'boolean', short: 'V' },
 } as const
@@ -117,6 +126,25 @@ function checkFlagsApply(args: CliArgs, values: { strict?: boolean; 'fail-on'?: 
   if (command === 'report' && args.json) {
     throw invalid('--json is not available for report, which is always Markdown. Use repolens --json instead')
   }
+  if (command === 'setup') {
+    for (const [flag, given] of [
+      ['--json', args.json],
+      ['--markdown', args.markdown],
+      ['--output', args.output !== undefined],
+      ['--quiet', args.quiet],
+    ] as const) {
+      if (given) throw invalid(`${flag} does not apply to setup, which shows its plan in the terminal`)
+    }
+    if (args.yes && args.dryRun) throw invalid('Use either --yes or --dry-run, not both')
+  } else {
+    for (const [flag, given] of [
+      ['--yes', args.yes],
+      ['--dry-run', args.dryRun],
+      ['--ignore-scripts', args.ignoreScripts],
+    ] as const) {
+      if (given) throw invalid(`${flag} only applies to setup (repolens setup ${flag})`)
+    }
+  }
 }
 
 export function parseCliArgs(argv: readonly string[], options: ParseOptions = {}): CliArgs {
@@ -146,6 +174,9 @@ export function parseCliArgs(argv: readonly string[], options: ParseOptions = {}
     noConfig: values['no-config'] === true,
     help: values.help === true,
     version: values.version === true,
+    yes: values.yes === true,
+    dryRun: values['dry-run'] === true,
+    ignoreScripts: values['ignore-scripts'] === true,
   }
 
   // `repolens doctor --help` shows doctor's help; a bare `repolens --help` shows the overview.

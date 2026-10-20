@@ -27,6 +27,8 @@ Qualquer coisa que quebre as garantias descritas em
   ambiente, token, senha ou outro segredo encontrado em um repositório analisado.
 - Analisar um repositório faz o RepoLens **executar** código ou comandos desse repositório
   (scripts, arquivos de configuração, hooks do Git, o próprio `git`, Docker, …).
+- O `repolens setup` executa algo que o plano dele não mostrou, executa sem perguntar (e
+  sem `--yes`) ou executa um programa de dentro do repositório.
 - Um repositório forjado faz o RepoLens **ler arquivos fora** do diretório analisado (exceto
   os metadados do Git no diretório pai, descritos no modelo de segurança), por exemplo via
   links simbólicos ou path traversal.

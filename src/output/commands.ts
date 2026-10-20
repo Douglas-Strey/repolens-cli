@@ -315,6 +315,8 @@ export interface ServicesCommand extends SuggestedCommand {
   services: string[]
   /** True when some service is a database, cache, queue or other backing service a local run needs. */
   backing: boolean
+  /** The project script that starts the services, when there is one. */
+  script?: Script
 }
 
 function isBuilt(service: Service): boolean {
@@ -336,28 +338,56 @@ export function servicesCommand(result: ScanResult): ServicesCommand | null {
     pickScript(root, COMPOSE_SCRIPT_NAMES, []) ??
     root.find((s) => s.category !== 'dev' && s.category !== 'start' && COMPOSE_UP.test(s.command))
   if (script) {
-    return { command: script.run, reason: 'start local services', services: [], backing: services.some(backingKind) }
+    return {
+      command: script.run,
+      reason: 'start local services',
+      services: [],
+      backing: services.some(backingKind),
+      script,
+    }
   }
+  const up = composeUp(result)
+  if (!up) return null
+  return {
+    command: commandLine(...up.words),
+    reason: up.services.length > 0 ? 'start the backing services' : 'start local services',
+    services: up.services,
+    backing: up.started.some(backingKind),
+  }
+}
 
+export interface ComposeUp {
+  /** `docker compose [-f file] up -d [service…]` as command-line words. */
+  words: Word[]
+  /** Services named on the command line; empty when it starts them all. */
+  services: string[]
+  /** Every service the command starts. */
+  started: Service[]
+}
+
+/**
+ * The `docker compose up -d` RepoLens builds itself: the default Compose files
+ * (or the first root one), without profiles, and only the backing services
+ * when Compose also builds the application.
+ */
+export function composeUp(result: ScanResult): ComposeUp | null {
+  const { composeFiles, services } = result.services
+  if (composeFiles.length === 0 || services.length === 0) return null
   const rootFiles = composeFiles.filter((file) => !file.includes('/'))
   const defaults = rootFiles.some((file) => DEFAULT_COMPOSE_FILE.test(file))
   const files = defaults
     ? rootFiles.filter((file) => DEFAULT_COMPOSE_FILE.test(file) || COMPOSE_OVERRIDE_FILE.test(file))
     : [rootFiles[0] ?? composeFiles[0] ?? '']
   const own = services.filter((service) => files.includes(service.source))
-  const started = (own.length > 0 ? own : services).filter((service) => service.profiles.length === 0)
-  const backing = started.filter((service) => !isBuilt(service))
-  const names = started.some(isBuilt) && backing.length > 0 ? [...new Set(backing.map((service) => service.name))] : []
+  const all = (own.length > 0 ? own : services).filter((service) => service.profiles.length === 0)
+  const backing = all.filter((service) => !isBuilt(service))
+  const names = all.some(isBuilt) && backing.length > 0 ? [...new Set(backing.map((service) => service.name))] : []
 
   const words: Word[] = ['docker', 'compose']
   if (!defaults) words.push('-f', { arg: files[0] ?? '' })
   words.push('up', '-d', ...names.map((name) => ({ arg: name })))
-  return {
-    command: commandLine(...words),
-    reason: names.length > 0 ? 'start the backing services' : 'start local services',
-    services: names,
-    backing: started.some(backingKind),
-  }
+  const started = names.length > 0 ? all.filter((service) => names.includes(service.name)) : all
+  return { words, services: names, started }
 }
 
 // ---------------------------------------------------------------------------

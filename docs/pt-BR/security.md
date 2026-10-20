@@ -5,7 +5,9 @@
 O RepoLens foi feito para ser a primeira coisa que você roda em um repositório que ainda não
 conhece. Isso só funciona se rodá-lo for seguro, então as regras abaixo são restrições
 rígidas, não metas. Violar qualquer uma delas é um bug de segurança; por favor,
-[reporte de forma privada](../../SECURITY.pt-BR.md).
+[reporte de forma privada](../../SECURITY.pt-BR.md). Elas valem para todos os comandos,
+exceto o `repolens setup`, cujo trabalho é executar o setup do projeto e que tem regras
+próprias ([7](#7-o-repolens-setup-executa-só-o-que-mostra-para-você)).
 
 ## Garantias
 
@@ -108,6 +110,39 @@ valores que estão no arquivo.
 abrem um FIFO no caminho de destino, então um repositório analisado não consegue
 redirecioná-los. O `agent init` também se recusa a sobrescrever arquivos que ele não gerou,
 a menos que você passe `--force`.
+
+### 7. O `repolens setup` executa só o que mostra para você
+
+Preparar um projeto significa executar coisas: instalar dependências roda scripts de ciclo
+de vida, e o Compose baixa ou constrói imagens. O `repolens setup` é o único comando que faz
+isso, de propósito e às claras:
+
+- **Só comandos que o RepoLens monta.** Copiar o arquivo de env de exemplo,
+  `docker compose up -d` e o `install` do gerenciador de pacotes (ou `go mod download`).
+  Scripts do projeto (`make setup`, `pnpm db:up`) nunca são executados; o setup os lista
+  para você. Um nome de arquivo ou de serviço do Compose que não seja um nome simples
+  (começa com `-`, ou tem espaços ou caracteres de shell) também vira só uma sugestão.
+- **Mostrado antes de rodar, com o que mais vai rodar.** O plano lista cada comando, os
+  scripts de ciclo de vida de instalação do projeto com o conteúdo deles (com segredos
+  ocultados, como qualquer outro texto repetido) e as imagens que o Compose baixa ou
+  constrói. `--ignore-scripts` instala sem nenhum script de ciclo de vida, nem do projeto
+  nem das dependências.
+- **Perguntado antes de rodar.** O setup espera um sim no terminal. Sem terminal, ele se
+  recusa a rodar a menos que você passe `--yes`, então uma entrada redirecionada não
+  responde por você.
+- **Programas do seu PATH, nunca do repositório.** O próprio RepoLens encontra `pnpm`,
+  `docker` e afins e os executa pelo caminho absoluto, sem shell. Entradas do PATH relativas
+  (`.`, `bin`) ou dentro do repositório (`node_modules/.bin`) são ignoradas, assim como um
+  programa no PATH que seja um link para dentro do repositório. Isso importa principalmente
+  no Windows, onde o diretório atual seria pesquisado primeiro. Os shims `.cmd` do Windows
+  (npm, pnpm, Yarn) só rodam com argumentos que o `cmd.exe` não consegue reinterpretar.
+- **O seu arquivo de env é seu.** O exemplo é lido como qualquer outro arquivo do projeto
+  (só dentro do repositório, nunca através de um link que saia dele) e copiado para um
+  arquivo novo que só você pode ler. Um arquivo existente, ou um link no lugar dele, nunca é
+  sobrescrito.
+- **Nada verificado pela metade.** Programas ausentes e uma versão do Node.js fora do
+  `engines.node` são detectados antes do primeiro passo, e o setup para no primeiro passo
+  que falhar.
 
 ## Privacidade
 
