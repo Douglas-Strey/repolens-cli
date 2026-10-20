@@ -7,6 +7,8 @@ a config file or a setup mistake it didn't know yet.
 
 ## Ways to help
 
+- **Start with a [good first issue](https://github.com/users/Douglas-Strey/projects/1/views/2).** That list only shows small,
+  self-contained tasks nobody has taken yet. Comment on the issue to claim it.
 - **Pick an item from the [roadmap](ROADMAP.md).** Each one says where to start and how
   big it is.
 - **Try it on your repositories** and [open an issue](https://github.com/Douglas-Strey/repolens-cli/issues/new/choose)

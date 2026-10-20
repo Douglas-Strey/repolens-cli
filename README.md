@@ -341,7 +341,8 @@ pnpm test
 pnpm dev -- ../some-project
 ```
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
+Looking for a first task? The [good first issues](https://github.com/users/Douglas-Strey/projects/1/views/2) are small,
+self-contained and not taken yet. Then read [CONTRIBUTING.md](CONTRIBUTING.md) and
 [docs/creating-a-detector.md](docs/creating-a-detector.md).
 
 ## License

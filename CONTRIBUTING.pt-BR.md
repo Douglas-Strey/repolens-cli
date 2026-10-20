@@ -7,6 +7,8 @@ arquivo de configuração ou um erro de setup que ele ainda não conhecia.
 
 ## Formas de ajudar
 
+- **Comece por uma [good first issue](https://github.com/users/Douglas-Strey/projects/1/views/2).** Essa lista só mostra tarefas
+  pequenas e independentes que ninguém pegou ainda. Comente na issue para ficar com ela.
 - **Pegue um item do [roadmap](ROADMAP.pt-BR.md).** Cada um diz por onde começar e qual o
   tamanho do trabalho.
 - **Teste nos seus repositórios** e [abra uma issue](https://github.com/Douglas-Strey/repolens-cli/issues/new/choose)

@@ -357,7 +357,9 @@ pnpm test
 pnpm dev -- ../some-project
 ```
 
-Comece pelo [CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-BR.md) e pelo
+Procurando uma primeira tarefa? As [good first issues](https://github.com/users/Douglas-Strey/projects/1/views/2) são
+pequenas, independentes e ainda não têm dono. Depois leia o
+[CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-BR.md) e o
 [docs/pt-BR/creating-a-detector.md](docs/pt-BR/creating-a-detector.md).
 
 ## Licença
