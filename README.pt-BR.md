@@ -314,9 +314,10 @@ do usuário e do projeto.
 - Grafos de arquitetura e de dependências
 - Extensões para editores
 
-Nada desta lista existe ainda. O [ROADMAP.pt-BR.md](ROADMAP.pt-BR.md) descreve cada item,
-com por onde começar e o tamanho do trabalho, se você quiser ajudar a construir algum.
-Ideias e votos são bem-vindos nas
+Nada desta lista existe ainda. Acompanhe no [quadro do roadmap](https://github.com/users/Douglas-Strey/projects/1),
+onde cada item tem uma issue para você comentar se quiser ajudar a construí-lo, e o
+[ROADMAP.pt-BR.md](ROADMAP.pt-BR.md) descreve cada um, com por onde começar e o tamanho do
+trabalho. Ideias e votos são bem-vindos nas
 [Discussions](https://github.com/Douglas-Strey/repolens-cli/discussions).
 
 ## Perguntas frequentes

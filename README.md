@@ -300,9 +300,10 @@ Markdown and agent output; 34 doctor checks; user and project configuration file
 - Architecture and dependency graphs
 - Editor extensions
 
-Nothing on this list exists yet. [ROADMAP.md](ROADMAP.md) describes each item, with where
-to start and how big it is, if you'd like to help build one. Ideas and votes are welcome
-in [Discussions](https://github.com/Douglas-Strey/repolens-cli/discussions).
+Nothing on this list exists yet. Follow it on the [roadmap board](https://github.com/users/Douglas-Strey/projects/1),
+where every item has an issue to comment on if you'd like to help build it, and
+[ROADMAP.md](ROADMAP.md) describes each one, with where to start and how big it is. Ideas
+and votes are welcome in [Discussions](https://github.com/Douglas-Strey/repolens-cli/discussions).
 
 ## FAQ
 
