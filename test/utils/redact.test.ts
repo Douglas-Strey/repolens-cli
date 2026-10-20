@@ -22,6 +22,11 @@ const ANTHROPIC = `sk-ant-${'f'.repeat(40)}`
 const GOOGLE = `AIza${'g'.repeat(35)}`
 const SENDGRID = `SG.${'h'.repeat(22)}.${'i'.repeat(43)}`
 const PRIVATE_KEY = `-----BEGIN RSA ${'PRIVATE'} KEY-----`
+const HUGGINGFACE = `hf_${'j'.repeat(34)}`
+const SHOPIFY = `shpat_${'a'.repeat(32)}`
+const PYPI = `pypi-${'AgEIcHlwaS5vcmc'}${'k'.repeat(60)}`
+const DIGITALOCEAN = `dop_v1_${'b'.repeat(64)}`
+const LINEAR = `lin_api_${'m'.repeat(40)}`
 
 describe('isSensitiveName', () => {
   it.each([
@@ -77,6 +82,11 @@ describe('findCredentialPattern', () => {
     [GOOGLE, 'google-api-key'],
     [SENDGRID, 'sendgrid-key'],
     [PRIVATE_KEY, 'private-key'],
+    [HUGGINGFACE, 'huggingface-token'],
+    [SHOPIFY, 'shopify-token'],
+    [PYPI, 'pypi-token'],
+    [DIGITALOCEAN, 'digitalocean-token'],
+    [LINEAR, 'linear-api-key'],
   ])('recognizes %s', (value, id) => {
     expect(findCredentialPattern(`prefix ${value} suffix`)).toBe(id)
   })
@@ -86,7 +96,19 @@ describe('findCredentialPattern', () => {
   })
 
   it('ignores ordinary values and placeholders', () => {
-    for (const value of ['changeme', 'sk_test_123', 'ghp_short', 'your-api-key-here', 'postgres://localhost/db', '']) {
+    for (const value of [
+      'changeme',
+      'sk_test_123',
+      'ghp_short',
+      'your-api-key-here',
+      'postgres://localhost/db',
+      'hf_your_token_here',
+      'shpat_xxxxxxxx',
+      'pypi-token',
+      'dop_v1_changeme',
+      'lin_api_key',
+      '',
+    ]) {
       expect(findCredentialPattern(value)).toBeNull()
     }
   })
@@ -159,7 +181,23 @@ describe('redactCommand', () => {
   })
 
   it('redacts every well-known credential format anywhere in the text', () => {
-    const all = [GITHUB_TOKEN, GITHUB_PAT, AWS_KEY, STRIPE_LIVE, SLACK, NPM_TOKEN, GITLAB, OPENAI, ANTHROPIC, GOOGLE]
+    const all = [
+      GITHUB_TOKEN,
+      GITHUB_PAT,
+      AWS_KEY,
+      STRIPE_LIVE,
+      SLACK,
+      NPM_TOKEN,
+      GITLAB,
+      OPENAI,
+      ANTHROPIC,
+      GOOGLE,
+      HUGGINGFACE,
+      SHOPIFY,
+      PYPI,
+      DIGITALOCEAN,
+      LINEAR,
+    ]
     const redacted = redactCommand(all.join(' | '))
     for (const secret of all) expect(redacted).not.toContain(secret)
     expect(redacted).toContain(REDACTED)

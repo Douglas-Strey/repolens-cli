@@ -38,6 +38,11 @@ export const CREDENTIAL_PATTERNS: ReadonlyArray<{ id: string; name: string; patt
   { id: 'npm-token', name: 'npm token', pattern: /\bnpm_[A-Za-z0-9]{36}\b/ },
   { id: 'google-api-key', name: 'Google API key', pattern: /\bAIza[0-9A-Za-z_-]{35}\b/ },
   { id: 'sendgrid-key', name: 'SendGrid API key', pattern: /\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b/ },
+  { id: 'huggingface-token', name: 'Hugging Face token', pattern: /\bhf_[A-Za-z0-9]{34,40}\b/ },
+  { id: 'shopify-token', name: 'Shopify token', pattern: /\bshp(?:at|ca|pa|ss)_[a-fA-F0-9]{32}\b/ },
+  { id: 'pypi-token', name: 'PyPI token', pattern: /\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,}/ },
+  { id: 'digitalocean-token', name: 'DigitalOcean token', pattern: /\bdo[opr]_v1_[a-f0-9]{64}\b/ },
+  { id: 'linear-api-key', name: 'Linear API key', pattern: /\blin_api_[A-Za-z0-9]{40}\b/ },
   { id: 'private-key', name: 'private key', pattern: /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----/ },
 ]
 

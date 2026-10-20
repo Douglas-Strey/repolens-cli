@@ -17,6 +17,8 @@ All notable changes to RepoLens are documented here. The format follows
   installs without lifecycle scripts. Project scripts are left for you to run, programs
   are never taken from the repository, and existing env files are never changed. It is
   the only command that runs anything; see docs/security.md.
+- `ENV_EXAMPLE_REAL_SECRET` and command redaction recognize Hugging Face, Shopify, PyPI and
+  DigitalOcean tokens and Linear API keys.
 
 ## [0.1.1] - 2026-10-20
 
