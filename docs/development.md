@@ -116,7 +116,7 @@ pattern for Node CLIs. `scripts/homebrew-formula.ts` generates it:
 
 ```sh
 node scripts/homebrew-formula.ts 0.1.0                        # hashes the tarball on npm
-node scripts/homebrew-formula.ts 0.1.0 --tarball repolens-cli-0.1.0.tgz   # before publishing
+node scripts/homebrew-formula.ts 0.1.0 --tarball douglas-strey-repolens-0.1.0.tgz   # before publishing
 ```
 
 The release workflow's `homebrew` job regenerates `Formula/repolens.rb` in the tap and

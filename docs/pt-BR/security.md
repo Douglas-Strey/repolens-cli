@@ -120,15 +120,15 @@ a menos que você passe `--force`.
 ## Rodando o próprio RepoLens com segurança
 
 O RepoLens só consegue proteger você depois que já está rodando. Quando você usa
-`npx repolens-cli` *dentro* de um repositório não confiável, o npm resolve o pacote
-primeiro, e o npm respeita o `.npmrc` desse repositório (que pode apontar para outro
+`npx @douglas-strey/repolens` *dentro* de um repositório não confiável, o npm resolve o
+pacote primeiro, e o npm respeita o `.npmrc` desse repositório (que pode apontar para outro
 registry) e o `node_modules` dele (que pode conter um pacote com o mesmo nome). Em vez
 disso, rode de fora do repositório:
 
 ```sh
-cd ~ && npx repolens-cli ~/code/unknown-repo
+cd ~ && npx @douglas-strey/repolens ~/code/unknown-repo
 # ou instale uma vez e use o binário
-npm install -g repolens-cli && repolens ~/code/unknown-repo
+npm install -g @douglas-strey/repolens && repolens ~/code/unknown-repo
 ```
 
 ## O que a saída contém

@@ -28,7 +28,7 @@ First public release (0.1.0). Move these entries under `## [0.1.0] - <date>` whe
   `--config`, `--no-config` and `repolens config`. A JSON Schema ships in
   `schema/config.schema.json`.
 - `--json` output with `schemaVersion: 1`, and a programmatic API (`scan()` and typed results).
-- Distribution through npm (`npx repolens-cli`) and a Homebrew tap
+- Distribution through npm (`npx @douglas-strey/repolens`) and a Homebrew tap
   (`brew install douglas-strey/tap/repolens`).
 - Route extraction for Nuxt, Next.js (App and Pages Router), Express, Fastify, NestJS, Hono,
   Gin, Echo, chi, Fiber, Gorilla mux and `net/http`, with prefix resolution across files,

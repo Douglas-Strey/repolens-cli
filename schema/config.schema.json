@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "$id": "https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json",
   "title": "RepoLens configuration",
   "description": "Settings for RepoLens, in repolens.config.json, the \"repolens\" key of package.json, or the user config file. See https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/configuration.md",
   "type": "object",

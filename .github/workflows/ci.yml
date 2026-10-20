@@ -72,7 +72,7 @@ jobs:
         run: |
           mkdir smoke && cd smoke
           npm init -y > /dev/null
-          npm install ../repolens-cli-*.tgz
+          npm install ../douglas-strey-repolens-*.tgz
           npx repolens --version
           npx repolens "$GITHUB_WORKSPACE" --no-color
           npx repolens doctor "$GITHUB_WORKSPACE" --fail-on never --no-color

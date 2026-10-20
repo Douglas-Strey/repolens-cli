@@ -27,7 +27,7 @@ describe('validateConfig', () => {
   it('keeps every valid setting', () => {
     const loaded = validate(
       {
-        $schema: 'https://unpkg.com/repolens-cli/schema/config.schema.json',
+        $schema: 'https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json',
         ignore: ['legacy/', 'examples/**'],
         maxFiles: 5000,
         doctor: { failOn: 'warning', rules: { ENV_UNUSED: 'off', LOCKFILE_MISSING: 'error' } },

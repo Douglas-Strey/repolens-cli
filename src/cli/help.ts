@@ -38,7 +38,7 @@ ${s.bold('Environment')}
   COLUMNS                Output width when stdout is not a terminal
 
 ${s.bold('Examples')}
-  ${s.cyan('npx repolens-cli')}
+  ${s.cyan('npx @douglas-strey/repolens')}
   ${s.cyan('repolens --json > repolens.json')}
   ${s.cyan('repolens ../another-project')}
   ${s.cyan('repolens doctor --strict')}

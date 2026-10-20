@@ -8,7 +8,7 @@
 <h3 align="center">Entenda qualquer repositório em segundos.</h3>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/repolens-cli"><img alt="versão no npm" src="https://img.shields.io/npm/v/repolens-cli?color=0969da"></a>
+  <a href="https://www.npmjs.com/package/@douglas-strey/repolens"><img alt="versão no npm" src="https://img.shields.io/npm/v/@douglas-strey/repolens?color=0969da"></a>
   <a href="https://github.com/Douglas-Strey/repolens-cli/actions/workflows/ci.yml"><img alt="status do CI" src="https://github.com/Douglas-Strey/repolens-cli/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Node.js 22 ou mais recente" src="https://img.shields.io/badge/node-%3E%3D22-417e38">
   <a href="LICENSE"><img alt="licença MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
@@ -25,7 +25,7 @@ mal configurado.
 seu código.**
 
 ```sh
-npx repolens-cli
+npx @douglas-strey/repolens
 ```
 
 <p align="center">
@@ -44,25 +44,26 @@ O RepoLens faz esse levantamento por você, lendo apenas os arquivos do reposit�
 ## Início rápido
 
 ```sh
-npx repolens-cli              # visão geral do diretório atual
-npx repolens-cli doctor       # problemas de setup, com correções sugeridas
-npx repolens-cli ../other-repo --json
+npx @douglas-strey/repolens          # visão geral do diretório atual
+npx @douglas-strey/repolens doctor   # problemas de setup, com correções sugeridas
+npx @douglas-strey/repolens ../other-repo --json
 ```
 
 Ou instale para usar o comando mais curto, `repolens`:
 
 ```sh
 brew install douglas-strey/tap/repolens   # macOS e Linux (Homebrew)
-npm install -g repolens-cli                # qualquer sistema com Node.js 22+
+npm install -g @douglas-strey/repolens    # qualquer sistema com Node.js 22+
 ```
 
 Funciona em macOS, Linux e Windows. O pacote npm precisa do Node.js 22 ou mais recente; o
 Homebrew instala o Node para você.
 
 > **Vai analisar um repositório em que você não confia?** Rode o RepoLens *fora* dele, por
-> exemplo `cd ~ && npx repolens-cli ~/path/to/repo`, ou use uma instalação global. Quando o
-> `npx` roda dentro de um repositório, o próprio npm respeita o `.npmrc` e o `node_modules`
-> desse repositório, que podem trocar o pacote por outro antes mesmo de o RepoLens iniciar.
+> exemplo `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, ou use uma instalação
+> global. Quando o `npx` roda dentro de um repositório, o próprio npm respeita o `.npmrc` e
+> o `node_modules` desse repositório, que podem trocar o pacote por outro antes mesmo de o
+> RepoLens iniciar.
 
 ## O que ele mostra
 
@@ -118,7 +119,7 @@ Uma análise simples com `repolens` sempre termina com código de saída 0 quand
 então colocá-la no log do CI nunca quebra um build. Para barrar o build, use o `doctor`:
 
 ```yaml
-- run: npx --yes repolens-cli doctor --fail-on error
+- run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
 
 ## Configuração
@@ -129,7 +130,7 @@ configuração do usuário em `~/.config/repolens/config.json` (seus padrões em
 
 ```jsonc
 {
-  "$schema": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "$schema": "https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json",
   "ignore": ["legacy/", "src/generated/"],        // sintaxe do .gitignore
   "doctor": {
     "failOn": "warning",                            // padrão para --fail-on
@@ -157,7 +158,7 @@ ordenados, só caminhos relativos) e documentada em
 pelo pacote:
 
 ```ts
-import { scan } from 'repolens-cli'
+import { scan } from '@douglas-strey/repolens'
 
 const result = await scan({ cwd: '/path/to/repo' })
 console.log(result.frameworks.map((f) => f.name))
@@ -276,8 +277,9 @@ Ideias e votos são bem-vindos nas
 
 ## Perguntas frequentes
 
-**Por que o pacote npm se chama `repolens-cli`?**
-O nome `repolens` no npm já estava em uso. O comando que você roda continua sendo `repolens`.
+**Por que o pacote npm se chama `@douglas-strey/repolens`?**
+Os nomes `repolens` sem escopo no npm já estavam em uso ou eram parecidos demais com pacotes
+existentes. O comando que você roda continua sendo `repolens`.
 
 **Ele faz upload do meu código ou usa um modelo de IA?**
 Não. Tudo acontece localmente, com análise estática. Não há acesso à rede, conta nem chave

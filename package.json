@@ -1,5 +1,5 @@
 {
-  "name": "repolens-cli",
+  "name": "@douglas-strey/repolens",
   "version": "0.1.0",
   "description": "Understand any repository in seconds: stack, services, env vars, scripts, routes and setup problems. Static, local, no telemetry.",
   "keywords": [

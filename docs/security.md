@@ -108,15 +108,16 @@ refuses to overwrite files it didn't generate unless you pass `--force`.
 
 ## Running RepoLens itself safely
 
-RepoLens can only protect you once it is running. When you use `npx repolens-cli` *inside*
-an untrusted repository, npm resolves the package first, and npm honors that repository's
-`.npmrc` (which can point at another registry) and its `node_modules` (which can contain a
-package with the same name). Run it from outside the repository instead:
+RepoLens can only protect you once it is running. When you use
+`npx @douglas-strey/repolens` *inside* an untrusted repository, npm resolves the package
+first, and npm honors that repository's `.npmrc` (which can point at another registry) and
+its `node_modules` (which can contain a package with the same name). Run it from outside the
+repository instead:
 
 ```sh
-cd ~ && npx repolens-cli ~/code/unknown-repo
+cd ~ && npx @douglas-strey/repolens ~/code/unknown-repo
 # or install once and use the binary
-npm install -g repolens-cli && repolens ~/code/unknown-repo
+npm install -g @douglas-strey/repolens && repolens ~/code/unknown-repo
 ```
 
 ## What the output does contain

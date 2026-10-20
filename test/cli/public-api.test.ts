@@ -1,4 +1,4 @@
-/** The package entry point (`import { scan } from 'repolens-cli'`), as programmatic users see it. */
+/** The package entry point (`import { scan } from '@douglas-strey/repolens'`), as programmatic users see it. */
 import { describe, expect, it } from 'vitest'
 import type { AgentFile, ContextOptions, MarkdownOptions, RenderOptions, Style } from '../../src/index.ts'
 import * as api from '../../src/index.ts'

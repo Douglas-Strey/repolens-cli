@@ -1,7 +1,7 @@
 /**
  * Programmatic API.
  *
- *   import { scan } from 'repolens-cli'
+ *   import { scan } from '@douglas-strey/repolens'
  *   const result = await scan({ cwd: '/path/to/repo' })
  *
  * scan() applies the repository's own repolens.config.json; pass

@@ -8,7 +8,7 @@
 <h3 align="center">Understand any repository in seconds.</h3>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/repolens-cli"><img alt="npm version" src="https://img.shields.io/npm/v/repolens-cli?color=0969da"></a>
+  <a href="https://www.npmjs.com/package/@douglas-strey/repolens"><img alt="npm version" src="https://img.shields.io/npm/v/@douglas-strey/repolens?color=0969da"></a>
   <a href="https://github.com/Douglas-Strey/repolens-cli/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/Douglas-Strey/repolens-cli/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Node.js 22 or newer" src="https://img.shields.io/badge/node-%3E%3D22-417e38">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
@@ -23,7 +23,7 @@ running, which environment variables you need, how to start it, and what's misco
 **No configuration needed. No cloud upload. No AI API. It never runs your code.**
 
 ```sh
-npx repolens-cli
+npx @douglas-strey/repolens
 ```
 
 <p align="center">
@@ -42,24 +42,24 @@ RepoLens does that pass for you, reading only the files in the repository.
 ## Quick start
 
 ```sh
-npx repolens-cli              # overview of the current directory
-npx repolens-cli doctor       # setup problems, with suggested fixes
-npx repolens-cli ../other-repo --json
+npx @douglas-strey/repolens          # overview of the current directory
+npx @douglas-strey/repolens doctor   # setup problems, with suggested fixes
+npx @douglas-strey/repolens ../other-repo --json
 ```
 
 Or install it to use the shorter command, `repolens`:
 
 ```sh
 brew install douglas-strey/tap/repolens   # macOS and Linux (Homebrew)
-npm install -g repolens-cli                # any OS with Node.js 22+
+npm install -g @douglas-strey/repolens    # any OS with Node.js 22+
 ```
 
 Works on macOS, Linux and Windows. The npm package needs Node.js 22 or newer; Homebrew
 installs Node for you.
 
 > **Scanning a repository you don't trust?** Run RepoLens from *outside* it, e.g.
-> `cd ~ && npx repolens-cli ~/path/to/repo`, or use a global install. When `npx` runs
-> inside a repository, npm itself honors that repository's `.npmrc` and `node_modules`,
+> `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, or use a global install. When
+> `npx` runs inside a repository, npm itself honors that repository's `.npmrc` and `node_modules`,
 > which could substitute a different package before RepoLens even starts.
 
 ## What it shows
@@ -116,7 +116,7 @@ A plain `repolens` scan always exits 0 when it completes, so adding it to a CI l
 breaks a build. Gate on `doctor` instead:
 
 ```yaml
-- run: npx --yes repolens-cli doctor --fail-on error
+- run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
 
 ## Configuration
@@ -127,7 +127,7 @@ RepoLens needs no configuration. To adjust it, add a `repolens.config.json` to t
 
 ```jsonc
 {
-  "$schema": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "$schema": "https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json",
   "ignore": ["legacy/", "src/generated/"],        // .gitignore syntax
   "doctor": {
     "failOn": "warning",                            // default for --fail-on
@@ -154,7 +154,7 @@ arrays, relative paths only) and documented in [docs/json-schema.md](docs/json-s
 TypeScript types are exported from the package:
 
 ```ts
-import { scan } from 'repolens-cli'
+import { scan } from '@douglas-strey/repolens'
 
 const result = await scan({ cwd: '/path/to/repo' })
 console.log(result.frameworks.map((f) => f.name))
@@ -264,8 +264,9 @@ in [Discussions](https://github.com/Douglas-Strey/repolens-cli/discussions).
 
 ## FAQ
 
-**Why is the npm package called `repolens-cli`?**
-The `repolens` name on npm was already taken. The command you run is still `repolens`.
+**Why is the npm package called `@douglas-strey/repolens`?**
+The unscoped `repolens` names on npm were already taken or too close to existing packages.
+The command you run is still `repolens`.
 
 **Does it upload my code or use an AI model?**
 No. Everything happens locally with static analysis. There is no network access, account

@@ -51,8 +51,8 @@ jobs:
         # exist); its tag then only creates the GitHub release and updates the tap.
         run: |
           version="$(node -p "require('./package.json').version")"
-          if npm view "repolens-cli@$version" version >/dev/null 2>&1; then
-            echo "::notice::repolens-cli@$version is already on npm; skipping publish"
+          if npm view "@douglas-strey/repolens@$version" version >/dev/null 2>&1; then
+            echo "::notice::@douglas-strey/repolens@$version is already on npm; skipping publish"
           else
             npm publish --access public
           fi

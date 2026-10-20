@@ -119,7 +119,7 @@ CLIs em Node. Quem gera a fórmula é o `scripts/homebrew-formula.ts`:
 
 ```sh
 node scripts/homebrew-formula.ts 0.1.0                        # calcula o hash do tarball no npm
-node scripts/homebrew-formula.ts 0.1.0 --tarball repolens-cli-0.1.0.tgz   # antes de publicar
+node scripts/homebrew-formula.ts 0.1.0 --tarball douglas-strey-repolens-0.1.0.tgz   # antes de publicar
 ```
 
 O job `homebrew` do workflow de release regenera `Formula/repolens.rb` no tap e faz o push

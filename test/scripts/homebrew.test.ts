@@ -8,7 +8,7 @@ describe('Homebrew formula', () => {
     const formula = renderFormula({ version: '1.2.3', sha256: SHA })
     expect(formula).toContain('class Repolens < Formula')
     expect(formula).toContain(`url "${tarballUrl('1.2.3')}"`)
-    expect(formula).toContain('https://registry.npmjs.org/repolens-cli/-/repolens-cli-1.2.3.tgz')
+    expect(formula).toContain('https://registry.npmjs.org/@douglas-strey/repolens/-/repolens-1.2.3.tgz')
     expect(formula).toContain(`sha256 "${SHA}"`)
     expect(formula).toContain('depends_on "node"')
     expect(formula).toContain('system "npm", "install", *std_npm_args')

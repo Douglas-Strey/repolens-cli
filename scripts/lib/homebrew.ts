@@ -1,6 +1,6 @@
 /** Homebrew formula for RepoLens, installed from the npm tarball (the standard pattern for Node CLIs). */
 
-export const PACKAGE_NAME = 'repolens-cli'
+export const PACKAGE_NAME = '@douglas-strey/repolens'
 export const HOMEPAGE = 'https://github.com/Douglas-Strey/repolens-cli'
 
 export interface FormulaInput {
@@ -10,7 +10,9 @@ export interface FormulaInput {
 }
 
 export function tarballUrl(version: string): string {
-  return `https://registry.npmjs.org/${PACKAGE_NAME}/-/${PACKAGE_NAME}-${version}.tgz`
+  // Scoped tarballs drop the scope from the file name: @scope/name/-/name-1.2.3.tgz
+  const basename = PACKAGE_NAME.split('/').pop()
+  return `https://registry.npmjs.org/${PACKAGE_NAME}/-/${basename}-${version}.tgz`
 }
 
 export function renderFormula({ version, sha256 }: FormulaInput): string {

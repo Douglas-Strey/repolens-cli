@@ -92,7 +92,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: npx --yes repolens-cli doctor --fail-on error
+      - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
 
 ## `repolens report`
@@ -179,7 +179,7 @@ exist) on stderr, so they never mix with `--json` output.
 ## Programmatic use
 
 ```ts
-import { scan, renderMarkdown } from 'repolens-cli'
+import { scan, renderMarkdown } from '@douglas-strey/repolens'
 
 const result = await scan({ cwd: '/path/to/repo' })
 console.log(result.frameworks.map((f) => f.name))
@@ -193,7 +193,7 @@ Use `filterByConfidence(result, 'medium')` for what the CLI shows by default.
 ignore it, or choose the files yourself:
 
 ```ts
-import { loadProjectConfig, loadUserConfig, scan } from 'repolens-cli'
+import { loadProjectConfig, loadUserConfig, scan } from '@douglas-strey/repolens'
 
 const user = await loadUserConfig(process.env, process.platform, process.cwd())
 const project = await loadProjectConfig(dir)

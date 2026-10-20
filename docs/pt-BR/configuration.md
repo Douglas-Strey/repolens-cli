@@ -31,7 +31,7 @@ JavaScript.
 ```jsonc
 // repolens.config.json
 {
-  "$schema": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "$schema": "https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json",
 
   // Código gerado e uma cópia vendorizada de um app antigo: não fazem parte do projeto.
   "ignore": ["legacy/", "src/generated/"],
@@ -68,7 +68,7 @@ As mesmas configurações no `package.json`:
 
 A linha `$schema` dá autocompletar e validação nos editores com suporte a JSON Schema
 (VS Code, IDEs da JetBrains, Zed…). O schema também vem no pacote como
-`repolens-cli/schema/config.schema.json`.
+`@douglas-strey/repolens/schema/config.schema.json`.
 
 ## Configurações
 

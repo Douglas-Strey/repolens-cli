@@ -30,7 +30,7 @@ ever reads these files as data; it never runs a JavaScript config.
 ```jsonc
 // repolens.config.json
 {
-  "$schema": "https://unpkg.com/repolens-cli/schema/config.schema.json",
+  "$schema": "https://unpkg.com/@douglas-strey/repolens/schema/config.schema.json",
 
   // Generated code and a vendored copy of an old app: not part of the project.
   "ignore": ["legacy/", "src/generated/"],
@@ -67,7 +67,7 @@ The same settings in `package.json`:
 
 The `$schema` line gives you completion and validation in editors that support JSON Schema
 (VS Code, JetBrains IDEs, Zed…). The schema also ships in the package as
-`repolens-cli/schema/config.schema.json`.
+`@douglas-strey/repolens/schema/config.schema.json`.
 
 ## Settings
 

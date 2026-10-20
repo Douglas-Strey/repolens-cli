@@ -19,7 +19,7 @@ repolens doctor --json | jq '.diagnostics[].code'
 - A breaking change bumps `schemaVersion`, and the release notes will say so.
 - Diagnostic `code`s are stable identifiers and are never renamed.
 - The TypeScript definitions in [`src/types.ts`](../src/types.ts) are the source of truth
-  and are exported from the package (`import type { ScanResult } from 'repolens-cli'`).
+  and are exported from the package (`import type { ScanResult } from '@douglas-strey/repolens'`).
 
 ## Guarantees
 

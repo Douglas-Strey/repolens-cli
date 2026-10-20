@@ -93,7 +93,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: npx --yes repolens-cli doctor --fail-on error
+      - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
 
 ## `repolens report`
@@ -181,7 +181,7 @@ verificação que não existe) em stderr, para que nunca se misturem com a saíd
 ## Uso programático
 
 ```ts
-import { scan, renderMarkdown } from 'repolens-cli'
+import { scan, renderMarkdown } from '@douglas-strey/repolens'
 
 const result = await scan({ cwd: '/path/to/repo' })
 console.log(result.frameworks.map((f) => f.name))
@@ -196,7 +196,7 @@ por padrão.
 `config: false` para ignorá-lo, ou escolha os arquivos você mesmo:
 
 ```ts
-import { loadProjectConfig, loadUserConfig, scan } from 'repolens-cli'
+import { loadProjectConfig, loadUserConfig, scan } from '@douglas-strey/repolens'
 
 const user = await loadUserConfig(process.env, process.platform, process.cwd())
 const project = await loadProjectConfig(dir)

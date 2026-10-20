@@ -16,7 +16,7 @@ repository. Human contributors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project in one paragraph
 
-RepoLens (`repolens-cli` on npm, command `repolens`) is a TypeScript CLI that statically
+RepoLens (`@douglas-strey/repolens` on npm, command `repolens`) is a TypeScript CLI that statically
 analyzes a repository: stack, workspace, env vars, Docker services, databases, routes,
 CI, tooling, Git metadata, plus a `doctor` mode with stable diagnostic codes. It must stay
 fast, deterministic, local-first and safe on untrusted repositories.
