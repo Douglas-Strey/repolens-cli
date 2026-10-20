@@ -103,21 +103,24 @@ export async function copyFixture(name: string): Promise<string> {
   // Copy into <tmp>/<name> so the project directory name is stable in output.
   const dir = path.join(await makeTempDir(`repolens-${name}-`), name)
   await fs.cp(path.join(FIXTURES_DIR, name), dir, { recursive: true })
-  await restoreGitignores(dir)
+  await restoreFixtureNames(dir)
   return dir
 }
 
 /**
- * Fixtures store their ignore rules as `_gitignore`, so the rules don't hide
- * fixture files (such as a fixture's own `.env`) from this repository's Git.
- * Restore the real name in the copy.
+ * Files fixtures store under another name, restored in the copy:
+ * - `_gitignore`, so the rules don't hide fixture files (such as a fixture's
+ *   own `.env`) from this repository's Git;
+ * - `_package.json` for a deliberately invalid manifest, which would otherwise
+ *   break tools that read every package.json in the repository (Dependabot's pnpm).
  */
-export async function restoreGitignores(dir: string): Promise<void> {
+const STORED_NAMES: Record<string, string> = { _gitignore: '.gitignore', '_package.json': 'package.json' }
+
+export async function restoreFixtureNames(dir: string): Promise<void> {
   for (const entry of await fs.readdir(dir, { recursive: true, withFileTypes: true })) {
-    if (entry.isFile() && entry.name === '_gitignore') {
-      const parent = entry.parentPath
-      await fs.rename(path.join(parent, '_gitignore'), path.join(parent, '.gitignore'))
-    }
+    const real = STORED_NAMES[entry.name]
+    if (entry.isFile() && real)
+      await fs.rename(path.join(entry.parentPath, entry.name), path.join(entry.parentPath, real))
   }
 }
 
