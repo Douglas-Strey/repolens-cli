@@ -6,7 +6,9 @@
  * Scans a copy of test/fixtures/monorepo (committed to a throwaway Git repo so
  * the Git section is realistic), runs the CLI in-process with colors forced on,
  * and converts the ANSI output to SVG. Nothing is mocked: the images show
- * exactly what this version of RepoLens prints.
+ * exactly what this version of RepoLens prints. The one exception is setup's
+ * view of the machine (which programs are installed, the active Node.js), kept
+ * fixed so the image doesn't depend on where it was generated.
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
@@ -14,6 +16,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { main } from '../src/cli/main.ts'
+import type { SetupHost } from '../src/setup/host.ts'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const COLUMNS = 92
@@ -118,9 +121,19 @@ ${rows.join('\n')}
 `
 }
 
+/** A machine with every tool setup needs and the Node.js version the fixture pins. */
+const DEMO_HOST: SetupHost = {
+  which: async (program) => `/usr/local/bin/${program}`,
+  run: async () => {
+    throw new Error('screenshots never run anything')
+  },
+  read: async () => 'v22.20.0',
+}
+
 async function capture(argv: string[], cwd: string): Promise<string> {
   let stdout = ''
   await main(argv, {
+    setupHost: DEMO_HOST,
     stdout: { write: (chunk: string) => (stdout += chunk), isTTY: true, columns: COLUMNS },
     stderr: { write: () => true, isTTY: false },
     env: { FORCE_COLOR: '1', TERM: 'xterm-256color' },
@@ -150,7 +163,10 @@ try {
   for (const [name, argv] of [
     ['scan', []],
     ['doctor', ['doctor']],
+    ['setup', ['setup', '--dry-run']],
   ] as const) {
+    // Setup is for a fresh clone, which has no local .env yet (the fixture keeps one for the other images).
+    if (name === 'setup') await fs.rm(path.join(project, '.env'), { force: true })
     const output = await capture([...argv], project)
     const command = ['repolens', ...argv].join(' ')
     await fs.writeFile(path.join(ROOT, 'assets', `demo-${name}.svg`), toSvg(command, output))

@@ -125,7 +125,7 @@ function lifecycleNotes(result: ScanResult, ignoreScripts: boolean): string[] {
     scripts.length > 0
       ? ['Runs these scripts from the repository:', ...list.map((l) => `  ${l}`)]
       : ['The project defines no install lifecycle scripts.']
-  return [...own, 'Dependencies can run their own install scripts too. Use --ignore-scripts to skip them all.']
+  return [...own, 'Dependencies may run install scripts too; --ignore-scripts skips them all.']
 }
 
 function installStep(result: ScanResult, options: PlanOptions): SetupStep | SkippedStep | null {

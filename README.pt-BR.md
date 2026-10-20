@@ -46,6 +46,7 @@ O RepoLens faz esse levantamento por você, lendo apenas os arquivos do reposit�
 ```sh
 npx @douglas-strey/repolens          # visão geral do diretório atual
 npx @douglas-strey/repolens doctor   # problemas de setup, com correções sugeridas
+npx @douglas-strey/repolens setup    # prepara um clone novo: arquivo de env, serviços, dependências
 npx @douglas-strey/repolens ../other-repo --json
 ```
 
@@ -59,10 +60,9 @@ npm install -g @douglas-strey/repolens    # qualquer sistema com Node.js 22+
 Funciona em macOS, Linux e Windows. O pacote npm precisa do Node.js 22 ou mais recente; o
 Homebrew instala o Node para você.
 
-Acabou de clonar? O `repolens setup` cria o arquivo de env a partir do exemplo, sobe os
-serviços de apoio e instala as dependências. Ele mostra os comandos exatos antes, inclusive
-os scripts de instalação que vão rodar, e pergunta antes de executar qualquer coisa
-([detalhes](docs/pt-BR/cli.md#repolens-setup)).
+Acabou de clonar? O [`repolens setup`](#repolens-setup) cria o arquivo de env a partir do
+exemplo, sobe os serviços de apoio e instala as dependências, depois de mostrar exatamente o
+que vai executar.
 
 > **Vai analisar um repositório em que você não confia?** Rode o RepoLens *fora* dele, por
 > exemplo `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, ou use uma instalação
@@ -126,6 +126,43 @@ então colocá-la no log do CI nunca quebra um build. Para barrar o build, use o
 ```yaml
 - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
+
+## `repolens setup`
+
+Acabou de clonar um projeto? O `setup` faz o início rápido por você: cria o seu arquivo de
+env local a partir do exemplo, sobe os serviços de apoio com o Docker Compose e instala as
+dependências (npm, pnpm, Yarn, Bun ou módulos Go). Experimente primeiro com `--dry-run` para
+ver o plano sem executar nada:
+
+<p align="center">
+  <img src="assets/demo-setup.svg" alt="Saída do repolens setup --dry-run: um plano que copia .env.example para .env e roda pnpm install, listando o script postinstall que ele dispara, com o script db:up do próprio projeto deixado para o desenvolvedor" width="760">
+</p>
+
+Instalar dependências executa código do projeto e das dependências, então o setup é
+transparente sobre isso:
+
+- **Ele mostra o plano antes**, incluindo cada script de ciclo de vida de instalação que o
+  projeto define (`postinstall`, `prepare`, …) e as imagens que o Compose vai baixar ou
+  construir.
+- **Ele pergunta antes de executar qualquer coisa.** Responda `y` para seguir; sem um
+  terminal, ele se recusa a rodar a menos que você passe `--yes`.
+- **Ele só executa comandos que ele mesmo monta.** Scripts do projeto, como `make setup` ou
+  `pnpm db:up`, aparecem em "Skipped" para você rodar.
+- **Ele nunca mexe nos seus valores.** Um `.env` existente é preservado, e um novo nunca é
+  preenchido.
+- **Ele confere a sua versão do Node.js** com o `engines.node` antes de instalar, e para no
+  primeiro passo que falhar. Rodar de novo é seguro.
+
+```sh
+repolens setup                    # mostra o plano, pergunta e depois executa
+repolens setup --dry-run          # só mostra o plano
+repolens setup --ignore-scripts   # instala sem scripts de ciclo de vida (código não confiável)
+repolens setup --yes              # não pergunta (CI, scripts)
+```
+
+Ao terminar, o setup diz se o `repolens doctor` ainda encontra problemas e como iniciar o
+projeto. Detalhes em [docs/pt-BR/cli.md](docs/pt-BR/cli.md#repolens-setup) e
+[docs/pt-BR/security.md](docs/pt-BR/security.md#7-o-repolens-setup-executa-só-o-que-mostra-para-você).
 
 ## Configuração
 

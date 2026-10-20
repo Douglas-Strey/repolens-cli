@@ -44,6 +44,7 @@ RepoLens does that pass for you, reading only the files in the repository.
 ```sh
 npx @douglas-strey/repolens          # overview of the current directory
 npx @douglas-strey/repolens doctor   # setup problems, with suggested fixes
+npx @douglas-strey/repolens setup    # set up a fresh clone: env file, services, dependencies
 npx @douglas-strey/repolens ../other-repo --json
 ```
 
@@ -57,10 +58,9 @@ npm install -g @douglas-strey/repolens    # any OS with Node.js 22+
 Works on macOS, Linux and Windows. The npm package needs Node.js 22 or newer; Homebrew
 installs Node for you.
 
-Just cloned it? `repolens setup` creates the env file from the example, starts the backing
-services and installs dependencies. It shows the exact commands first, including the
-install scripts they will run, and asks before running anything
-([details](docs/cli.md#repolens-setup)).
+Just cloned it? [`repolens setup`](#repolens-setup) creates the env file from the example,
+starts the backing services and installs dependencies, after showing you exactly what it
+will run.
 
 > **Scanning a repository you don't trust?** Run RepoLens from *outside* it, e.g.
 > `cd ~ && npx @douglas-strey/repolens ~/path/to/repo`, or use a global install. When
@@ -123,6 +123,42 @@ breaks a build. Gate on `doctor` instead:
 ```yaml
 - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
+
+## `repolens setup`
+
+Just cloned a project? `setup` does the quick start for you: it creates your local env
+file from the example, starts the backing services with Docker Compose and installs
+dependencies (npm, pnpm, Yarn, Bun or Go modules). Try it with `--dry-run` first to see
+the plan without running anything:
+
+<p align="center">
+  <img src="assets/demo-setup.svg" alt="repolens setup --dry-run output: a plan that copies .env.example to .env and runs pnpm install, listing the postinstall script it triggers, with the project's own db:up script left for the developer" width="760">
+</p>
+
+Installing dependencies runs code from the project and its dependencies, so setup is
+upfront about it:
+
+- **It shows the plan first**, including every install lifecycle script the project
+  defines (`postinstall`, `prepare`, …) and the images Compose will pull or build.
+- **It asks before running anything.** Answer `y` to go ahead; without a terminal it
+  refuses to run unless you pass `--yes`.
+- **It only runs commands it builds itself.** Project scripts such as `make setup` or
+  `pnpm db:up` are listed under "Skipped" for you to run.
+- **It never touches your values.** An existing `.env` is left alone, and a new one is
+  never filled in.
+- **It checks your Node.js version** against `engines.node` before installing, and stops at
+  the first step that fails. Running it again is safe.
+
+```sh
+repolens setup                    # show the plan, ask, then run it
+repolens setup --dry-run          # only show the plan
+repolens setup --ignore-scripts   # install without lifecycle scripts (untrusted code)
+repolens setup --yes              # don't ask (CI, scripts)
+```
+
+When it finishes, setup tells you whether `repolens doctor` still finds problems and how to
+start the project. Details in [docs/cli.md](docs/cli.md#repolens-setup) and
+[docs/security.md](docs/security.md#7-repolens-setup-runs-only-what-it-shows-you).
 
 ## Configuration
 

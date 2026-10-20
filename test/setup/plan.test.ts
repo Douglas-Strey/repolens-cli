@@ -46,7 +46,7 @@ describe('setupPlan', () => {
       'Runs these scripts from the repository:',
       '  postinstall (package.json): node scripts/setup.js',
       '  prepare (package.json): husky',
-      'Dependencies can run their own install scripts too. Use --ignore-scripts to skip them all.',
+      'Dependencies may run install scripts too; --ignore-scripts skips them all.',
     ])
     expect(plan.skipped).toEqual([])
     expect(plan.next).toEqual({ command: 'pnpm dev', reason: 'start the development server' })

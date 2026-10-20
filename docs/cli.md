@@ -132,7 +132,7 @@ Setup plan for web
   3. pnpm install             install dependencies
      · Runs these scripts from the repository:
        postinstall (package.json): node scripts/setup.js
-     · Dependencies can run their own install scripts too. Use --ignore-scripts to skip them all.
+     · Dependencies may run install scripts too; --ignore-scripts skips them all.
 
 Run these 3 steps? [y/N]
 ```
