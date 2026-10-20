@@ -7,7 +7,20 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
-First public release (0.1.0). Move these entries under `## [0.1.0] - <date>` when releasing.
+## [0.1.1] - 2026-10-20
+
+No changes to the CLI or the API.
+
+### Changed
+
+- First version published by the release workflow through npm trusted publishing, so the
+  package now carries an npm provenance attestation linking it to its source commit.
+- Development docs: `HOMEBREW_TAP_TOKEN` must be a repository secret, not an environment
+  secret, for the release workflow to update the Homebrew tap.
+
+## [0.1.0] - 2026-10-20
+
+First public release, on npm as `@douglas-strey/repolens`.
 
 ### Added
 
