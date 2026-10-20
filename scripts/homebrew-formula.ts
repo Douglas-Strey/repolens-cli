@@ -24,12 +24,13 @@ if (!version) {
 }
 
 async function download(url: string): Promise<Buffer> {
-  // The registry can take a moment to serve a version that was just published.
+  // The registry lists a just-published version minutes before it serves the tarball,
+  // so keep trying for about 12 minutes.
   for (let attempt = 1; ; attempt++) {
     const response = await fetch(url)
     if (response.ok) return Buffer.from(await response.arrayBuffer())
-    if (attempt === 10) throw new Error(`GET ${url} failed with ${response.status}`)
-    await new Promise((resolve) => setTimeout(resolve, attempt * 3000))
+    if (attempt === 30) throw new Error(`GET ${url} failed with ${response.status}`)
+    await new Promise((resolve) => setTimeout(resolve, Math.min(attempt * 3000, 30_000)))
   }
 }
 
