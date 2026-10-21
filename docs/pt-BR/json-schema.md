@@ -284,6 +284,14 @@ com todos os achados ignorados fica como `passed`.
 arquivos indexados, se a indexação parou no limite de arquivos, problemas não fatais e a
 configuração que foi aplicada.
 
+`config` é `{ sources, settings, rootIgnore? }`: os arquivos que foram aplicados, do de
+menor precedência para o de maior (caminhos relativos ao diretório analisado, por exemplo
+`../../repolens.config.json` para o da raiz do repositório), e as configurações combinadas.
+`rootIgnore` existe quando um subdiretório é analisado e o arquivo da raiz do repositório
+tem padrões de `ignore`: `{ prefix, patterns }`, em que os padrões são relativos à raiz e
+`prefix` é o caminho do diretório analisado a partir dela (veja
+[configuration.md](configuration.md#monorepos)).
+
 `kind` é `"parse"` (não foi possível fazer o parse de um arquivo), `"size"` (um arquivo
 foi ignorado por ser grande demais), `"limit"` (um limite da análise foi atingido),
 `"error"` (um detector ou uma verificação falhou) ou `"config"` (um arquivo de
