@@ -2,8 +2,9 @@
 
 **English** | [Português (Brasil)](ROADMAP.pt-BR.md)
 
-RepoLens 0.2 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
-`repolens setup`, terminal, JSON, Markdown and agent output, and configuration files. This page lists what
+RepoLens 0.3 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
+`repolens setup`, terminal, JSON, Markdown and agent output, and configuration files
+(including per-finding ignores and a monorepo root's config). This page lists what
 comes next, with enough detail that you can pick an item up and start.
 
 **Want to work on something?** Every item below links to its issue, and the
@@ -71,30 +72,11 @@ the command is a thin adapter over `scan()`. RepoLens has three runtime dependen
 adding one needs discussion: open an issue on whether to use the official SDK or a small
 JSON-RPC implementation before starting.
 
-### Configuration: ignore a single finding (M)
-
-Issue [#11](https://github.com/Douglas-Strey/repolens-cli/issues/11).
-
-`doctor.rules` can turn off a whole check. Projects also need to silence one finding (one
-variable, one file) and keep the check. Proposed shape:
-
-```json
-{ "doctor": { "ignore": [{ "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN" }] } }
-```
-
-It must follow the rules in [docs/configuration.md](docs/configuration.md): a project's own
-file can't hide security findings, and the output says how many findings were ignored.
-Touches `src/config/`, `src/doctor/index.ts`, `schema/config.schema.json` and the docs in
-both languages.
-
 ### Smaller improvements (S–M)
 
 - **Compose `include:` and `extends:`, GitLab CI `include:` ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12)).** Follow local includes
   (never URLs) so services and CI jobs defined in other files show up.
   `src/facts/compose.ts`, `src/detectors/ci.ts`.
-- **Config lookup from a subdirectory ([#13](https://github.com/Douglas-Strey/repolens-cli/issues/13)).** When you scan `apps/web`, also read the
-  repository root's `repolens.config.json`, the way `.git` is already found above the
-  scanned directory. `src/config/load.ts`.
 - **Parent `.gitignore` files and `core.excludesFile` ([#14](https://github.com/Douglas-Strey/repolens-cli/issues/14)).** When scanning a subdirectory of a
   repository, apply the ignore files above it, still without running `git`.
   `src/core/walker.ts`.

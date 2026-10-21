@@ -41,7 +41,7 @@ repolens doctor --json | jq '.diagnostics[].code'
 ```jsonc
 {
   "schemaVersion": 1,
-  "tool": { "name": "repolens", "version": "0.2.0" },
+  "tool": { "name": "repolens", "version": "0.3.0" },
   "project": { … },          // name, type, license, manifests, entrypoints, structure
   "languages": [ … ],        // { name, kind, files, share }
   "runtimes": [ … ],         // Node.js, Go, Bun, Deno com todas as fontes de versão
@@ -320,7 +320,7 @@ Um documento menor, só com os resultados do doctor:
 ```jsonc
 {
   "schemaVersion": 1,
-  "tool": { "name": "repolens", "version": "0.2.0" },
+  "tool": { "name": "repolens", "version": "0.3.0" },
   "project": { "name": "acme-api", "directory": "acme-api" },
   "checks": [ … ],
   "diagnostics": [ … ],

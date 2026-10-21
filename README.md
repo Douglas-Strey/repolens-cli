@@ -284,16 +284,15 @@ takes around 35 ms, a synthetic 500-package monorepo (3,000 files) around 250 ms
 
 ## Roadmap
 
-**v0.2 (now)**: everything above. JavaScript/TypeScript and Go in depth; terminal, JSON,
+**v0.3 (now)**: everything above. JavaScript/TypeScript and Go in depth; terminal, JSON,
 Markdown and agent output; 34 doctor checks; `repolens setup` for a fresh clone; user and
-project configuration files.
+project configuration files, with per-finding ignores and a monorepo root's config.
 
 **Next**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (Cargo workspaces), PHP (Laravel, Composer)
 - An MCP server (`repolens mcp`) exposing overview, services, env vars, routes, scripts and diagnostics as tools
 - More routes: SvelteKit, Remix / React Router, Astro endpoints
 - Following Compose `include:`/`extends:` and GitLab `include:`
-- Ignoring a single finding (one variable, one file) in the config file, not only whole checks
 - Submitting the formula to `homebrew-core` (so `brew install repolens` works without the tap)
 
 **Later**

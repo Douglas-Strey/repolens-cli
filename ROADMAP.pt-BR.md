@@ -2,9 +2,9 @@
 
 [English](ROADMAP.md) | **Português (Brasil)**
 
-O RepoLens 0.2 cobre JavaScript/TypeScript e Go em profundidade: a visão geral, 34
+O RepoLens 0.3 cobre JavaScript/TypeScript e Go em profundidade: a visão geral, 34
 verificações no doctor, o `repolens setup`, saída para terminal, JSON, Markdown e agentes, e
-arquivos de configuração. Esta página lista o que vem a seguir, com detalhe suficiente para você pegar
+arquivos de configuração (com exceções por achado e a configuração da raiz de um monorepo). Esta página lista o que vem a seguir, com detalhe suficiente para você pegar
 um item e começar.
 
 **Quer trabalhar em algo?** Cada item abaixo tem um link para a sua issue, e o
@@ -78,30 +78,11 @@ fino sobre o `scan()`. O RepoLens tem três dependências de runtime, e adiciona
 de discussão: antes de começar, abra uma issue sobre usar o SDK oficial ou uma
 implementação pequena de JSON-RPC.
 
-### Configuração: ignorar um achado específico (M)
-
-Issue [#11](https://github.com/Douglas-Strey/repolens-cli/issues/11).
-
-O `doctor.rules` desliga uma verificação inteira. Os projetos também precisam silenciar um
-achado só (uma variável, um arquivo) e manter a verificação. Formato proposto:
-
-```json
-{ "doctor": { "ignore": [{ "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN" }] } }
-```
-
-Precisa seguir as regras de [docs/pt-BR/configuration.md](docs/pt-BR/configuration.md): o
-arquivo do próprio projeto não pode esconder achados de segurança, e a saída diz quantos
-achados foram ignorados. Mexe em `src/config/`, `src/doctor/index.ts`,
-`schema/config.schema.json` e na documentação nos dois idiomas.
-
 ### Melhorias menores (P–M)
 
 - **`include:` e `extends:` do Compose, `include:` do GitLab CI ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12)).** Seguir os includes locais
   (nunca URLs) para que serviços e jobs de CI definidos em outros arquivos apareçam.
   `src/facts/compose.ts`, `src/detectors/ci.ts`.
-- **Procurar a configuração a partir de um subdiretório ([#13](https://github.com/Douglas-Strey/repolens-cli/issues/13)).** Ao analisar `apps/web`, ler
-  também o `repolens.config.json` da raiz do repositório, do jeito que o `.git` já é
-  encontrado acima do diretório analisado. `src/config/load.ts`.
 - **`.gitignore` dos diretórios pai e `core.excludesFile` ([#14](https://github.com/Douglas-Strey/repolens-cli/issues/14)).** Ao analisar um subdiretório de
   um repositório, aplicar os arquivos de ignore acima dele, ainda sem rodar o `git`.
   `src/core/walker.ts`.

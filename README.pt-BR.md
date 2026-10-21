@@ -296,17 +296,16 @@ máquina.
 
 ## Roadmap
 
-**v0.2 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
+**v0.3 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
 para terminal, JSON, Markdown e agentes; 34 verificações no doctor; `repolens setup` para um
-clone novo; arquivos de configuração do usuário e do projeto.
+clone novo; arquivos de configuração do usuário e do projeto, com exceções por achado e a
+configuração da raiz de um monorepo.
 
 **A seguir**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (workspaces do Cargo), PHP (Laravel, Composer)
 - Um servidor MCP (`repolens mcp`) que expõe visão geral, serviços, variáveis de ambiente, rotas, scripts e diagnósticos como ferramentas
 - Mais rotas: SvelteKit, Remix / React Router, endpoints do Astro
 - Seguir `include:`/`extends:` do Compose e `include:` do GitLab
-- Ignorar um achado específico (uma variável, um arquivo) no arquivo de configuração, e não
-  só verificações inteiras
 - Enviar a fórmula para o `homebrew-core` (para que `brew install repolens` funcione sem o tap)
 
 **Mais adiante**
