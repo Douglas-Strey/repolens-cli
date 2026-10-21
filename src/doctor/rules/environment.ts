@@ -79,7 +79,7 @@ const PLATFORM_NAMES: ReadonlySet<string> = new Set([
   'GITHUB_BASE_REF',
   'GITHUB_TRIGGERING_ACTOR',
   'GITHUB_RETENTION_DAYS',
-  // Heroku dyno identity (the rest of the metadata is HEROKU_*)
+  // Heroku dyno identity (metadata names are matched by HEROKU_DYNO_FAMILY)
   'DYNO',
   // AWS Lambda reserved names that are not AWS_LAMBDA_*
   'AWS_EXECUTION_ENV',
@@ -92,8 +92,23 @@ const PLATFORM_NAMES: ReadonlySet<string> = new Set([
   // Deno Deploy
   'DENO_DEPLOYMENT_ID',
   'DENO_REGION',
-  // GitLab CI boolean flag (the rest of the predefined set is CI_*)
+  // GitLab / CircleCI / Travis / Buildkite boolean flags
   'GITLAB_CI',
+  'CIRCLECI',
+  'TRAVIS',
+  'BUILDKITE',
+  // Amplify-managed names. Other AMPLIFY_* values are user-set (including secrets).
+  'AMPLIFY_BACKEND_APP_ID',
+  'AMPLIFY_BACKEND_PULL_ONLY',
+  'AWS_APP_ID',
+  'AWS_BRANCH',
+  'AWS_BRANCH_ARN',
+  'AWS_CLONE_URL',
+  'AWS_COMMIT_ID',
+  'AWS_JOB_ID',
+  'AWS_PULL_REQUEST_ID',
+  'AWS_PULL_REQUEST_SOURCE_BRANCH',
+  'AWS_PULL_REQUEST_DESTINATION_BRANCH',
 ])
 
 /**
@@ -104,6 +119,12 @@ const PLATFORM_NAMES: ReadonlySet<string> = new Set([
  */
 const GITHUB_ACTIONS_FAMILY =
   /^GITHUB_(?:ACTIONS|(?:ACTION|ACTOR|REF|REPOSITORY|WORKFLOW)(?:_[A-Z0-9_]+)?|(?:RUN|EVENT)_[A-Z0-9_]+)$/
+
+/**
+ * Heroku dyno metadata. HEROKU_API_KEY and other user-set credentials stay
+ * reportable, the same way GITHUB_CLIENT_ID is not treated as GitHub Actions.
+ */
+const HEROKU_DYNO_FAMILY = /^HEROKU_(?:APP_ID|APP_NAME|DYNO_ID|RELEASE_[A-Z0-9_]+|SLUG_[A-Z0-9_]+)$/
 
 const PLATFORM_PREFIXES: readonly string[] = [
   'npm_',
@@ -119,13 +140,11 @@ const PLATFORM_PREFIXES: readonly string[] = [
   'VITEST',
   'JEST_WORKER_ID',
   'XDG_',
-  'HEROKU_',
   'AWS_LAMBDA_',
   'CI_',
   'CIRCLE_',
   'TRAVIS_',
   'BUILDKITE_',
-  'AMPLIFY_',
   'COOLIFY_',
   'KOYEB_',
   'GAE_',
@@ -178,6 +197,7 @@ export function isPlatformVariable(name: string): boolean {
   return (
     PLATFORM_NAMES.has(name) ||
     GITHUB_ACTIONS_FAMILY.test(name) ||
+    HEROKU_DYNO_FAMILY.test(name) ||
     PLATFORM_PREFIXES.some((prefix) => name.startsWith(prefix))
   )
 }
