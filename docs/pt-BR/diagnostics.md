@@ -176,9 +176,9 @@ três diretórios de profundidade. Arquivos env ignorados pelo Git também são 
 **Severidade:** error · **Categoria:** security
 
 - **O que verifica:** um arquivo env de exemplo tem um valor que corresponde a um formato
-  conhecido de credencial: chave de acesso da AWS, token do GitHub, GitLab, npm ou Slack,
-  chave live do Stripe, chave de API da OpenAI, Anthropic, Google ou SendGrid, ou chave
-  privada. Atribuições comentadas (`# NAME=value`) também contam. Um diagnóstico por
+  conhecido de credencial: chave de acesso da AWS, token do GitHub, GitLab, npm, Slack,
+  Hugging Face, Shopify, PyPI ou DigitalOcean, chave live do Stripe, chave de API da
+  OpenAI, Anthropic, Google, SendGrid ou Linear, ou chave privada. Atribuições comentadas (`# NAME=value`) também contam. Um diagnóstico por
   variável, listando todos os arquivos de exemplo em que ela tem um valor assim.
 - **Por que importa:** arquivos de exemplo são commitados e compartilhados; uma credencial
   real em um deles é uma credencial vazada.

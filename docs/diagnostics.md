@@ -169,10 +169,10 @@ deep. Env files ignored by Git are read too.
 **Severity:** error · **Category:** security
 
 - **What it checks:** an example env file holds a value that matches a known credential
-  format: AWS access key, GitHub, GitLab, npm or Slack token, Stripe live key, OpenAI,
-  Anthropic, Google or SendGrid API key, or private key. Commented-out assignments
-  (`# NAME=value`) count too. One diagnostic per variable, listing every example file that
-  holds one.
+  format: AWS access key, GitHub, GitLab, npm, Slack, Hugging Face, Shopify, PyPI or
+  DigitalOcean token, Stripe live key, OpenAI, Anthropic, Google, SendGrid or Linear API
+  key, or private key. Commented-out assignments (`# NAME=value`) count too. One diagnostic
+  per variable, listing every example file that holds one.
 - **Why it matters:** example files are committed and shared; a real credential in one is
   a leaked credential.
 - **How to fix:** rotate the credential first (removing it from the file does not remove
