@@ -7,7 +7,7 @@ import type { CliConfig } from './main.ts'
 const DOCS_URL = 'https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/configuration.md'
 
 interface ConfigFileInfo {
-  kind: 'user' | 'project' | 'file'
+  kind: 'user' | 'root' | 'project' | 'file'
   /** As shown to the user: "~/.config/repolens/config.json", "repolens.config.json". */
   path: string
   found: boolean
@@ -17,6 +17,7 @@ interface ConfigFileInfo {
 export function configFiles(config: CliConfig, typedConfig: string | undefined): ConfigFileInfo[] {
   const files: ConfigFileInfo[] = []
   if (config.userPath) files.push({ kind: 'user', path: config.userPath, found: config.user !== null })
+  if (config.root?.source.file) files.push({ kind: 'root', path: config.root.source.file, found: true })
   if (typedConfig !== undefined) {
     files.push({ kind: 'file', path: typedConfig, found: config.second !== null })
   } else {
@@ -31,6 +32,7 @@ export function configFiles(config: CliConfig, typedConfig: string | undefined):
 
 const KIND_LABEL: Record<ConfigFileInfo['kind'], string> = {
   user: 'User config',
+  root: 'Repository root config',
   project: 'Project config',
   file: '--config',
 }
@@ -54,7 +56,12 @@ export function renderConfigInfo(
   const files = options.noConfig ? [] : configFiles(config, options.typedConfig)
   const output = config.user?.config.output ?? {}
   if (options.json) {
-    const document = { files, settings: effective.settings, output }
+    const document = {
+      files,
+      settings: effective.settings,
+      ...(effective.rootIgnore ? { rootIgnore: effective.rootIgnore } : {}),
+      output,
+    }
     return `${JSON.stringify(document, null, 2)}\n`
   }
 
@@ -80,6 +87,11 @@ export function renderConfigInfo(
     lines.push(`  ${s.dim('None: RepoLens uses its defaults.')}`)
   } else {
     for (const line of settingsLines(effective.settings)) lines.push(`  ${line}`)
+  }
+  if (effective.rootIgnore) {
+    const { prefix, patterns } = effective.rootIgnore
+    lines.push('', `${s.bold('Ignore patterns from the repository root')} ${s.dim(`(matched as ${prefix}/<path>)`)}`)
+    for (const pattern of patterns) lines.push(`  ${cleanUntrusted(pattern, { oneLine: true })}`)
   }
   if (Object.keys(output).length > 0) {
     lines.push('', s.bold('Output'))

@@ -59,6 +59,12 @@ Breaking any of them is a security bug; please [report it privately](../SECURITY
   (linked worktrees, submodules) is only followed when the Git directory it names points
   back at this checkout, so a crafted `.git` file can't make RepoLens report another
   repository on your machine.
+- **A second exception:** in that case RepoLens also reads the repository root's
+  configuration (`repolens.config.json`, or the `"repolens"` key of its `package.json`), so a
+  monorepo's shared settings apply to the package you scan. It reads only those two files,
+  only at the root of the enclosing repository, with the same protections as any project
+  file: the path must resolve inside the repository (a link leading out is refused), and the
+  file is held to the limits of a project config (§5).
 
 ### 4. Hostile input can't hang or exhaust RepoLens
 

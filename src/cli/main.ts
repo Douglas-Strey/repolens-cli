@@ -2,7 +2,7 @@ import { constants, type Stats, statSync } from 'node:fs'
 import fs, { type FileHandle } from 'node:fs/promises'
 import path from 'node:path'
 import { GENERATED_MARKER, renderAgentContext, renderAgentFiles } from '../agent/index.ts'
-import { loadConfigFile, loadProjectConfig, loadUserConfig, tildePath, userConfigPath } from '../config/load.ts'
+import { loadConfigFile, loadProjectConfigs, loadUserConfig, tildePath, userConfigPath } from '../config/load.ts'
 import { resolveConfig } from '../config/resolve.ts'
 import { filterByConfidence } from '../core/confidence.ts'
 import { RepoLensError } from '../core/errors.ts'
@@ -379,6 +379,8 @@ export interface CliConfig {
   /** Where the user config file is looked for ("~/.config/repolens/config.json"), if anywhere. */
   userPath?: string
   user: LoadedConfig | null
+  /** The repository root's file, when a subdirectory is scanned and the root has one. */
+  root: LoadedConfig | null
   /** The project's own file, or the --config file. */
   second: LoadedConfig | null
 }
@@ -388,14 +390,16 @@ function posixPath(value: string): string {
 }
 
 /**
- * Load the user config and either the --config file or the project's own
- * file. --no-config loads nothing. A broken user or --config file stops the
- * run (the user can fix it); a broken project file only warns.
+ * Load the user config and either the --config file or the project's files
+ * (the repository root's, then the scanned directory's own). --no-config
+ * loads nothing. A broken user or --config file stops the run (the user can
+ * fix it); a broken project file only warns.
  */
 async function loadCliConfig(args: CliArgs, io: CliIO, scanned: Scanned): Promise<CliConfig> {
-  if (args.noConfig) return { layers: [], user: null, second: null }
+  if (args.noConfig) return { layers: [], user: null, root: null, second: null }
   const userFile = userConfigPath(io.env, io.platform, io.cwd)
   const user = await loadUserConfig(io.env, io.platform, io.cwd)
+  let root: LoadedConfig | null = null
   let second: LoadedConfig | null
   if (args.config !== undefined) {
     const file = path.resolve(io.cwd, args.config)
@@ -410,12 +414,15 @@ async function loadCliConfig(args: CliArgs, io: CliIO, scanned: Scanned): Promis
       args.config,
     )
   } else {
-    second = await loadProjectConfig(scanned.realRoot)
+    const project = await loadProjectConfigs(scanned.realRoot)
+    root = project.find((layer) => layer.ignorePrefix !== undefined) ?? null
+    second = project.find((layer) => layer.ignorePrefix === undefined) ?? null
   }
   return {
-    layers: [user, second].filter((layer): layer is LoadedConfig => layer !== null),
+    layers: [user, root, second].filter((layer): layer is LoadedConfig => layer !== null),
     ...(userFile ? { userPath: tildePath(userFile, io.env) } : {}),
     user,
+    root,
     second,
   }
 }

@@ -84,6 +84,12 @@ export interface WalkOptions {
    * alone: "is .env ignored?" must not depend on RepoLens's configuration.
    */
   exclude?: readonly string[]
+  /**
+   * `exclude` patterns relative to a directory above the root (the
+   * repository root's configuration): `prefix` is the root's path from that
+   * directory, put in front of each path before matching.
+   */
+  rootExclude?: { prefix: string; patterns: readonly string[] }
   debug?: (message: string) => void
 }
 
@@ -245,16 +251,23 @@ export async function walk(root: string, options: WalkOptions): Promise<WalkResu
 
   let compiledRules = 0
 
-  let excluder: Ignore | null = null
-  if (options.exclude && options.exclude.length > 0) {
+  const compile = (patterns: readonly string[] | undefined): Ignore | null => {
+    if (!patterns || patterns.length === 0) return null
     try {
-      excluder = ignore({ allowRelativePaths: true, ignorecase: false }).add([...options.exclude])
+      return ignore({ allowRelativePaths: true, ignorecase: false }).add([...patterns])
     } catch (error) {
       options.debug?.(`walk: ignore patterns from the configuration were not usable (${String(error)})`)
+      return null
     }
   }
-  const excluded = (relative: string, isDirectory: boolean): boolean =>
-    excluder?.ignores(isDirectory ? `${relative}/` : relative) === true
+  const excluder = compile(options.exclude)
+  const rootExcluder = compile(options.rootExclude?.patterns)
+  const rootPrefix = options.rootExclude?.prefix ?? ''
+  const excluded = (relative: string, isDirectory: boolean): boolean => {
+    const suffix = isDirectory ? '/' : ''
+    if (excluder?.ignores(`${relative}${suffix}`)) return true
+    return rootExcluder?.ignores(`${rootPrefix}/${relative}${suffix}`) === true
+  }
 
   const rootLayers: IgnoreLayer[] = []
   // Read through the root-contained reader: a planted .git (or info/exclude) symlink must not be followed out.

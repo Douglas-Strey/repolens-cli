@@ -20,7 +20,8 @@ repolens config          # which files apply here, and the settings in effect
 | File | Location |
 | --- | --- |
 | User config | `~/.config/repolens/config.json`. `$XDG_CONFIG_HOME/repolens/config.json` when `XDG_CONFIG_HOME` is set, `%APPDATA%\repolens\config.json` on Windows, or any path in `REPOLENS_CONFIG`. |
-| Project config | `repolens.config.json` in the scanned directory, or a `"repolens"` key in its `package.json`. Only the scanned directory is searched, not its parents. |
+| Project config | `repolens.config.json` in the scanned directory, or a `"repolens"` key in its `package.json`. |
+| Repository root config | The same file at the root of the Git repository, when you scan a subdirectory of it (see [Monorepos](#monorepos)). Directories in between and above the repository are never searched. |
 
 Both use the same format: JSON, with comments and trailing commas allowed. RepoLens only
 ever reads these files as data; it never runs a JavaScript config.
@@ -187,17 +188,39 @@ Terminal preferences. A project can't set these: they are yours.
 From lowest to highest:
 
 1. Your user config.
-2. The project config, or the file passed with `--config`.
-3. Command-line options (`--fail-on`, `--strict`, `--max-files`, `--color`…).
+2. The repository root's config, when a subdirectory is scanned.
+3. The scanned directory's config.
+4. Command-line options (`--fail-on`, `--strict`, `--max-files`, `--color`…).
 
-Later sources override single values (`maxFiles`, `doctor.failOn`, each `doctor.rules`
-entry). Lists (`ignore`, `environment.provided`) accumulate.
+A file passed with `--config` takes the place of both 2 and 3. Later sources override
+single values (`maxFiles`, `doctor.failOn`, each `doctor.rules` entry). Lists (`ignore`,
+`doctor.ignore`, `environment.provided`) accumulate.
+
+## Monorepos
+
+When you scan a subdirectory of a Git repository (`repolens doctor apps/web`), RepoLens also
+reads the configuration at the repository root, found the way Git finds `.git`. Shared
+settings can live in one place, and a package can still add or override its own in
+`apps/web/repolens.config.json`. Only the root and the scanned directory are read, never a
+directory in between or above the repository; outside a Git repository only the scanned
+directory is.
+
+`ignore` patterns in the root's file are relative to the root, as in a root `.gitignore`:
+`apps/web/legacy/` leaves out `legacy/` when you scan `apps/web`, and `**/fixtures/` applies
+everywhere. `repolens config apps/web` lists the root file and the patterns it adds.
+
+The root's file is held to the same limits as any project config (it can't turn off or
+ignore security checks), and is named by its relative path in the output:
+
+```
+Configured by ../../repolens.config.json: 1 check turned off, 1 ignore pattern.
+```
 
 ## Command-line options
 
 | Option | Effect |
 | --- | --- |
-| `--config <file>` | Use this file instead of the project's own config. Your user config still applies. |
+| `--config <file>` | Use this file instead of the project's config files (the scanned directory's and the repository root's). Your user config still applies. |
 | `--no-config` | Ignore every configuration file, yours and the project's. |
 
 `repolens config [path]` shows which files apply to a directory and the merged settings;

@@ -20,7 +20,8 @@ repolens config          # quais arquivos valem aqui e as configurações em vig
 | Arquivo | Local |
 | --- | --- |
 | Configuração do usuário | `~/.config/repolens/config.json`. `$XDG_CONFIG_HOME/repolens/config.json` quando `XDG_CONFIG_HOME` está definida, `%APPDATA%\repolens\config.json` no Windows, ou qualquer caminho em `REPOLENS_CONFIG`. |
-| Configuração do projeto | `repolens.config.json` no diretório analisado, ou uma chave `"repolens"` no `package.json` dele. Só o diretório analisado é pesquisado, não os diretórios acima dele. |
+| Configuração do projeto | `repolens.config.json` no diretório analisado, ou uma chave `"repolens"` no `package.json` dele. |
+| Configuração da raiz do repositório | O mesmo arquivo na raiz do repositório Git, quando você analisa um subdiretório dele (veja [Monorepos](#monorepos)). Os diretórios no meio do caminho e acima do repositório nunca são pesquisados. |
 
 Os dois usam o mesmo formato: JSON, com comentários e vírgulas no final permitidos. O
 RepoLens só lê esses arquivos como dados; ele nunca executa uma configuração em
@@ -195,17 +196,40 @@ Preferências do terminal. Um projeto não pode defini-las: elas são suas.
 Da menor para a maior:
 
 1. A sua configuração do usuário.
-2. A configuração do projeto, ou o arquivo passado com `--config`.
-3. Opções de linha de comando (`--fail-on`, `--strict`, `--max-files`, `--color`…).
+2. A configuração da raiz do repositório, quando um subdiretório é analisado.
+3. A configuração do diretório analisado.
+4. Opções de linha de comando (`--fail-on`, `--strict`, `--max-files`, `--color`…).
 
-Fontes posteriores sobrescrevem valores únicos (`maxFiles`, `doctor.failOn`, cada entrada
-de `doctor.rules`). Listas (`ignore`, `environment.provided`) se acumulam.
+Um arquivo passado com `--config` ocupa o lugar de 2 e 3. Fontes posteriores sobrescrevem
+valores únicos (`maxFiles`, `doctor.failOn`, cada entrada de `doctor.rules`). Listas
+(`ignore`, `doctor.ignore`, `environment.provided`) se acumulam.
+
+## Monorepos
+
+Quando você analisa um subdiretório de um repositório Git (`repolens doctor apps/web`), o
+RepoLens também lê a configuração na raiz do repositório, encontrada do mesmo jeito que o
+Git encontra o `.git`. As configurações compartilhadas podem ficar num só lugar, e um pacote
+ainda pode adicionar ou sobrescrever as suas em `apps/web/repolens.config.json`. Só a raiz e
+o diretório analisado são lidos, nunca um diretório no meio do caminho ou acima do
+repositório; fora de um repositório Git, só o diretório analisado.
+
+Os padrões de `ignore` no arquivo da raiz são relativos à raiz, como num `.gitignore` da
+raiz: `apps/web/legacy/` deixa de fora `legacy/` quando você analisa `apps/web`, e
+`**/fixtures/` vale em todo lugar. O `repolens config apps/web` lista o arquivo da raiz e os
+padrões que ele adiciona.
+
+O arquivo da raiz tem os mesmos limites de qualquer configuração do projeto (não pode
+desativar nem ignorar verificações de segurança) e aparece na saída pelo caminho relativo:
+
+```
+Configured by ../../repolens.config.json: 1 check turned off, 1 ignore pattern.
+```
 
 ## Opções de linha de comando
 
 | Opção | Efeito |
 | --- | --- |
-| `--config <file>` | Usa este arquivo em vez da configuração do próprio projeto. A sua configuração do usuário continua valendo. |
+| `--config <file>` | Usa este arquivo em vez dos arquivos de configuração do projeto (o do diretório analisado e o da raiz do repositório). A sua configuração do usuário continua valendo. |
 | `--no-config` | Ignora todos os arquivos de configuração, os seus e os do projeto. |
 
 `repolens config [path]` mostra quais arquivos se aplicam a um diretório e as

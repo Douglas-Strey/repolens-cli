@@ -318,8 +318,8 @@ or API key.
 
 **Is it safe on a repository I don't trust?**
 That's the main design goal: it never executes project code, config files, hooks or `git`,
-and it never reads outside the directory you scan (except the enclosing `.git` metadata
-when you scan a subdirectory). `repolens setup` is the exception you opt into: it installs
+and it never reads outside the directory you scan (except the enclosing `.git` metadata and
+the repository root's config when you scan a subdirectory). `repolens setup` is the exception you opt into: it installs
 dependencies, which runs the project's install scripts, so it lists them and asks first
 (`--ignore-scripts` skips them). See [docs/security.md](docs/security.md).
 

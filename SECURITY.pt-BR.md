@@ -30,7 +30,8 @@ Qualquer coisa que quebre as garantias descritas em
 - O `repolens setup` executa algo que o plano dele não mostrou, executa sem perguntar (e
   sem `--yes`) ou executa um programa de dentro do repositório.
 - Um repositório forjado faz o RepoLens **ler arquivos fora** do diretório analisado (exceto
-  os metadados do Git no diretório pai, descritos no modelo de segurança), por exemplo via
+  os metadados do Git no diretório pai e a configuração da raiz do repositório, descritos no
+  modelo de segurança), por exemplo via
   links simbólicos ou path traversal.
 - Um repositório forjado faz o RepoLens travar ou usar memória sem limite (por exemplo, via
   bombas de alias no YAML, arquivos enormes ou FIFOs).

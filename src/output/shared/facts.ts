@@ -692,7 +692,8 @@ export function configNote(result: ScanResult, verbose: boolean): string | null 
   if (ignored > 0) effects.push(`${plural(ignored, 'finding')} ignored`)
   const changed = Object.values(settings.doctor?.rules ?? {}).filter((setting) => setting !== 'off').length
   if (changed > 0) effects.push(`${plural(changed, 'check')} with a custom severity`)
-  if (settings.ignore?.length) effects.push(plural(settings.ignore.length, 'ignore pattern'))
+  const patterns = (settings.ignore?.length ?? 0) + (config.rootIgnore?.patterns.length ?? 0)
+  if (patterns > 0) effects.push(plural(patterns, 'ignore pattern'))
   if (settings.environment?.provided?.length) {
     effects.push(plural(settings.environment.provided.length, 'provided variable'))
   }

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { loadProjectConfig } from '../config/load.ts'
+import { loadProjectConfigs } from '../config/load.ts'
 import { NO_CONFIG, resolveConfig } from '../config/resolve.ts'
 import { type DetectorRegistry, detectors } from '../detectors/index.ts'
 import { runDoctor } from '../doctor/index.ts'
@@ -50,10 +50,7 @@ export function resolveOptions(options: ScanOptions = {}): ResolvedScanOptions {
 
 async function configLayers(option: ScanOptions['config'], root: string): Promise<readonly LoadedConfig[]> {
   if (option === false) return []
-  if (option === undefined || option === 'project') {
-    const project = await loadProjectConfig(root)
-    return project ? [project] : []
-  }
+  if (option === undefined || option === 'project') return loadProjectConfigs(root)
   return option
 }
 
@@ -89,6 +86,7 @@ export async function createContext(options: ScanOptions = {}): Promise<Context>
     maxFiles: resolved.maxFiles,
     maxDepth: resolved.maxDepth,
     ...(config.settings.ignore ? { exclude: config.settings.ignore } : {}),
+    ...(config.rootIgnore ? { rootExclude: config.rootIgnore } : {}),
     debug: resolved.debug,
   })
   resolved.debug(
