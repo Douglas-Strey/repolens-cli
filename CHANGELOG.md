@@ -7,6 +7,8 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-21
+
 ### Added
 
 - `repolens setup`: sets up a freshly cloned project by creating the local env file from
@@ -18,7 +20,20 @@ All notable changes to RepoLens are documented here. The format follows
   are never taken from the repository, and existing env files are never changed. It is
   the only command that runs anything; see docs/security.md.
 - `ENV_EXAMPLE_REAL_SECRET` and command redaction recognize Hugging Face, Shopify, PyPI and
-  DigitalOcean tokens and Linear API keys.
+  DigitalOcean tokens and Linear API keys. Thanks to @umeraamir69 for the first outside
+  contribution (#25).
+
+### Fixed
+
+- Two regular expressions (the `rm -rf` check for agent examples and a cleanup of
+  package-manager evidence) could take quadratic time on crafted input. Inputs were
+  already capped, so no repository could trigger it; both now run in linear time.
+- The Homebrew formula script waits up to about 12 minutes for a just-published npm
+  tarball instead of 2, so the tap update no longer fails right after a release.
+
+### Changed
+
+- `ignore` updated to 7.0.12.
 
 ## [0.1.1] - 2026-10-20
 

@@ -2,8 +2,8 @@
 
 **English** | [Português (Brasil)](ROADMAP.pt-BR.md)
 
-RepoLens 0.1 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
-terminal, JSON, Markdown and agent output, and configuration files. This page lists what
+RepoLens 0.2 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
+`repolens setup`, terminal, JSON, Markdown and agent output, and configuration files. This page lists what
 comes next, with enough detail that you can pick an item up and start.
 
 **Want to work on something?** Every item below links to its issue, and the

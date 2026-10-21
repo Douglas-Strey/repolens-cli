@@ -296,9 +296,9 @@ máquina.
 
 ## Roadmap
 
-**v0.1 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
-para terminal, JSON, Markdown e agentes; 34 verificações no doctor; arquivos de configuração
-do usuário e do projeto.
+**v0.2 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
+para terminal, JSON, Markdown e agentes; 34 verificações no doctor; `repolens setup` para um
+clone novo; arquivos de configuração do usuário e do projeto.
 
 **A seguir**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (workspaces do Cargo), PHP (Laravel, Composer)
