@@ -18,7 +18,9 @@ type RuleInfo = Pick<DoctorRule, 'code' | 'category'>
 /**
  * Merge configuration files, lowest precedence first. Later files override
  * single values (`maxFiles`, `doctor.failOn`, each `doctor.rules` entry);
- * lists (`ignore`, `doctor.ignore`, `environment.provided`) accumulate.
+ * lists (`ignore`, `doctor.ignore`, `environment.provided`) accumulate. The
+ * `ignore` patterns of the repository root's file (a layer with
+ * `ignorePrefix`) are relative to the root, so they go to `rootIgnore`.
  *
  * Settings for checks that don't exist are dropped with a suggestion. A
  * project's own file can't turn off, lower or ignore findings of a security
@@ -35,16 +37,22 @@ export function resolveConfig(
 
   const byCode = new Map(rules.map((rule) => [rule.code, rule]))
   const ignore: string[] = []
+  // The repository root's patterns when a subdirectory is scanned: relative to the root, so kept apart.
+  let rootIgnore: EffectiveConfig['rootIgnore']
   const provided: string[] = []
   const ruleSettings = new Map<string, RuleSetting>()
   const ignored: IgnoreEntry[] = []
   let maxFiles: number | undefined
   let failOn: FailOn | undefined
 
-  for (const { source, label, config } of layers) {
+  for (const { source, label, config, ignorePrefix } of layers) {
     const warn = (message: string) =>
       warnings.push({ kind: 'config', ...(source.file ? { file: source.file } : {}), message })
-    for (const pattern of config.ignore ?? []) if (!ignore.includes(pattern)) ignore.push(pattern)
+    if (ignorePrefix !== undefined) {
+      if (config.ignore?.length) rootIgnore = { prefix: ignorePrefix, patterns: [...config.ignore] }
+    } else {
+      for (const pattern of config.ignore ?? []) if (!ignore.includes(pattern)) ignore.push(pattern)
+    }
     maxFiles = config.maxFiles ?? maxFiles
     failOn = config.doctor?.failOn ?? failOn
     for (const [code, setting] of Object.entries(config.doctor?.rules ?? {})) {
@@ -100,7 +108,9 @@ export function resolveConfig(
     }
   }
   if (provided.length > 0) settings.environment = { provided }
-  return { config: { sources: layers.map((layer) => layer.source), settings }, warnings }
+  const config: EffectiveConfig = { sources: layers.map((layer) => layer.source), settings }
+  if (rootIgnore) config.rootIgnore = rootIgnore
+  return { config, warnings }
 }
 
 /** Does a variable name match one of the `environment.provided` patterns (`*` matches any characters)? */

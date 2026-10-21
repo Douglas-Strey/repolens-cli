@@ -3,11 +3,12 @@ import path from 'node:path'
 import { RepoLensError } from '../core/errors.ts'
 import { type ReadFailure, readRegularFile, readTextWithin } from '../core/fs.ts'
 import { isRecord, parseJson, parseJsonc } from '../core/parse.ts'
+import { repositoryRoot } from '../facts/git.ts'
 import type { ConfigSource, LoadedConfig } from '../types.ts'
-import { isWithin } from '../utils/paths.ts'
+import { isWithin, toPosix } from '../utils/paths.ts'
 import { validateConfig } from './validate.ts'
 
-/** The project configuration file, looked up in the scanned directory only. */
+/** The project configuration file, looked up in the scanned directory and the repository root. */
 export const PROJECT_CONFIG_FILE = 'repolens.config.json'
 /** Largest configuration file RepoLens reads. */
 export const MAX_CONFIG_BYTES = 256 * 1024
@@ -48,20 +49,14 @@ async function packageJsonConfig(root: string): Promise<{ found: false } | { fou
 }
 
 /**
- * The scanned directory's own configuration: `repolens.config.json`, or else
- * the "repolens" key of its package.json. Null when it has neither. Never
- * throws: the repository may not be trusted, so a file RepoLens can't use is
- * ignored with a warning. The file must resolve inside `root`.
+ * The configuration in `root` (a real path): `repolens.config.json`, or else
+ * the "repolens" key of its package.json. Null when it has neither. `shown`
+ * names a file of that directory as seen from the scanned directory.
  */
-export async function loadProjectConfig(dir: string): Promise<LoadedConfig | null> {
-  let root: string
-  try {
-    root = await fs.realpath(dir)
-  } catch {
-    return null
-  }
-  const source: ConfigSource = { kind: 'project', file: PROJECT_CONFIG_FILE }
-  const label = PROJECT_CONFIG_FILE
+async function loadConfigIn(root: string, shown: (name: string) => string): Promise<LoadedConfig | null> {
+  const file = shown(PROJECT_CONFIG_FILE)
+  const source: ConfigSource = { kind: 'project', file }
+  const label = file
   const read = await readTextWithin(root, PROJECT_CONFIG_FILE, MAX_CONFIG_BYTES)
   if (read.ok) {
     let raw: unknown
@@ -74,8 +69,8 @@ export async function loadProjectConfig(dir: string): Promise<LoadedConfig | nul
     if ((await packageJsonConfig(root)).found) {
       loaded.warnings.push({
         kind: 'config',
-        file: 'package.json',
-        message: `The "repolens" key in package.json was ignored: ${label} takes precedence`,
+        file: shown('package.json'),
+        message: `The "repolens" key in ${shown('package.json')} was ignored: ${label} takes precedence`,
       })
     }
     return loaded
@@ -87,9 +82,50 @@ export async function loadProjectConfig(dir: string): Promise<LoadedConfig | nul
   if (!fromPackage.found) return null
   return validateConfig(
     fromPackage.value,
-    { kind: 'project', file: 'package.json' },
-    'the "repolens" key of package.json',
+    { kind: 'project', file: shown('package.json') },
+    `the "repolens" key of ${shown('package.json')}`,
   )
+}
+
+/**
+ * The scanned directory's own configuration: `repolens.config.json`, or else
+ * the "repolens" key of its package.json. Null when it has neither. Never
+ * throws: the repository may not be trusted, so a file RepoLens can't use is
+ * ignored with a warning. The file must resolve inside `root`.
+ */
+export async function loadProjectConfig(dir: string): Promise<LoadedConfig | null> {
+  let root: string
+  try {
+    root = await fs.realpath(dir)
+  } catch {
+    return null
+  }
+  return loadConfigIn(root, (name) => name)
+}
+
+/**
+ * The project configuration files for a scan, lowest precedence first: the
+ * Git repository root's, when the scanned directory is below it, then the
+ * scanned directory's own. Nothing above the repository root is read, and
+ * the root's file must resolve inside the repository. Never throws.
+ */
+export async function loadProjectConfigs(dir: string): Promise<LoadedConfig[]> {
+  let root: string
+  try {
+    root = await fs.realpath(dir)
+  } catch {
+    return []
+  }
+  const layers: LoadedConfig[] = []
+  const repository = await repositoryRoot(root)
+  if (repository !== null && repository !== root) {
+    const up = toPosix(path.relative(root, repository))
+    const parent = await loadConfigIn(repository, (name) => `${up}/${name}`)
+    if (parent) layers.push({ ...parent, ignorePrefix: toPosix(path.relative(repository, root)) })
+  }
+  const own = await loadConfigIn(root, (name) => name)
+  if (own) layers.push(own)
+  return layers
 }
 
 /**

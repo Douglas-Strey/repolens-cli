@@ -265,6 +265,25 @@ async function resolveDotGit(workTree: string): Promise<DotGit> {
 }
 
 /**
+ * The working tree of the Git repository containing `start` (a real path):
+ * the first directory upward with a `.git`, found the same way as
+ * `gitLayout`. Null outside a repository, or when that `.git` is unusable.
+ * Works before a scan starts, to find the repository root's configuration.
+ */
+export async function repositoryRoot(start: string): Promise<string | null> {
+  let current = start
+  for (let level = 0; level < MAX_PARENT_LEVELS; level++) {
+    const found = await resolveDotGit(current)
+    if (found === 'invalid') return null
+    if (found !== 'absent') return current
+    const parent = path.dirname(current)
+    if (parent === current) return null
+    current = parent
+  }
+  return null
+}
+
+/**
  * Locate the Git repository containing the scan root (the root itself or a
  * parent directory). The search stops at the first `.git` entry; if that
  * entry is unusable the result is null, like git refusing a broken gitfile.

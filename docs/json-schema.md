@@ -279,6 +279,13 @@ present only when something was ignored. A check whose findings were all ignored
 indexed files, whether indexing stopped at the file limit, non-fatal problems, and the
 configuration that applied.
 
+`config` is `{ sources, settings, rootIgnore? }`: the files that applied, lowest precedence
+first (paths relative to the scanned directory, e.g. `../../repolens.config.json` for the
+repository root's), and the merged settings. `rootIgnore` is present when a subdirectory is
+scanned and the repository root's file has `ignore` patterns: `{ prefix, patterns }`, where
+the patterns are relative to the root and `prefix` is the scanned directory's path from it
+(see [configuration.md](configuration.md#monorepos)).
+
 `kind` is `"parse"` (a file couldn't be parsed), `"size"` (a file was skipped for being too
 large), `"limit"` (a scan limit was hit), `"error"` (a detector or check failed) or
 `"config"` (a configuration file has a setting RepoLens ignored). `detail` holds the parser

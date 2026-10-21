@@ -1,6 +1,7 @@
 export {
   loadConfigFile,
   loadProjectConfig,
+  loadProjectConfigs,
   loadUserConfig,
   PROJECT_CONFIG_FILE,
   tildePath,

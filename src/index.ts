@@ -6,7 +6,7 @@
  *
  * scan() applies the repository's own repolens.config.json; pass
  * `config: false` to ignore it, or a list from loadUserConfig /
- * loadProjectConfig / loadConfigFile to choose the files yourself.
+ * loadProjectConfigs / loadConfigFile to choose the files yourself.
  *
  * The result has the same shape as `repolens --json` (see docs/json-schema.md).
  */
@@ -19,6 +19,7 @@ export { type AgentFile, renderAgentContext, renderAgentFiles } from './agent/in
 export {
   loadConfigFile,
   loadProjectConfig,
+  loadProjectConfigs,
   loadUserConfig,
   PROJECT_CONFIG_FILE,
   resolveConfig,

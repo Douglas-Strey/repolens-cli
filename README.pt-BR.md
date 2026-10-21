@@ -333,7 +333,8 @@ de API.
 **É seguro usar em um repositório em que eu não confio?**
 Esse é o principal objetivo do design: ele nunca executa código do projeto, arquivos de
 configuração, hooks nem o `git`, e nunca lê fora do diretório analisado (exceto os metadados
-do `.git` que o contém quando você analisa um subdiretório). O `repolens setup` é a exceção
+do `.git` que o contém e a configuração da raiz do repositório quando você analisa um
+subdiretório). O `repolens setup` é a exceção
 que você escolhe usar: ele instala dependências, o que roda os scripts de instalação do
 projeto, então ele os lista e pergunta antes (`--ignore-scripts` os pula). Veja
 [docs/pt-BR/security.md](docs/pt-BR/security.md).

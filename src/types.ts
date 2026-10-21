@@ -745,6 +745,12 @@ export interface LoadedConfig {
   config: RepoLensConfig
   /** Problems found in the file (kind "config"). */
   warnings: ScanWarning[]
+  /**
+   * Set for the repository root's file when a subdirectory is scanned: the
+   * scanned directory's path from the root (posix, e.g. "apps/web"). The
+   * file's `ignore` patterns are relative to the root, like a root .gitignore.
+   */
+  ignorePrefix?: string
 }
 
 /** The configuration a scan used, after merging every file. */
@@ -756,6 +762,11 @@ export interface EffectiveConfig {
    * override earlier ones, `ignore` and `environment.provided` accumulate.
    */
   settings: Omit<RepoLensConfig, 'output'>
+  /**
+   * `ignore` patterns of the repository root's file when a subdirectory is
+   * scanned: relative to the root, matched against `prefix` + "/" + each path.
+   */
+  rootIgnore?: { prefix: string; patterns: string[] }
 }
 
 // ---------------------------------------------------------------------------

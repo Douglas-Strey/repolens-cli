@@ -27,7 +27,8 @@ Anything that breaks the guarantees in [docs/security.md](docs/security.md), for
 - `repolens setup` runs something its plan didn't show, runs without asking (and without
   `--yes`), or runs a program from inside the repository.
 - A crafted repository makes RepoLens **read files outside** the scanned directory
-  (other than the parent Git metadata described in the security model), for example
+  (other than the parent Git metadata and repository root configuration described in the
+  security model), for example
   through symlinks or path traversal.
 - A crafted repository makes RepoLens hang or use unbounded memory (for example
   through YAML alias bombs, huge files or FIFOs).

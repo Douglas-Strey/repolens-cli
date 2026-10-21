@@ -65,6 +65,13 @@ próprias ([7](#7-o-repolens-setup-executa-só-o-que-mostra-para-você)).
   seguido quando o diretório Git que ele indica aponta de volta para este checkout, então um
   arquivo `.git` forjado não consegue fazer o RepoLens reportar outro repositório da sua
   máquina.
+- **Uma segunda exceção:** nesse caso, o RepoLens também lê a configuração da raiz do
+  repositório (`repolens.config.json`, ou a chave `"repolens"` do `package.json` dela), para
+  que as configurações compartilhadas de um monorepo valham no pacote que você analisa. Ele
+  lê só esses dois arquivos, só na raiz do repositório que contém a pasta, com as mesmas
+  proteções de qualquer arquivo do projeto: o caminho precisa ficar dentro do repositório
+  (um link que leve para fora é recusado), e o arquivo tem os limites de uma configuração do
+  projeto (§5).
 
 ### 4. Entradas hostis não conseguem travar nem esgotar o RepoLens
 

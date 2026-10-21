@@ -9,6 +9,12 @@ All notable changes to RepoLens are documented here. The format follows
 
 ### Added
 
+- Monorepos: when you scan a subdirectory of a Git repository, the repository root's
+  configuration applies too, below the scanned directory's own. Its `ignore` patterns are
+  relative to the root, like a root `.gitignore`. Nothing above the repository root is
+  read, the root's file has the same limits as any project config, and `--config` replaces
+  both. ([#13](https://github.com/Douglas-Strey/repolens-cli/issues/13))
+
 - `doctor.ignore` in configuration files leaves single findings out by check code and
   subject (`*` wildcards allowed), while the check keeps reporting everything else.
   Ignored findings don't count toward `--fail-on` but are never hidden: the summary counts
