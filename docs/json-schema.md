@@ -268,6 +268,11 @@ example Docker checks when there are no Compose files), or `disabled` when a
 replaces the severity of every diagnostic that check reports. See
 [diagnostics.md](diagnostics.md) for every code.
 
+Findings a configuration file's `doctor.ignore` left out are not in `diagnostics`. They are
+listed in `ignored` (same shape as `diagnostics`) and counted in `summary.ignored`; both are
+present only when something was ignored. A check whose findings were all ignored is
+`passed`.
+
 ### `meta`
 
 `{ files, truncated, warnings: [{ kind, file?, message, detail? }], config }`: the number of
@@ -305,6 +310,7 @@ A smaller document with just the doctor results:
   "project": { "name": "acme-api", "directory": "acme-api" },
   "checks": [ … ],
   "diagnostics": [ … ],
+  "ignored": [ … ], // only when doctor.ignore left findings out
   "summary": { … },
   "config": { "sources": [ … ], "settings": { … } }
 }

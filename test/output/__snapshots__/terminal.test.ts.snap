@@ -22,6 +22,7 @@ exports[`renderDoctor > lists passing checks, skipped counts, files and scan not
     ✗ TRACKED_ENV_FILE       .env is tracked by Git
                              → Run \`git rm --cached .env\` and add .env to .gitignore
                              Files: .env
+                             Ignore: { "code": "TRACKED_ENV_FILE", "subject": ".env" }
 ⚠ Runtime
     ⚠ NODE_VERSION_CONFLICT  Node.js versions disagree: .nvmrc pins 22, Dockerfile uses 20
                              → Use the same major version everywhere (22)
@@ -30,8 +31,10 @@ exports[`renderDoctor > lists passing checks, skipped counts, files and scan not
     ⚠ ENV_UNDOCUMENTED       STRIPE_SECRET_KEY is used in code but missing from .env.example
                              → Add STRIPE_SECRET_KEY= to .env.example
                              Files: apps/api/src/billing.ts
+                             Ignore: { "code": "ENV_UNDOCUMENTED", "subject": "STRIPE_SECRET_KEY" }
     ℹ ENV_UNUSED             LEGACY_FLAG is documented in .env.example but never referenced
                              Files: .env.example
+                             Ignore: { "code": "ENV_UNUSED", "subject": "LEGACY_FLAG" }
 ✓ Tooling  1 skipped
     ✓ Passing check 0
     ✓ Passing check 1

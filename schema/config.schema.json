@@ -45,6 +45,34 @@
             "enum": ["off", "info", "warning", "error"]
           },
           "examples": [{ "ENV_UNUSED": "off", "LOCKFILE_MISSING": "error" }]
+        },
+        "ignore": {
+          "description": "Single findings to leave out, by check code and subject; the checks keep running. `repolens doctor --verbose` prints the entry for each finding. A project's own config file can't ignore findings of security checks.",
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "subject"],
+            "properties": {
+              "code": {
+                "description": "Check code, e.g. ENV_UNDOCUMENTED.",
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              },
+              "subject": {
+                "description": "The finding's subject: a variable name, file, service, … `*` matches any characters.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "reason": {
+                "description": "Why the finding is ignored, for whoever reads this file. RepoLens never prints it.",
+                "type": "string"
+              }
+            }
+          },
+          "examples": [[{ "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN", "reason": "removed in v3" }]]
         }
       }
     },

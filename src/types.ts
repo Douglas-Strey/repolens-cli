@@ -617,12 +617,19 @@ export interface DoctorSummary {
   errors: number
   warnings: number
   infos: number
+  /** Findings left out by `doctor.ignore` in a configuration file. Present when there are any. */
+  ignored?: number
 }
 
 export interface DoctorResult {
   checks: CheckResult[]
   diagnostics: Diagnostic[]
   summary: DoctorSummary
+  /**
+   * Findings a configuration file's `doctor.ignore` left out of `diagnostics`
+   * (they don't count toward --fail-on). Present when there are any.
+   */
+  ignored?: Diagnostic[]
 }
 
 // ---------------------------------------------------------------------------
@@ -688,6 +695,8 @@ export interface RepoLensConfig {
     failOn?: FailOn
     /** Per-check settings by code, e.g. { "ENV_UNUSED": "off", "LOCKFILE_MISSING": "error" }. */
     rules?: Record<string, RuleSetting>
+    /** Single findings to leave out, by check code and subject; the checks keep running. */
+    ignore?: IgnoreEntry[]
   }
   environment?: {
     /**
@@ -703,6 +712,14 @@ export interface RepoLensConfig {
     /** ASCII status symbols (+, !, x) instead of Unicode ones. */
     ascii?: boolean
   }
+}
+
+/** A `doctor.ignore` entry: the findings of one check whose subject matches. */
+export interface IgnoreEntry {
+  /** Check code, e.g. "ENV_UNDOCUMENTED". */
+  code: string
+  /** The finding's subject (variable name, file, …); `*` matches any characters. */
+  subject: string
 }
 
 /**

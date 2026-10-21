@@ -218,6 +218,9 @@ export function summaryItems(
   if (summary.infos > 0) items.push([severitySpan('info', s), span(` ${plural(summary.infos, 'info', 'info')}`)])
   if (summary.passed > 0) items.push([passSpan(s), span(` ${options.passedLabel(summary.passed)}`)])
   if (options.skipped && summary.skipped > 0) items.push([span(`${formatNumber(summary.skipped)} skipped`, s.dim)])
+  // Always shown: a result with findings left out must not pass for a clean one.
+  const ignored = summary.ignored ?? 0
+  if (ignored > 0) items.push([span(`${formatNumber(ignored)} ignored`, s.dim)])
   return items
 }
 

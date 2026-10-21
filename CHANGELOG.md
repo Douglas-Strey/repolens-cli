@@ -7,6 +7,16 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `doctor.ignore` in configuration files leaves single findings out by check code and
+  subject (`*` wildcards allowed), while the check keeps reporting everything else.
+  Ignored findings don't count toward `--fail-on` but are never hidden: the summary counts
+  them, `--verbose` lists them, and `--json` output has them under `ignored` with
+  `summary.ignored`. `--verbose` prints the entry to copy for every finding. An entry that
+  matches nothing is reported, and a project's own config can't ignore security findings.
+  ([#11](https://github.com/Douglas-Strey/repolens-cli/issues/11))
+
 ## [0.2.0] - 2026-10-21
 
 ### Added

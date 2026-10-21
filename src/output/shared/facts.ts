@@ -671,7 +671,7 @@ export function noteWarnings(meta: ScanResult['meta']): ScanWarning[] {
 }
 
 /**
- * "Configured by repolens.config.json: 2 checks turned off, 1 ignore pattern."
+ * "Configured by repolens.config.json: 2 checks turned off, 1 finding ignored, 1 ignore pattern."
  * Shown whenever the scanned repository's own configuration (or a --config
  * file) shaped the results, so nobody mistakes a trimmed report for a clean
  * one. The user's own config is only mentioned with `verbose`.
@@ -688,6 +688,8 @@ export function configNote(result: ScanResult, verbose: boolean): string | null 
   const effects: string[] = []
   const disabled = result.doctor.summary.disabled ?? 0
   if (disabled > 0) effects.push(`${plural(disabled, 'check')} turned off`)
+  const ignored = result.doctor.summary.ignored ?? 0
+  if (ignored > 0) effects.push(`${plural(ignored, 'finding')} ignored`)
   const changed = Object.values(settings.doctor?.rules ?? {}).filter((setting) => setting !== 'off').length
   if (changed > 0) effects.push(`${plural(changed, 'check')} with a custom severity`)
   if (settings.ignore?.length) effects.push(plural(settings.ignore.length, 'ignore pattern'))

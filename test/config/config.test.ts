@@ -159,6 +159,62 @@ describe('validateConfig', () => {
     expect(JSON.stringify(loaded)).not.toContain(SECRET_SENTINEL)
   })
 
+  it('keeps doctor.ignore entries without their reason, once each', () => {
+    const { config, warnings } = validate({
+      doctor: {
+        ignore: [
+          { code: 'ENV_UNDOCUMENTED', subject: 'LEGACY_TOKEN', reason: 'removed in v3' },
+          { code: 'ENV_UNDOCUMENTED', subject: 'LEGACY_TOKEN' },
+          { code: 'ESLINT_LEGACY_CONFIG', subject: 'packages/old/.eslintrc.json' },
+          { code: 'ENV_UNUSED', subject: 'LEGACY_*' },
+        ],
+      },
+    })
+    expect(warnings).toEqual([])
+    // The reason is for people reading the file; it never reaches the result.
+    expect(config.doctor?.ignore).toEqual([
+      { code: 'ENV_UNDOCUMENTED', subject: 'LEGACY_TOKEN' },
+      { code: 'ESLINT_LEGACY_CONFIG', subject: 'packages/old/.eslintrc.json' },
+      { code: 'ENV_UNUSED', subject: 'LEGACY_*' },
+    ])
+  })
+
+  it('reports doctor.ignore entries it cannot use, by position, never echoing them', () => {
+    const token = `ghp_${'a'.repeat(36)}`
+    const { config, warnings } = validate({
+      doctor: {
+        ignore: [
+          'ENV_UNUSED',
+          { code: 'env_unused', subject: 'X' },
+          { code: 'ENV_UNUSED' },
+          { code: 'ENV_UNUSED', subject: '' },
+          { code: 'ENV_UNUSED', subject: 'x'.repeat(301) },
+          { code: 'ENV_UNUSED', subject: `A${String.fromCharCode(10)}B` },
+          { code: 'ENV_UNUSED', subject: token },
+          { code: 'ENV_UNUSED', subject: 'X', reason: 3 },
+          { code: 'ENV_UNUSED', subject: 'X', reson: 'typo' },
+        ],
+      },
+    })
+    expect(warnings.map((warning) => warning.message)).toEqual([
+      'Ignored entry 1 of "doctor.ignore" in repolens.config.json: entries must be objects with "code" and "subject"',
+      'Ignored entry 2 of "doctor.ignore" in repolens.config.json: "code" must be a check code like ENV_UNUSED',
+      'Ignored entry 3 of "doctor.ignore" in repolens.config.json: "subject" must be a non-empty string',
+      'Ignored entry 4 of "doctor.ignore" in repolens.config.json: "subject" must be a non-empty string',
+      'Ignored entry 5 of "doctor.ignore" in repolens.config.json: "subject" is limited to 300 characters',
+      'Ignored entry 6 of "doctor.ignore" in repolens.config.json: "subject" must be one line of printable text',
+      'Ignored entry 7 of "doctor.ignore" in repolens.config.json: "subject" looks like a credential',
+      'Ignored entry 8 of "doctor.ignore" in repolens.config.json: "reason" must be a string',
+      'Unknown setting "reson" in entry 9 of "doctor.ignore" in repolens.config.json (did you mean "reason"?)',
+    ])
+    expect(warnings.map((warning) => warning.message).join()).not.toContain(token)
+    // The entry with a misspelled key is still kept: only "reason" was misspelled.
+    expect(config.doctor?.ignore).toEqual([{ code: 'ENV_UNUSED', subject: 'X' }])
+    expect(validate({ doctor: { ignore: { code: 'ENV_UNUSED' } } }).warnings.map((w) => w.message)).toEqual([
+      '"doctor.ignore" in repolens.config.json must be a list of { "code", "subject" } entries; the setting was ignored',
+    ])
+  })
+
   it('quotes keys short, printable and never credential-shaped', () => {
     expect(quoted(`ghp_${'a'.repeat(36)}`)).toBe('(a key that looks like a credential)')
     expect(quoted('x'.repeat(100))).toHaveLength(50)
@@ -228,6 +284,50 @@ describe('resolveConfig', () => {
       expect(resolveConfig([layer({ doctor: { rules } }, source)], doctorRules).config.settings.doctor?.rules).toEqual(
         rules,
       )
+    }
+  })
+})
+
+describe('resolveConfig: doctor.ignore', () => {
+  const layer = (raw: unknown, source: ConfigSource = PROJECT) => validate(raw, source)
+  const entry = (code: string, subject: string) => ({ code, subject })
+
+  it('accumulates entries from every file, sorted and without duplicates', () => {
+    const user = layer({ doctor: { ignore: [entry('ENV_UNUSED', 'B'), entry('ENV_UNDOCUMENTED', 'A')] } }, USER)
+    const project = layer({ doctor: { ignore: [entry('ENV_UNUSED', 'B'), entry('ENV_UNUSED', 'A')] } })
+    const { config, warnings } = resolveConfig([user, project], doctorRules)
+    expect(warnings).toEqual([])
+    expect(config.settings.doctor?.ignore).toEqual([
+      entry('ENV_UNDOCUMENTED', 'A'),
+      entry('ENV_UNUSED', 'A'),
+      entry('ENV_UNUSED', 'B'),
+    ])
+  })
+
+  it('drops entries for checks that do not exist, with a suggestion', () => {
+    const { config, warnings } = resolveConfig(
+      [layer({ doctor: { ignore: [entry('ENV_UNDOCUMNTED', 'A')] } })],
+      doctorRules,
+    )
+    expect(config.settings.doctor).toBeUndefined()
+    expect(warnings.map((w) => w.message)).toEqual([
+      'Unknown check "ENV_UNDOCUMNTED" in "doctor.ignore" of repolens.config.json (did you mean ENV_UNDOCUMENTED?); the entry was ignored',
+    ])
+  })
+
+  it("doesn't let a project's own file ignore security findings", () => {
+    const ignore = [entry('TRACKED_ENV_FILE', '.env'), entry('ENV_UNUSED', 'X')]
+    const project = resolveConfig([layer({ doctor: { ignore } })], doctorRules)
+    expect(project.config.settings.doctor?.ignore).toEqual([entry('ENV_UNUSED', 'X')])
+    expect(project.warnings.map((w) => w.message)).toEqual([
+      "repolens.config.json can't ignore findings of the security check TRACKED_ENV_FILE; that takes your user config or a file passed with --config",
+    ])
+    for (const source of [USER, { kind: 'file' } as const]) {
+      const resolved = resolveConfig([layer({ doctor: { ignore } }, source)], doctorRules)
+      expect(resolved.config.settings.doctor?.ignore).toEqual([
+        entry('ENV_UNUSED', 'X'),
+        entry('TRACKED_ENV_FILE', '.env'),
+      ])
     }
   })
 })
@@ -418,7 +518,12 @@ describe('config.schema.json', () => {
     const schema = JSON.parse(await fs.readFile(schemaPath, 'utf8'))
     const keys = (node: { properties?: Record<string, unknown> }) => Object.keys(node.properties ?? {}).sort()
     expect(keys(schema)).toEqual(['$schema', 'doctor', 'environment', 'ignore', 'maxFiles', 'output'])
-    expect(keys(schema.properties.doctor)).toEqual(['failOn', 'rules'])
+    expect(keys(schema.properties.doctor)).toEqual(['failOn', 'ignore', 'rules'])
+    expect(Object.keys(schema.properties.doctor.properties.ignore.items.properties).sort()).toEqual([
+      'code',
+      'reason',
+      'subject',
+    ])
     expect(keys(schema.properties.environment)).toEqual(['provided'])
     expect(keys(schema.properties.output)).toEqual(['ascii', 'color'])
     expect(schema.properties.doctor.properties.failOn.enum).toEqual(['error', 'warning', 'info', 'never'])
@@ -433,7 +538,11 @@ describe('config.schema.json', () => {
       $schema: schema.$id,
       ignore: ['a/'],
       maxFiles: schema.properties.maxFiles.maximum,
-      doctor: { failOn: 'never', rules: { ENV_UNUSED: 'off' } },
+      doctor: {
+        failOn: 'never',
+        rules: { ENV_UNUSED: 'off' },
+        ignore: [{ code: 'ENV_UNDOCUMENTED', subject: 'X_*', reason: 'why' }],
+      },
       environment: { provided: ['X_*'] },
       output: { color: 'auto', ascii: false },
     }
