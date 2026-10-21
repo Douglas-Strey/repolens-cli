@@ -1,6 +1,14 @@
 import { isRecord } from '../core/parse.ts'
 import { ignoreRuleCost, MAX_IGNORE_RULES_PER_PATH } from '../core/walker.ts'
-import type { ConfigSource, FailOn, LoadedConfig, RepoLensConfig, RuleSetting, ScanWarning } from '../types.ts'
+import type {
+  ConfigSource,
+  FailOn,
+  IgnoreEntry,
+  LoadedConfig,
+  RepoLensConfig,
+  RuleSetting,
+  ScanWarning,
+} from '../types.ts'
 import { findCredentialPattern } from '../utils/redact.ts'
 import { closestMatch } from '../utils/suggest.ts'
 import { cleanUntrusted } from '../utils/text.ts'
@@ -10,6 +18,8 @@ export const MAX_CONFIG_FILES = 1_000_000
 /** Entries read from one list (`ignore`, `environment.provided`); the rest are dropped with a warning. */
 export const MAX_CONFIG_LIST = 1000
 const MAX_PATTERN_LENGTH = 500
+/** Longest `doctor.ignore` subject: variable names, file paths, `8080/tcp`. */
+const MAX_SUBJECT_LENGTH = 300
 
 export const FAIL_ON_VALUES: readonly FailOn[] = ['error', 'warning', 'info', 'never']
 export const RULE_SETTINGS: readonly RuleSetting[] = ['off', 'info', 'warning', 'error']
@@ -22,7 +32,8 @@ const VARIABLE_PATTERN = /^[A-Za-z0-9_*]{1,128}$/
 
 const KEYS: Record<string, readonly string[]> = {
   '': ['$schema', 'ignore', 'maxFiles', 'doctor', 'environment', 'output'],
-  doctor: ['failOn', 'rules'],
+  doctor: ['failOn', 'rules', 'ignore'],
+  'doctor.ignore': ['code', 'subject', 'reason'],
   environment: ['provided'],
   output: ['color', 'ascii'],
 }
@@ -141,6 +152,61 @@ function doctorSettings(v: Validator, value: unknown): RepoLensConfig['doctor'] 
       }
       out.rules = rules
     }
+  }
+  if (doctor.ignore !== undefined) {
+    const ignore = ignoreEntries(v, doctor.ignore)
+    if (ignore) out.ignore = ignore
+  }
+  return out
+}
+
+/** What is wrong with a `doctor.ignore` entry, or null when it can be used. */
+function ignoreEntryProblem(item: Record<string, unknown>): string | null {
+  const { code, subject, reason } = item
+  if (typeof code !== 'string' || !CODE.test(code)) return '"code" must be a check code like ENV_UNUSED'
+  if (typeof subject !== 'string' || subject === '') return '"subject" must be a non-empty string'
+  if (subject.length > MAX_SUBJECT_LENGTH) return `"subject" is limited to ${MAX_SUBJECT_LENGTH} characters`
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: rejecting control characters is the point
+  if (/[\x00-\x1f\x7f]/.test(subject)) return '"subject" must be one line of printable text'
+  // Subjects are echoed in output (settings in effect, warnings): never one shaped like a credential.
+  if (findCredentialPattern(subject) !== null) return '"subject" looks like a credential'
+  if (reason !== undefined && typeof reason !== 'string') return '"reason" must be a string'
+  return null
+}
+
+/**
+ * `doctor.ignore` entries. `reason` is accepted and dropped: it is for whoever
+ * reads the file, and text from a configuration file never reaches the output.
+ */
+function ignoreEntries(v: Validator, value: unknown): IgnoreEntry[] | undefined {
+  if (!Array.isArray(value)) {
+    v.invalid('doctor.ignore', 'must be a list of { "code", "subject" } entries')
+    return undefined
+  }
+  if (value.length > MAX_CONFIG_LIST) {
+    v.warn(`"doctor.ignore" in ${v.label} has more than ${MAX_CONFIG_LIST} entries; the rest were ignored`)
+  }
+  const known = KEYS['doctor.ignore'] ?? []
+  const out: IgnoreEntry[] = []
+  // Entries are named by position: a value from the file is never echoed back.
+  for (const [index, item] of value.slice(0, MAX_CONFIG_LIST).entries()) {
+    const where = `entry ${index + 1} of "doctor.ignore" in ${v.label}`
+    if (!isRecord(item)) {
+      v.warn(`Ignored ${where}: entries must be objects with "code" and "subject"`)
+      continue
+    }
+    for (const name of Object.keys(item)) {
+      if (known.includes(name)) continue
+      const suggestion = closestMatch(name, known)
+      v.warn(`Unknown setting ${quoted(name)} in ${where}${suggestion ? ` (did you mean "${suggestion}"?)` : ''}`)
+    }
+    const problem = ignoreEntryProblem(item)
+    if (problem !== null) {
+      v.warn(`Ignored ${where}: ${problem}`)
+      continue
+    }
+    const entry = { code: item.code as string, subject: item.subject as string }
+    if (!out.some((other) => other.code === entry.code && other.subject === entry.subject)) out.push(entry)
   }
   return out
 }

@@ -273,6 +273,11 @@ repositório (por exemplo, verificações de Docker quando não há arquivos Com
 severidade definida em `doctor.rules` substitui a severidade de todo diagnóstico que essa
 verificação reporta. Veja todos os códigos em [diagnostics.md](diagnostics.md).
 
+Achados que o `doctor.ignore` de um arquivo de configuração deixou de fora não ficam em
+`diagnostics`. Eles aparecem em `ignored` (com o mesmo formato de `diagnostics`) e são
+contados em `summary.ignored`; os dois só existem quando algo foi ignorado. Uma verificação
+com todos os achados ignorados fica como `passed`.
+
 ### `meta`
 
 `{ files, truncated, warnings: [{ kind, file?, message, detail? }], config }`: o número de
@@ -311,6 +316,7 @@ Um documento menor, só com os resultados do doctor:
   "project": { "name": "acme-api", "directory": "acme-api" },
   "checks": [ … ],
   "diagnostics": [ … ],
+  "ignored": [ … ], // só quando o doctor.ignore deixou achados de fora
   "summary": { … },
   "config": { "sources": [ … ], "settings": { … } }
 }

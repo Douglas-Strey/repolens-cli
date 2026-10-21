@@ -46,7 +46,29 @@ function diagnosticExtras(diagnostic: Diagnostic, ctx: RenderContext): Diagnosti
   if (ctx.verbose && diagnostic.files && diagnostic.files.length > 0) {
     extras.push({ text: `Files: ${diagnostic.files.join(', ')}`, paint: s.dim })
   }
+  if (ctx.verbose && diagnostic.subject !== undefined) {
+    // Ready to paste into "doctor.ignore", the only place the subject shows in the terminal.
+    // Spaced like the docs, so a long entry wraps between its parts instead of after "Ignore:".
+    const entry = `{ "code": ${JSON.stringify(diagnostic.code)}, "subject": ${JSON.stringify(diagnostic.subject)} }`
+    extras.push({ text: `Ignore: ${ownText(entry)}`, paint: s.dim })
+  }
   return extras
+}
+
+/** With --verbose: each finding `doctor.ignore` left out, by code and subject. */
+function ignoredLines(result: ScanResult, ctx: RenderContext): Line[] {
+  const { s } = ctx
+  const ignored = result.doctor.ignored ?? []
+  if (!ctx.verbose || ignored.length === 0) return []
+  const lines: Line[] = [
+    [span('Ignored', s.bold), span(`  ${plural(ignored.length, 'finding')} left out by doctor.ignore`, s.dim)],
+  ]
+  for (const diagnostic of ignored) {
+    const text =
+      diagnostic.subject === undefined ? diagnostic.code : `${diagnostic.code} (${ownText(diagnostic.subject)})`
+    append(lines, hanging([spaces(2), span(s.symbols.bullet, s.dim), spaces(1)], text, s.dim, ctx.width))
+  }
+  return lines
 }
 
 function categoryLines(result: ScanResult, ctx: RenderContext): Line[] {
@@ -129,6 +151,7 @@ export function renderDoctorReport(result: ScanResult, options: RenderOptions): 
   const blocks: Line[][] = [[heading('RepoLens Doctor', result.project.name, ctx)]]
   blocks.push(categoryLines(result, ctx))
   if (result.doctor.diagnostics.length === 0) blocks.push([[passSpan(s), span(' No problems found')]])
+  blocks.push(ignoredLines(result, ctx))
   blocks.push(notesLines(result, ctx))
   const summary = summaryLines(result, ctx)
   // Always shown: findings a configuration turned off must not pass for a clean result.

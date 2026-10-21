@@ -126,6 +126,108 @@ describe('scan with a project config', () => {
   })
 })
 
+describe('doctor.ignore', () => {
+  const ignore = (...entries: [string, string][]) => ({
+    doctor: { ignore: entries.map(([code, subject]) => ({ code, subject })) },
+  })
+  const subjects = (result: ScanResult, code: string) =>
+    result.doctor.diagnostics.filter((d) => d.code === code).map((d) => d.subject)
+
+  it('leaves single findings out, lists and counts them, and keeps the check running', async () => {
+    const result = await scanDir(await withConfig('broken-env', ignore(['ENV_UNDOCUMENTED', 'LEGACY_TOKEN'])))
+    expect(subjects(result, 'ENV_UNDOCUMENTED')).not.toContain('LEGACY_TOKEN')
+    expect(subjects(result, 'ENV_UNDOCUMENTED')).toContain('ANALYTICS_KEY')
+    expect(result.doctor.ignored?.map((d) => [d.code, d.subject])).toEqual([['ENV_UNDOCUMENTED', 'LEGACY_TOKEN']])
+    expect(result.doctor.summary.ignored).toBe(1)
+    expect(result.doctor.checks.find((check) => check.code === 'ENV_UNDOCUMENTED')?.status).toBe('failed')
+    expect(result.meta.config.settings.doctor?.ignore).toEqual([{ code: 'ENV_UNDOCUMENTED', subject: 'LEGACY_TOKEN' }])
+  })
+
+  it('matches subjects with * and passes a check whose findings are all ignored', async () => {
+    const result = await scanDir(
+      await withConfig('broken-env', ignore(['ENV_LOCAL_ONLY', '*'], ['ENV_UNUSED', 'LEGACY_*'])),
+    )
+    expect(result.doctor.checks.find((check) => check.code === 'ENV_LOCAL_ONLY')?.status).toBe('passed')
+    expect(result.doctor.checks.find((check) => check.code === 'ENV_UNUSED')?.status).toBe('passed')
+    expect(codes(result)).not.toContain('ENV_LOCAL_ONLY')
+    expect(result.doctor.summary.ignored).toBe(result.doctor.ignored?.length)
+    expect(result.doctor.summary.ignored).toBeGreaterThan(2)
+  })
+
+  it('adds nothing to the result when no file ignores anything', async () => {
+    const result = await scanDir(await copyFixture('broken-env'))
+    expect(result.doctor).not.toHaveProperty('ignored')
+    expect(result.doctor.summary).not.toHaveProperty('ignored')
+  })
+
+  it('warns about an entry that matched no finding in a check that ran, never about a disabled check', async () => {
+    const config = {
+      doctor: {
+        rules: { SCRIPT_MISSING_LINT: 'off' },
+        ignore: [
+          { code: 'ENV_UNDOCUMENTED', subject: 'GONE_LONG_AGO' },
+          { code: 'SCRIPT_MISSING_LINT', subject: 'lint' },
+        ],
+      },
+    }
+    const result = await scanDir(await withConfig('broken-env', config))
+    expect(result.meta.warnings.filter((w) => w.kind === 'config').map((w) => w.message)).toEqual([
+      'The "doctor.ignore" entry for ENV_UNDOCUMENTED with subject "GONE_LONG_AGO" matched no finding; remove it if the problem is gone',
+    ])
+  })
+
+  it("doesn't let a project's own file ignore a security finding", async () => {
+    const files = {
+      'package.json': JSON.stringify({ name: 'web', dependencies: { vite: '^7.0.0' } }),
+      '.env.example': 'VITE_STRIPE_SECRET_KEY=\n',
+      'src/main.ts': 'console.log(import.meta.env.VITE_STRIPE_SECRET_KEY)\n',
+    }
+    const plain = await scanDir(await makeProject(files))
+    expect(codes(plain)).toContain('ENV_PUBLIC_SECRET')
+    const project = await makeProject({
+      ...files,
+      'repolens.config.json': JSON.stringify(ignore(['ENV_PUBLIC_SECRET', '*'])),
+    })
+    const result = await scanDir(project)
+    expect(codes(result)).toContain('ENV_PUBLIC_SECRET')
+    expect(result.doctor.ignored).toBeUndefined()
+    const user = await scanDir(await makeProject(files), { config: [userLayer(ignore(['ENV_PUBLIC_SECRET', '*']))] })
+    expect(codes(user)).not.toContain('ENV_PUBLIC_SECRET')
+    expect(user.doctor.summary.ignored).toBe(1)
+  })
+
+  it('never fails doctor on an ignored finding', async () => {
+    const dir = await withConfig('broken-env', { doctor: { failOn: 'info', ignore: [{ code: '*', subject: '*' }] } })
+    // "*" is not a check code: nothing is ignored, so the threshold still fails.
+    expect((await runCli(['doctor', dir])).code).toBe(1)
+    const all = (await scanDir(await copyFixture('broken-env'))).doctor.diagnostics
+    const everything = {
+      doctor: { failOn: 'info', ignore: [...new Set(all.map((d) => d.code))].map((code) => ({ code, subject: '*' })) },
+    }
+    const quiet = await withConfig('broken-env', everything)
+    const run = await runCli(['doctor', quiet])
+    expect(run.code).toBe(0)
+    expect(run.stdout).toContain('No problems found')
+  })
+
+  it('shows the count, the ignored findings and the entry to copy', async () => {
+    const dir = await withConfig('broken-env', ignore(['ENV_UNDOCUMENTED', 'LEGACY_TOKEN']))
+    const plain = await runCli(['doctor', dir])
+    expect(plain.stdout).toContain('1 ignored')
+    expect(plain.stdout).toContain('Configured by repolens.config.json: 1 finding ignored.')
+    expect(plain.stdout).not.toContain('Ignore: {')
+    const verbose = await runCli(['doctor', '-v', dir], { columns: 140 })
+    expect(verbose.stdout).toContain('Ignored  1 finding left out by doctor.ignore')
+    expect(verbose.stdout).toContain('ENV_UNDOCUMENTED (LEGACY_TOKEN)')
+    expect(verbose.stdout).toContain('Ignore: { "code": "ENV_UNDOCUMENTED", "subject": "ANALYTICS_KEY" }')
+    const json = JSON.parse((await runCli(['doctor', '--json', dir])).stdout)
+    expect(json.ignored.map((d: { subject: string }) => d.subject)).toEqual(['LEGACY_TOKEN'])
+    expect(json.summary.ignored).toBe(1)
+    const scan = await runCli([dir])
+    expect(scan.stdout).toContain('1 ignored')
+  })
+})
+
 describe('CLI configuration', () => {
   it('prints configuration warnings to stderr, keeping --json output parseable', async () => {
     const dir = await withConfig('broken-env', { ignroe: ['x/'] })

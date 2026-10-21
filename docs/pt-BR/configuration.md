@@ -130,6 +130,41 @@ ainda, e esses repositórios não podem ter como esconder os próprios achados d
 Uma configuração do projeto pode elevá-las para `"error"`. Para desativar uma delas, use a
 sua configuração do usuário ou um arquivo passado com `--config`.
 
+### `doctor.ignore`
+
+Achados específicos a deixar de fora, pelo [código](diagnostics.md) da verificação e pelo
+assunto. Diferente de desativar a verificação, ela continua rodando e reportando todo o
+resto:
+
+```json
+{
+  "doctor": {
+    "ignore": [
+      { "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN", "reason": "removed in v3" },
+      { "code": "ENV_UNUSED", "subject": "FEATURE_*" }
+    ]
+  }
+}
+```
+
+- `code` e `subject` são obrigatórios. O assunto é aquilo de que o achado trata: o nome de
+  uma variável, um arquivo, a porta de um serviço (`8080/tcp`), um runtime (`node@18`). O
+  `repolens doctor --verbose` mostra a entrada de cada achado, pronta para copiar:
+  `Ignore: { "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN" }`.
+- `*` em `subject` corresponde a quaisquer caracteres.
+- `reason` é opcional, para quem lê o arquivo. O RepoLens nunca o exibe.
+
+Achados ignorados não contam para o `--fail-on`, mas nunca ficam escondidos: o resumo diz
+quantos são ("1 ignored"), o `--verbose` lista cada um, e a saída `--json` os traz em
+`ignored` (veja [json-schema.md](json-schema.md)). Uma entrada que não corresponde a nenhum
+achado de uma verificação que rodou é reportada como aviso de configuração, para que uma
+exceção esquecida não esconda em silêncio o problema se ele voltar. As entradas de todos os
+arquivos de configuração se somam; são lidas no máximo 1.000 de cada arquivo.
+
+Assim como em `doctor.rules`, uma configuração do projeto não pode ignorar achados das
+**verificações de segurança**; a sua configuração do usuário ou um arquivo passado com
+`--config` podem.
+
 ### `environment.provided`
 
 Variáveis que a sua plataforma ou as suas ferramentas definem, e que por isso nunca

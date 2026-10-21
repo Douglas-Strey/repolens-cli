@@ -13,6 +13,7 @@ export function renderDoctorJson(result: ScanResult): string {
     project: { name: result.project.name, directory: result.project.directory },
     checks: result.doctor.checks,
     diagnostics: result.doctor.diagnostics,
+    ...(result.doctor.ignored ? { ignored: result.doctor.ignored } : {}),
     summary: result.doctor.summary,
     config: result.meta.config,
   }

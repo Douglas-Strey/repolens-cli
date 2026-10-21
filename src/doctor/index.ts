@@ -1,5 +1,16 @@
+import { matchWildcard } from '../config/resolve.ts'
+import { quoted } from '../config/validate.ts'
 import { errorSummary } from '../core/errors.ts'
-import type { CheckResult, Diagnostic, DoctorResult, DoctorRule, ProjectContext, Sections, Severity } from '../types.ts'
+import type {
+  CheckResult,
+  Diagnostic,
+  DoctorResult,
+  DoctorRule,
+  IgnoreEntry,
+  ProjectContext,
+  Sections,
+  Severity,
+} from '../types.ts'
 import { compareText } from '../utils/compare.ts'
 import { doctorRules } from './rules/index.ts'
 
@@ -15,10 +26,16 @@ export function compareDiagnostics(a: Diagnostic, b: Diagnostic): number {
   )
 }
 
+function matches(entry: IgnoreEntry, diagnostic: Diagnostic): boolean {
+  return entry.code === diagnostic.code && matchWildcard(entry.subject, diagnostic.subject ?? '')
+}
+
 /**
  * Run doctor rules against detected sections. A rule that throws is reported
  * as a scan warning and skipped. The configuration's `doctor.rules` turn
- * checks off ("disabled", never run) or set the severity of what they find.
+ * checks off ("disabled", never run) or set the severity of what they find,
+ * and `doctor.ignore` leaves single findings out (a check whose findings are
+ * all ignored passes; the result still lists and counts what was ignored).
  */
 export async function runDoctor(
   sections: Sections,
@@ -28,15 +45,19 @@ export async function runDoctor(
   const checks: CheckResult[] = []
   const diagnostics: Diagnostic[] = []
   const settings = ctx.options.config?.settings.doctor?.rules ?? {}
+  const ignores = ctx.options.config?.settings.doctor?.ignore ?? []
 
   const run = async (rule: DoctorRule) => {
     const setting = Object.hasOwn(settings, rule.code) ? settings[rule.code] : undefined
-    if (setting === 'off') return { rule, status: 'disabled' as const, found: [] }
+    if (setting === 'off') return { rule, status: 'disabled' as const, found: [], ignored: [] }
     try {
-      if (rule.applies && !(await rule.applies(sections, ctx))) return { rule, status: 'skipped' as const, found: [] }
+      if (rule.applies && !(await rule.applies(sections, ctx)))
+        return { rule, status: 'skipped' as const, found: [], ignored: [] }
       let found = await rule.check(sections, ctx)
       if (setting !== undefined) found = found.map((diagnostic) => ({ ...diagnostic, severity: setting }))
-      return { rule, status: found.length > 0 ? ('failed' as const) : ('passed' as const), found }
+      const ignored = found.filter((diagnostic) => ignores.some((entry) => matches(entry, diagnostic)))
+      found = found.filter((diagnostic) => !ignored.includes(diagnostic))
+      return { rule, status: found.length > 0 ? ('failed' as const) : ('passed' as const), found, ignored }
     } catch (error) {
       ctx.warn({
         kind: 'error',
@@ -44,7 +65,7 @@ export async function runDoctor(
         detail: errorSummary(error, ctx.root),
       })
       ctx.debug(`doctor ${rule.code} failed: ${String((error as Error)?.stack ?? error)}`)
-      return { rule, status: 'skipped' as const, found: [] }
+      return { rule, status: 'skipped' as const, found: [], ignored: [] }
     }
   }
   // Rules marked `final` read ctx.warnings, so they run once the others are done.
@@ -55,11 +76,27 @@ export async function runDoctor(
   // Keep the declared rule order in the check list.
   outcomes.sort((a, b) => rules.indexOf(a.rule) - rules.indexOf(b.rule))
 
-  for (const { rule, status, found } of outcomes) {
+  const ignored: Diagnostic[] = []
+  for (const { rule, status, found, ignored: left } of outcomes) {
     checks.push({ code: rule.code, title: rule.title, category: rule.category, status })
     diagnostics.push(...found)
+    ignored.push(...left)
   }
   diagnostics.sort(compareDiagnostics)
+  ignored.sort(compareDiagnostics)
+
+  // An entry that ignores nothing in a check that ran is likely stale: the problem it hid is gone, and the
+  // entry would hide it again if it came back.
+  const ran = new Set(
+    checks.filter((check) => check.status !== 'disabled' && check.status !== 'skipped').map((c) => c.code),
+  )
+  for (const entry of ignores) {
+    if (!ran.has(entry.code) || ignored.some((diagnostic) => matches(entry, diagnostic))) continue
+    ctx.warn({
+      kind: 'config',
+      message: `The "doctor.ignore" entry for ${entry.code} with subject ${quoted(entry.subject)} matched no finding; remove it if the problem is gone`,
+    })
+  }
 
   return {
     checks,
@@ -72,6 +109,8 @@ export async function runDoctor(
       errors: diagnostics.filter((d) => d.severity === 'error').length,
       warnings: diagnostics.filter((d) => d.severity === 'warning').length,
       infos: diagnostics.filter((d) => d.severity === 'info').length,
+      ...(ignored.length > 0 ? { ignored: ignored.length } : {}),
     },
+    ...(ignored.length > 0 ? { ignored } : {}),
   }
 }

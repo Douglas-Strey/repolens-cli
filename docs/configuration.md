@@ -125,6 +125,39 @@ often run on repositories nobody has reviewed yet, and those must not be able to
 their own security findings. A project config may raise them to `"error"`. To turn one
 off, use your user config or a file passed with `--config`.
 
+### `doctor.ignore`
+
+Single findings to leave out, by check [code](diagnostics.md) and subject. Unlike turning a
+check off, the check keeps running and still reports everything else:
+
+```json
+{
+  "doctor": {
+    "ignore": [
+      { "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN", "reason": "removed in v3" },
+      { "code": "ENV_UNUSED", "subject": "FEATURE_*" }
+    ]
+  }
+}
+```
+
+- `code` and `subject` are required. The subject is what the finding is about: a variable
+  name, a file, a service port (`8080/tcp`), a runtime (`node@18`). `repolens doctor
+  --verbose` prints the entry for each finding, ready to copy:
+  `Ignore: { "code": "ENV_UNDOCUMENTED", "subject": "LEGACY_TOKEN" }`.
+- `*` in `subject` matches any characters.
+- `reason` is optional, for whoever reads the file. RepoLens never prints it.
+
+Ignored findings don't count toward `--fail-on`, but they are never hidden: the summary says
+how many there are ("1 ignored"), `--verbose` lists them, and `--json` output has them under
+`ignored` (see [json-schema.md](json-schema.md)). An entry that matches no finding of a check
+that ran is reported as a configuration warning, so a stale exception can't quietly hide the
+problem if it comes back. Entries from every configuration file add up; at most 1,000 are
+read from each file.
+
+Like `doctor.rules`, a project config can't ignore findings of the **security checks**;
+your user config or a file passed with `--config` can.
+
 ### `environment.provided`
 
 Variables your platform or tooling sets, so they never need to be in an env file. Like

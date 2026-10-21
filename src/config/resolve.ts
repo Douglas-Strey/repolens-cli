@@ -1,4 +1,12 @@
-import type { DoctorRule, EffectiveConfig, FailOn, LoadedConfig, RuleSetting, ScanWarning } from '../types.ts'
+import type {
+  DoctorRule,
+  EffectiveConfig,
+  FailOn,
+  IgnoreEntry,
+  LoadedConfig,
+  RuleSetting,
+  ScanWarning,
+} from '../types.ts'
 import { compareText } from '../utils/compare.ts'
 import { closestMatch } from '../utils/suggest.ts'
 import { quoted } from './validate.ts'
@@ -10,13 +18,13 @@ type RuleInfo = Pick<DoctorRule, 'code' | 'category'>
 /**
  * Merge configuration files, lowest precedence first. Later files override
  * single values (`maxFiles`, `doctor.failOn`, each `doctor.rules` entry);
- * lists (`ignore`, `environment.provided`) accumulate.
+ * lists (`ignore`, `doctor.ignore`, `environment.provided`) accumulate.
  *
  * Settings for checks that don't exist are dropped with a suggestion. A
- * project's own file can't turn off or lower a security check: RepoLens is
- * often pointed at repositories nobody has reviewed yet, and those must not
- * be able to hide their own security findings. The user config and --config
- * files can.
+ * project's own file can't turn off, lower or ignore findings of a security
+ * check: RepoLens is often pointed at repositories nobody has reviewed yet,
+ * and those must not be able to hide their own security findings. The user
+ * config and --config files can.
  */
 export function resolveConfig(
   layers: readonly LoadedConfig[],
@@ -29,6 +37,7 @@ export function resolveConfig(
   const ignore: string[] = []
   const provided: string[] = []
   const ruleSettings = new Map<string, RuleSetting>()
+  const ignored: IgnoreEntry[] = []
   let maxFiles: number | undefined
   let failOn: FailOn | undefined
 
@@ -55,6 +64,23 @@ export function resolveConfig(
       }
       ruleSettings.set(code, setting)
     }
+    for (const entry of config.doctor?.ignore ?? []) {
+      const rule = byCode.get(entry.code)
+      if (!rule) {
+        const suggestion = closestMatch(entry.code, byCode.keys())
+        warn(
+          `Unknown check ${quoted(entry.code)} in "doctor.ignore" of ${label}${suggestion ? ` (did you mean ${suggestion}?)` : ''}; the entry was ignored`,
+        )
+        continue
+      }
+      if (source.kind === 'project' && rule.category === 'security') {
+        warn(
+          `${label} can't ignore findings of the security check ${entry.code}; that takes your user config or a file passed with --config`,
+        )
+        continue
+      }
+      if (!ignored.some((other) => other.code === entry.code && other.subject === entry.subject)) ignored.push(entry)
+    }
     for (const name of config.environment?.provided ?? []) if (!provided.includes(name)) provided.push(name)
   }
 
@@ -62,11 +88,14 @@ export function resolveConfig(
   const settings: EffectiveConfig['settings'] = {}
   if (ignore.length > 0) settings.ignore = ignore
   if (maxFiles !== undefined) settings.maxFiles = maxFiles
-  if (failOn !== undefined || ruleSettings.size > 0) {
+  if (failOn !== undefined || ruleSettings.size > 0 || ignored.length > 0) {
     settings.doctor = {
       ...(failOn !== undefined ? { failOn } : {}),
       ...(ruleSettings.size > 0
         ? { rules: Object.fromEntries([...ruleSettings].sort(([a], [b]) => compareText(a, b))) }
+        : {}),
+      ...(ignored.length > 0
+        ? { ignore: ignored.sort((a, b) => compareText(a.code, b.code) || compareText(a.subject, b.subject)) }
         : {}),
     }
   }
