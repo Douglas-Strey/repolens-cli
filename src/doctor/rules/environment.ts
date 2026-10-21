@@ -79,6 +79,21 @@ const PLATFORM_NAMES: ReadonlySet<string> = new Set([
   'GITHUB_BASE_REF',
   'GITHUB_TRIGGERING_ACTOR',
   'GITHUB_RETENTION_DAYS',
+  // Heroku dyno identity (the rest of the metadata is HEROKU_*)
+  'DYNO',
+  // AWS Lambda reserved names that are not AWS_LAMBDA_*
+  'AWS_EXECUTION_ENV',
+  'LAMBDA_TASK_ROOT',
+  'LAMBDA_RUNTIME_DIR',
+  // Google Cloud Run / Knative contract
+  'K_SERVICE',
+  'K_REVISION',
+  'K_CONFIGURATION',
+  // Deno Deploy
+  'DENO_DEPLOYMENT_ID',
+  'DENO_REGION',
+  // GitLab CI boolean flag (the rest of the predefined set is CI_*)
+  'GITLAB_CI',
 ])
 
 /**
@@ -104,6 +119,17 @@ const PLATFORM_PREFIXES: readonly string[] = [
   'VITEST',
   'JEST_WORKER_ID',
   'XDG_',
+  'HEROKU_',
+  'AWS_LAMBDA_',
+  'CI_',
+  'CIRCLE_',
+  'TRAVIS_',
+  'BUILDKITE_',
+  'AMPLIFY_',
+  'COOLIFY_',
+  'KOYEB_',
+  'GAE_',
+  'CLOUD_RUN_',
 ]
 
 /**

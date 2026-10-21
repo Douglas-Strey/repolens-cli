@@ -44,8 +44,43 @@ describe('isPlatformVariable', () => {
     }
   })
 
+  it('ignores host and CI variables the platform injects', () => {
+    for (const name of [
+      'HEROKU_APP_NAME',
+      'DYNO',
+      'AWS_LAMBDA_FUNCTION_NAME',
+      'AWS_EXECUTION_ENV',
+      'LAMBDA_TASK_ROOT',
+      'CI_COMMIT_SHA',
+      'CIRCLE_SHA1',
+      'TRAVIS_BUILD_ID',
+      'BUILDKITE_BUILD_NUMBER',
+      'AMPLIFY_MONOREPO_APP_ROOT',
+      'COOLIFY_FQDN',
+      'KOYEB_APP_NAME',
+      'GAE_SERVICE',
+      'CLOUD_RUN_JOB',
+      'K_SERVICE',
+      'DENO_DEPLOYMENT_ID',
+      'GITLAB_CI',
+    ]) {
+      expect(isPlatformVariable(name), name).toBe(true)
+    }
+  })
+
   it('keeps application variables, including PORT', () => {
-    for (const name of ['PORT', 'DATABASE_URL', 'API_KEY', 'NODE_VERSION_OVERRIDE', 'GITHUB', 'NPM_TOKEN']) {
+    for (const name of [
+      'PORT',
+      'DATABASE_URL',
+      'API_KEY',
+      'NODE_VERSION_OVERRIDE',
+      'GITHUB',
+      'NPM_TOKEN',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_REGION',
+      'GITLAB_TOKEN',
+      'HEROKU',
+    ]) {
       expect(isPlatformVariable(name), name).toBe(false)
     }
   })

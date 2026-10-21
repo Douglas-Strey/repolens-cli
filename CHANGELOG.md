@@ -7,6 +7,12 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `ENV_UNDOCUMENTED` treats more host-injected variables as platform-provided (Heroku,
+  AWS Lambda, GitLab CI, CircleCI, Travis, Buildkite, Amplify, Coolify, Koyeb, App Engine
+  and Cloud Run), so they are not reported as missing from `.env.example`.
+
 ## [0.3.0] - 2026-10-21
 
 ### Added
