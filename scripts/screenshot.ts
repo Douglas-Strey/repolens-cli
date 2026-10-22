@@ -10,7 +10,8 @@
  * view of the machine (which programs are installed, the active Node.js), kept
  * fixed so the image doesn't depend on where it was generated. The MCP image
  * shows one real tool call answered by `repolens mcp`, and the text the
- * assistant receives.
+ * assistant receives. The vulnerabilities image scans a small PHP API with a
+ * Go worker, pinned to versions that missed security releases.
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
@@ -193,6 +194,23 @@ try {
   git('remote', 'add', 'origin', 'https://github.com/acme/acme.git')
 
   await fs.mkdir(path.join(ROOT, 'assets'), { recursive: true })
+
+  const shop = path.join(workDir, 'shop-api')
+  const shopFiles: Record<string, string> = {
+    'composer.json': '{\n  "name": "acme/shop-api",\n  "require": { "php": "^8.3" }\n}\n',
+    Dockerfile: 'FROM php:8.3.10-fpm\nWORKDIR /var/www\nCOPY . .\n',
+    '.github/workflows/ci.yml':
+      'name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: shivammathur/setup-php@v2\n        with:\n          php-version: "8.3.10"\n      - run: composer test\n',
+    'worker/go.mod': 'module acme/worker\n\ngo 1.26\n',
+    'worker/Dockerfile': 'FROM golang:1.26.2-alpine\nWORKDIR /src\nCOPY . .\nRUN go build -o /worker .\n',
+  }
+  for (const [file, text] of Object.entries(shopFiles)) {
+    await fs.mkdir(path.dirname(path.join(shop, file)), { recursive: true })
+    await fs.writeFile(path.join(shop, file), text)
+  }
+  const vulnerabilities = await capture(['doctor'], shop)
+  await fs.writeFile(path.join(ROOT, 'assets', 'demo-vulnerabilities.svg'), toSvg('repolens doctor', vulnerabilities))
+  console.log(`wrote assets/demo-vulnerabilities.svg (${vulnerabilities.split('\n').length} lines)`)
   for (const [name, argv] of [
     ['scan', []],
     ['doctor', ['doctor']],

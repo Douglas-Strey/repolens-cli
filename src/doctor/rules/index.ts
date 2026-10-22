@@ -8,6 +8,7 @@ import { runtimeRules } from './runtime.ts'
 import { scriptRules } from './scripts.ts'
 import { securityRules } from './security.ts'
 import { toolingRules } from './tooling.ts'
+import { runtimeVulnerable } from './vulnerabilities.ts'
 import { workspaceRules } from './workspace.ts'
 
 /**
@@ -19,6 +20,7 @@ import { workspaceRules } from './workspace.ts'
 export const doctorRules: readonly DoctorRule[] = Object.freeze([
   ...configurationRules,
   ...securityRules,
+  runtimeVulnerable,
   ...environmentRules,
   ...packageManagerRules,
   ...runtimeRules,

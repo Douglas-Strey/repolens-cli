@@ -68,8 +68,8 @@ severidade dela com `doctor.rules`, por código:
 
 A configuração do próprio projeto (`repolens.config.json`, ou a chave `"repolens"` no
 `package.json` dele) não pode desativar nem rebaixar as verificações de segurança
-(`ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `ENV_PUBLIC_SECRET`):
-um repositório não pode ter como esconder os próprios achados de segurança. Ela pode
+(`ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `ENV_PUBLIC_SECRET`,
+`RUNTIME_VULNERABLE`): um repositório não pode ter como esconder os próprios achados de segurança. Ela pode
 elevá-las para `"error"`. A sua configuração do usuário ou um arquivo passado com `--config`
 podem desativá-las. Veja [configuration.md](configuration.md#doctorrules) para os detalhes.
 
@@ -83,6 +83,7 @@ podem desativá-las. Veja [configuration.md](configuration.md#doctorrules) para 
 | [`TRACKED_ENV_FILE`](#tracked_env_file) | error / warning | security | Os arquivos env locais não são commitados |
 | [`ENV_FILE_NOT_IGNORED`](#env_file_not_ignored) | warning | security | Os arquivos env locais são ignorados pelo Git |
 | [`ENV_PUBLIC_SECRET`](#env_public_secret) | warning | security | Nenhum segredo é exposto ao navegador |
+| [`RUNTIME_VULNERABLE`](#runtime_vulnerable) | error / warning | security | Os runtimes fixados não têm vulnerabilidades conhecidas |
 | [`ENV_UNDOCUMENTED`](#env_undocumented) | warning / info | environment | As variáveis de ambiente usadas no código estão documentadas |
 | [`ENV_LOCAL_ONLY`](#env_local_only) | warning | environment | As variáveis de ambiente locais estão documentadas |
 | [`ENV_EXAMPLE_MISSING`](#env_example_missing) | warning / info | environment | Um arquivo env de exemplo documenta o ambiente |
@@ -249,6 +250,36 @@ três diretórios de profundidade. Arquivos env ignorados pelo Git também são 
 - **Como corrigir:** renomeie a variável sem o prefixo (por exemplo, `JWT_SECRET`), leia-a
   só no código do servidor e rotacione o valor se ele já tiver ido para algum deploy.
 - **Exemplo:** `NEXT_PUBLIC_JWT_SECRET is exposed to the browser bundle but looks like a secret`
+
+### `RUNTIME_VULNERABLE`
+
+**Severidade:** error quando uma release perdida corrige uma vulnerabilidade crítica; senão,
+warning · **Categoria:** security
+
+- **O que verifica:** uma versão exata de Node.js, Go ou PHP, fixada em um arquivo de versão
+  (`.nvmrc`, `.node-version`, `.php-version`, `.tool-versions`, mise), no `volta.node`, numa
+  imagem de Dockerfile ou do GitLab CI, ou num passo de setup do CI (`setup-node`,
+  `setup-go`, `setup-php`), que é mais antiga que uma release de segurança da sua linha. A
+  linha é o major no Node.js (22) e o minor no Go e no PHP (1.26, 8.3). O RepoLens compara
+  a versão fixada com uma tabela de releases de segurança desde 2024 que vem com ele,
+  tirada dos anúncios de cada projeto: os posts de security releases do Node.js, as
+  notícias do php.net e o histórico de releases do Go. A análise continua offline, e a
+  tabela é tão atual quanto a sua versão do RepoLens (última atualização em 2026-10-22).
+  Um diagnóstico por versão de runtime informa os arquivos, quantas releases de segurança
+  a versão fixada perdeu, a maior severidade que o projeto deu a elas (o Go não classifica
+  as correções) e a versão corrigida mais recente.
+- **Não contam:** versões parciais, que acompanham o patch mais recente da linha
+  (`php:8.3-fpm`, `22`), faixas (`engines.node`, `require.php`), as linhas `go` e
+  `toolchain` do go.mod (versões mínimas) e o `config.platform.php` do Composer. Uma linha
+  que chegou ao fim de vida não recebe novas releases de segurança, então uma versão fixada
+  na última release dela não é reportada aqui (o `RUNTIME_EOL` cobre o Node.js).
+- **Por que importa:** as vulnerabilidades são públicas, e muitas vezes a forma de
+  explorá-las também. Em outubro de 2026, o PHP 8.2.35, 8.3.36, 8.4.27 e 8.5.12 corrigiu
+  duas falhas críticas de execução remota de código em todas as linhas com suporte.
+- **Como corrigir:** atualize para a release mais recente da linha (a dica diz qual é e
+  traz o link do anúncio), ou fixe a linha em vez do patch (`php:8.3-fpm`) quando as
+  imagens são reconstruídas com frequência.
+- **Exemplo:** `PHP 8.3.10 (pinned in Dockerfile) misses 10 security releases, rated up to critical; the latest is 8.3.36 (2026-10-21)`
 
 ## Ambiente
 

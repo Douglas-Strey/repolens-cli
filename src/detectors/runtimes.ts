@@ -10,20 +10,27 @@ import {
 import { type GoModule, manifests, type PackageManifest } from '../facts/manifests.ts'
 import type { Detector, ProjectContext, Runtime, VersionSource } from '../types.ts'
 import { compareText } from '../utils/compare.ts'
-import { dirOf, joinPath } from '../utils/paths.ts'
+import { isUnder, NON_PROJECT_ROLES } from '../utils/path-roles.ts'
+import { depthOf, dirOf, joinPath } from '../utils/paths.ts'
 import { redactCommand } from '../utils/redact.ts'
 import { cleanUntrusted } from '../utils/text.ts'
 import { type ExpressionScope, expandExpression, githubStyleWorkflows } from './ci.ts'
 
-export type RuntimeId = 'node' | 'go' | 'bun' | 'deno'
+export type RuntimeId = 'node' | 'go' | 'php' | 'bun' | 'deno'
 
 export interface NormalizedVersion {
   version: string | null
   kind: VersionSource['kind']
 }
 
-const RUNTIME_ORDER: readonly RuntimeId[] = ['node', 'go', 'bun', 'deno']
-const RUNTIME_NAMES: Readonly<Record<RuntimeId, string>> = { node: 'Node.js', go: 'Go', bun: 'Bun', deno: 'Deno' }
+const RUNTIME_ORDER: readonly RuntimeId[] = ['node', 'go', 'php', 'bun', 'deno']
+const RUNTIME_NAMES: Readonly<Record<RuntimeId, string>> = {
+  node: 'Node.js',
+  go: 'Go',
+  php: 'PHP',
+  bun: 'Bun',
+  deno: 'Deno',
+}
 
 /** Values longer than this are not versions; they are dropped rather than echoed. */
 const MAX_RAW_LENGTH = 200
@@ -166,6 +173,7 @@ const TOOL_NAMES: Readonly<Record<string, RuntimeId>> = {
   nodejs: 'node',
   go: 'go',
   golang: 'go',
+  php: 'php',
   bun: 'bun',
   deno: 'deno',
 }
@@ -224,6 +232,7 @@ function officialRepository(ref: ImageRef): string | null {
 const IMAGE_RUNTIMES: Readonly<Record<string, RuntimeId>> = {
   node: 'node',
   golang: 'go',
+  php: 'php',
   'oven/bun': 'bun',
   'denoland/deno': 'deno',
 }
@@ -262,6 +271,7 @@ const MAX_IMAGE_LENGTH = 512
 const SETUP_ACTIONS: ReadonlyArray<{ pattern: RegExp; runtime: RuntimeId; input: string; field: string }> = [
   { pattern: /^actions\/setup-node(?:@|$)/i, runtime: 'node', input: 'node-version', field: 'setup-node' },
   { pattern: /^actions\/setup-go(?:@|$)/i, runtime: 'go', input: 'go-version', field: 'setup-go' },
+  { pattern: /^shivammathur\/setup-php(?:@|$)/i, runtime: 'php', input: 'php-version', field: 'setup-php' },
   { pattern: /^oven-sh\/setup-bun(?:@|$)/i, runtime: 'bun', input: 'bun-version', field: 'setup-bun' },
   { pattern: /^denoland\/setup-deno(?:@|$)/i, runtime: 'deno', input: 'deno-version', field: 'setup-deno' },
 ]
@@ -279,7 +289,7 @@ function scalar(value: unknown): string | null {
 }
 
 /**
- * Versions requested from setup-node / setup-go / setup-bun / setup-deno in a
+ * Versions requested from setup-node / setup-go / setup-php / setup-bun / setup-deno in a
  * GitHub Actions workflow. Matrix and env expressions are expanded when their
  * values are literal (one entry per value); `*-version-file` inputs are
  * skipped because RepoLens reads those files directly.
@@ -407,6 +417,7 @@ function addDeclared(
 const VERSION_FILES: ReadonlyArray<{ name: string; runtime: RuntimeId }> = [
   { name: '.nvmrc', runtime: 'node' },
   { name: '.node-version', runtime: 'node' },
+  { name: '.php-version', runtime: 'php' },
   { name: '.dvmrc', runtime: 'deno' },
 ]
 const MISE_FILES = ['mise.toml', '.mise.toml']
@@ -524,6 +535,42 @@ function collectGoModule(mod: GoModule, list: SourceList): void {
   }
 }
 
+/** Composer files are looked for at the root and up to two directories deep (apps/api/composer.json). */
+const MAX_COMPOSER_DEPTH = 2
+
+/** composer.json files of the project itself, root first. */
+export function composerFiles(files: readonly string[]): string[] {
+  return files
+    .filter((file) => /(?:^|\/)composer\.json$/.test(file) && depthOf(file) <= MAX_COMPOSER_DEPTH)
+    .filter((file) => !isUnder(file, NON_PROJECT_ROLES))
+    .sort((a, b) => depthOf(a) - depthOf(b) || compareText(a, b))
+}
+
+/**
+ * PHP versions a composer.json declares: `require.php` is a constraint the
+ * project supports (a range, even when written "8.3"), `config.platform.php`
+ * the exact version Composer resolves dependencies for.
+ */
+export function composerPhpVersions(doc: unknown): Array<{ field: string; raw: string; pinned: boolean }> {
+  if (!isRecord(doc)) return []
+  const out: Array<{ field: string; raw: string; pinned: boolean }> = []
+  const required = getString(doc.require, 'php')
+  if (required) out.push({ field: 'require.php', raw: required, pinned: false })
+  const platform = getString(isRecord(doc.config) ? doc.config.platform : undefined, 'php')
+  if (platform) out.push({ field: 'config.platform.php', raw: platform, pinned: true })
+  return out
+}
+
+async function collectComposer(ctx: ProjectContext, list: SourceList): Promise<void> {
+  for (const file of composerFiles(ctx.files.files)) {
+    const root = file === 'composer.json'
+    for (const { field, raw, pinned } of composerPhpVersions(await ctx.readJson(file))) {
+      if (pinned) addDeclared(list, 'php', 'manifest-pin', root, { file, field }, raw)
+      else addSource(list, 'php', 'engines', root, { file, field, raw, ...range(raw) })
+    }
+  }
+}
+
 /** `go` and `toolchain` directives of a go.work file. */
 export function parseGoWorkVersions(text: string): { go?: string; toolchain?: string } {
   const out: { go?: string; toolchain?: string } = {}
@@ -607,6 +654,8 @@ export function displayVersion(runtime: RuntimeId, items: readonly RuntimeSource
       return exactFrom(['package-manager']) ?? pinned(['version-file']) ?? rootEngines() ?? exactFrom(['docker', 'ci'])
     case 'deno':
       return pinned(['version-file']) ?? exactFrom(['ci', 'docker'])
+    case 'php':
+      return pinned(['version-file', 'manifest-pin']) ?? rootEngines() ?? exactFrom(['docker', 'ci'])
   }
 }
 
@@ -621,6 +670,8 @@ export interface RuntimeEvidence {
   bunDirs: readonly string[]
   /** Directories with deno.json or deno.jsonc. */
   denoDirs: readonly string[]
+  /** Directories with a composer.json. */
+  phpDirs?: readonly string[]
 }
 
 /**
@@ -642,9 +693,11 @@ function projectRuntimeDirs(evidence: RuntimeEvidence, items: readonly RuntimeSo
   const nodeDirs = new Set([...evidence.packageDirs.filter((dir) => !explained(dir)), ...declaredDirs('node')])
   // A Go version in .tool-versions alone does not make a Go project.
   const goDirs = new Set(evidence.goModule ? [...(evidence.goDirs ?? ['.']), ...declaredDirs('go')] : [])
+  const phpDirs = new Set([...(evidence.phpDirs ?? []), ...declaredDirs('php')])
   return new Map<RuntimeId, Set<string>>([
     ['node', nodeDirs],
     ['go', goDirs],
+    ['php', phpDirs],
     ['bun', bunDirs],
     ['deno', denoDirs],
   ])
@@ -677,7 +730,7 @@ export function rankRuntimes(evidence: RuntimeEvidence, items: readonly RuntimeS
 
 /**
  * Assemble runtimes ordered by `ranks` (lowest first), then in fixed order
- * (node, go, bun, deno); sources sorted by file, then field.
+ * (node, go, php, bun, deno); sources sorted by file, then field.
  */
 export function buildRuntimes(
   items: readonly RuntimeSource[],
@@ -736,6 +789,7 @@ export const runtimesDetector: Detector<'runtimes'> = {
       }
     }
 
+    await collectComposer(ctx, list)
     await collectDockerfiles(ctx, list)
     await collectCi(ctx, list)
 
@@ -750,6 +804,7 @@ export const runtimesDetector: Detector<'runtimes'> = {
       ],
       bunDirs: dirsWith('bun.lock', 'bun.lockb', 'bunfig.toml'),
       denoDirs: dirsWith('deno.json', 'deno.jsonc'),
+      phpDirs: composerFiles(ctx.files.files).map(dirOf),
     }
     return buildRuntimes(list.items, presentRuntimes(evidence, list.items), rankRuntimes(evidence, list.items))
   },

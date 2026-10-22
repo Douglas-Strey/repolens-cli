@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { parseYaml } from '../../src/core/parse.ts'
 import {
   buildRuntimes,
+  composerFiles,
+  composerPhpVersions,
   displayVersion,
   dockerfileSources,
   gitlabImages,
@@ -703,10 +705,12 @@ describe('runtimes detector', () => {
     expect([...rankRuntimes(evidence, [ci])]).toEqual([
       ['node', 1],
       ['go', 0],
+      ['php', 2],
       ['bun', 2],
       ['deno', 2],
     ])
     expect(rankRuntimes({ ...evidence, packageDirs: [] }, [ci]).get('node')).toBe(2)
+    expect(rankRuntimes({ ...evidence, phpDirs: ['.'] }, [ci]).get('php')).toBe(0)
   })
 
   it('stays fast on hostile version files', () => {
@@ -719,5 +723,65 @@ describe('runtimes detector', () => {
     substituteArgs(`\${${'A'.repeat(500_000)}`, new Map())
     parseVersionFile(' '.repeat(500_000))
     expect(performance.now() - started).toBeLessThan(timeBudget(1000))
+  })
+})
+
+describe('PHP', () => {
+  it('reads require.php as a range and config.platform.php as a pin', () => {
+    expect(composerPhpVersions({ require: { php: '^8.2 || ^8.3' }, config: { platform: { php: '8.3.4' } } })).toEqual([
+      { field: 'require.php', raw: '^8.2 || ^8.3', pinned: false },
+      { field: 'config.platform.php', raw: '8.3.4', pinned: true },
+    ])
+    expect(composerPhpVersions({ require: { 'laravel/framework': '^11' } })).toEqual([])
+    expect(composerPhpVersions('nope')).toEqual([])
+  })
+
+  it('finds the project composer.json files, root first, not vendored or example ones', () => {
+    expect(
+      composerFiles(['apps/api/composer.json', 'composer.json', 'a/b/c/composer.json', 'examples/x/composer.json']),
+    ).toEqual(['composer.json', 'apps/api/composer.json'])
+  })
+
+  it('recognizes the official php image and setup-php', () => {
+    expect(imageRuntime('php:8.3.10-fpm-alpine')).toEqual({
+      runtime: 'php',
+      version: { version: '8.3.10', kind: 'exact' },
+    })
+    expect(imageRuntime('php:8.4-apache')).toEqual({ runtime: 'php', version: { version: '8.4', kind: 'exact' } })
+    const workflow = parseYaml(
+      'jobs:\n  t:\n    strategy:\n      matrix:\n        php: ["8.2", "8.3"]\n    steps:\n      - uses: shivammathur/setup-php@v2\n        with:\n          php-version: ${{ matrix.php }}\n',
+    )
+    expect(setupActionVersions(workflow)).toEqual([
+      { runtime: 'php', field: 'setup-php', raw: '8.2' },
+      { runtime: 'php', field: 'setup-php', raw: '8.3' },
+    ])
+  })
+
+  it('collects every PHP version source and shows the closest pin', async () => {
+    const runtimes = await runtimesOf({
+      'composer.json': JSON.stringify({ require: { php: '^8.3' } }),
+      '.php-version': '8.3.10\n',
+      '.tool-versions': 'php 8.3.9\nnodejs 22.1.0\n',
+      Dockerfile: 'FROM php:8.3-fpm\n',
+    })
+    const php = runtimes.find((runtime) => runtime.id === 'php')
+    expect(php?.name).toBe('PHP')
+    expect(php?.version).toBe('8.3.10')
+    expect(php?.sources.map((s) => [s.file, s.field ?? null, s.version, s.kind])).toEqual([
+      ['.php-version', null, '8.3.10', 'exact'],
+      ['.tool-versions', 'php', '8.3.9', 'exact'],
+      ['Dockerfile', 'FROM', '8.3', 'exact'],
+      ['composer.json', 'require.php', '^8.3', 'range'],
+    ])
+  })
+
+  it('is a project runtime with a composer.json, not with a CI step alone', async () => {
+    expect((await runtimesOf({ 'composer.json': '{}' })).map((runtime) => runtime.id)).toEqual(['php'])
+    const ciOnly = await runtimesOf({
+      'package.json': '{}',
+      '.github/workflows/ci.yml':
+        'on: push\njobs:\n  t:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: shivammathur/setup-php@v2\n        with:\n          php-version: "8.3"\n',
+    })
+    expect(ciOnly.map((runtime) => runtime.id)).toEqual(['node'])
   })
 })

@@ -121,7 +121,7 @@ A misspelled code is reported with a suggestion (`Unknown check "ENV_UNDOCUMNTED
 mean ENV_UNDOCUMENTED?`), and the setting is ignored.
 
 **Security checks** (`ENV_PUBLIC_SECRET`, `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`,
-`ENV_FILE_NOT_IGNORED`) can't be turned off or lowered by a project config: RepoLens is
+`ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`) can't be turned off or lowered by a project config: RepoLens is
 often run on repositories nobody has reviewed yet, and those must not be able to hide
 their own security findings. A project config may raise them to `"error"`. To turn one
 off, use your user config or a file passed with `--config`.

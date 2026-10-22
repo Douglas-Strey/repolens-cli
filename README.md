@@ -88,7 +88,7 @@ every variable, route and script.
 
 ## `repolens doctor`
 
-`doctor` runs 34 checks for problems that cost teams time. Each finding has a stable
+`doctor` runs 35 checks for problems that cost teams time. Each finding has a stable
 code, a one-line explanation and a suggested fix:
 
 <p align="center">
@@ -102,6 +102,7 @@ Some of the things it catches:
 - a **real credential committed to `.env.example`** (AWS keys, GitHub tokens, Stripe live keys, …), reported by variable name only
 - secrets exposed to the browser (`NEXT_PUBLIC_…SECRET`, `VITE_…PASSWORD`)
 - **`package-lock.json` next to `pnpm-lock.yaml`**, or a lockfile that contradicts `packageManager`
+- **runtime versions with known vulnerabilities**: a pinned PHP, Node.js or Go release older than its line's latest security release
 - **Node versions that disagree** across `.nvmrc`, `.node-version`, `engines`, Dockerfiles and CI, and end-of-life versions
 - a `go.mod` that asks for a newer Go than the Docker image or CI provides
 - **two Compose services publishing the same port**, and `DATABASE_URL` pointing at 5433 while Postgres is published on 5432
@@ -123,6 +124,32 @@ breaks a build. Gate on `doctor` instead:
 ```yaml
 - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
+
+### Known vulnerabilities in your runtimes
+
+A security release only protects the projects that upgrade. `doctor` reads every place a
+project pins its runtime, from Dockerfiles to CI steps and version files, and tells you
+when that version has known vulnerabilities. The PHP image you forgot in a Dockerfile shows
+up the day the fix ships:
+
+<p align="center">
+  <img src="assets/demo-vulnerabilities.svg" alt="repolens doctor output: an error for PHP 8.3.10, pinned in the CI workflow and the Dockerfile, which misses 10 security releases rated up to critical, with the CVEs fixed in PHP 8.3.36 and a link to the announcement, and a warning for a Go 1.26.2 image that misses 6 security releases" width="760">
+</p>
+
+- **PHP, Node.js and Go.** An exact pin older than the latest security release of its line
+  is reported with how many fixes it misses, the severity the project gave them, the CVEs
+  and the version to upgrade to.
+- **A critical fix fails the run.** Missing a fix rated critical is an error, so
+  `repolens doctor` exits with 1 in CI; other missed fixes are warnings. A repository's own
+  config can't turn the check off or lower it.
+- **Straight from the source, still offline.** The security releases come from php.net,
+  the Node.js security posts and the Go release history, in a table that ships with
+  RepoLens and is updated with every release. The scan makes no network requests, so
+  upgrading RepoLens is how you get the latest advisories.
+- **Only versions that are really pinned.** `php:8.3-fpm`, `^8.3` and `engines` ranges
+  follow the latest patch and aren't reported; `php:8.3.10-fpm` is.
+
+Details in [docs/diagnostics.md](docs/diagnostics.md#runtime_vulnerable).
 
 ## `repolens setup`
 
@@ -280,7 +307,7 @@ them; they never contain secret values.
 | --- | --- |
 | Languages | JavaScript, TypeScript and Go in depth. File counts for Python, Rust, Ruby, PHP, Java, Kotlin, Swift, C/C++, C#, Shell and more |
 | Package managers | npm, pnpm (including catalogs), Yarn Classic and Berry, Bun, Go modules; `packageManager` and `devEngines` |
-| Runtimes | Node.js (`.nvmrc`, `.node-version`, `.tool-versions`, mise, `engines`, Volta, `devEngines`, Dockerfiles, CI), Go, Bun, Deno |
+| Runtimes | Node.js (`.nvmrc`, `.node-version`, `.tool-versions`, mise, `engines`, Volta, `devEngines`, Dockerfiles, CI), Go, PHP (`composer.json`, `.php-version`, Dockerfiles, `setup-php`), Bun, Deno |
 | Monorepos | pnpm, npm, Yarn and Bun workspaces, Turborepo, Nx, Lerna, `go.work` |
 | Frameworks | Nuxt, Next.js, Remix, React Router, SvelteKit, Astro, Angular, React, Vue, Svelte, Solid, Preact, Qwik, Express, Fastify, NestJS, Koa, Hono, hapi, Elysia, AdonisJS, tRPC, Electron, React Native, Expo, Gatsby, Docusaurus, VitePress; Go: Gin, Echo, chi, Fiber, Gorilla mux, gRPC, `net/http` |
 | Routes | Nuxt (server routes and pages, `srcDir`), Next.js (App and Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; router prefixes are resolved across files, including Go routers passed to functions |

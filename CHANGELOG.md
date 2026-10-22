@@ -7,6 +7,21 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `RUNTIME_VULNERABLE`: `repolens doctor` reports an exact PHP, Node.js or Go version that
+  is older than the latest security release of its line, pinned in a Dockerfile, a CI
+  setup step, a GitLab CI image or a version file. The diagnostic names the files, how
+  many security releases the pin misses, the severity the project gave them, the CVEs and
+  the version to upgrade to. Missing a fix rated critical is an error. The security
+  releases come from php.net, the Node.js security posts and the Go release history, in
+  a table that ships with RepoLens (updated 2026-10-22), so the scan stays offline. A
+  repository's own config can't turn the check off.
+  ([#36](https://github.com/Douglas-Strey/repolens-cli/issues/36))
+- PHP runtime detection: `composer.json` (`require.php`, `config.platform.php`),
+  `.php-version`, `.tool-versions`, mise, official `php` Docker images and
+  `shivammathur/setup-php` in GitHub Actions.
+
 ## [0.4.0] - 2026-10-22
 
 ### Added
