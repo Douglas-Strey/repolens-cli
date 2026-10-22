@@ -235,7 +235,7 @@ them; they never contain secret values.
 | Routes | Nuxt (server routes and pages, `srcDir`), Next.js (App and Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; router prefixes are resolved across files, including Go routers passed to functions |
 | Databases & ORMs | PostgreSQL, MySQL, MariaDB, SQLite/libSQL, MongoDB, Redis/Valkey, CockroachDB, SQL Server, ClickHouse and more; Prisma, Drizzle, TypeORM, Sequelize, MikroORM, Kysely, Knex, Mongoose, GORM, Ent, sqlx, sqlc |
 | Containers | Docker Compose (all file names, overrides and variants, local `include` and `extends`, long and short syntax), Dockerfiles (multi-stage, `ARG` substitution) |
-| CI | GitHub Actions, GitLab CI (with local `include`), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone and Woodpecker are listed |
+| CI | GitHub Actions, GitLab CI (with local `include` and job `extends`), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone and Woodpecker are listed |
 | Tooling | Vitest, Jest, Mocha, AVA, `node:test`, Bun test, Playwright, Cypress, go test, pytest; ESLint, Biome, Oxlint, Prettier, golangci-lint, Ruff; Husky, Lefthook, lint-staged; Vite, webpack, Rollup, esbuild, tsup, tsdown and more |
 
 Other repositories still get languages, Makefile/justfile targets, CI, key config files

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { ciDetector, gitlabLocalIncludes, MAX_GITLAB_INCLUDES, mergeGitlabConfig } from '../../src/detectors/ci.ts'
+import {
+  ciDetector,
+  gitlabLocalIncludes,
+  MAX_GITLAB_EXTENDS_DEPTH,
+  MAX_GITLAB_INCLUDES,
+  mergeGitlabConfig,
+  parseGitlabCi,
+  resolveGitlabExtends,
+} from '../../src/detectors/ci.ts'
 import { contextFor, makeProject, timeBudget } from '../helpers.ts'
 
 async function gitlab(files: Record<string, string>) {
@@ -105,5 +113,79 @@ describe('GitLab CI include', () => {
     const workflow = await gitlab(files)
     expect(workflow?.includes).toHaveLength(MAX_GITLAB_INCLUDES)
     expect(workflow?.jobs).toHaveLength(MAX_GITLAB_INCLUDES)
+  })
+})
+
+describe('GitLab CI job extends', () => {
+  it('applies a template from an included file', async () => {
+    const workflow = await gitlab({
+      '.gitlab-ci.yml': 'include: ci/templates.yml\nunit:\n  extends: .node-test\n  tags: [linux]\n',
+      'ci/templates.yml': '.node-test:\n  image: node:22\n  script: pnpm test\n  tags: [docker]\n',
+    })
+    expect(workflow?.jobs).toEqual([{ id: 'unit', tasks: ['test'], runsOn: ['node:22', 'linux'] }])
+  })
+
+  it('merges a list of templates in order, the job winning, mappings deep and arrays replaced', () => {
+    const doc = {
+      '.a': { script: ['a'], variables: { A: '1', X: 'a' }, image: 'a' },
+      '.b': { script: ['b'], variables: { B: '2', X: 'b' } },
+      job: { extends: ['.a', '.b'], variables: { C: '3' } },
+    }
+    expect(resolveGitlabExtends(doc).get('job')).toEqual({
+      script: ['b'],
+      variables: { A: '1', X: 'b', B: '2', C: '3' },
+      image: 'a',
+    })
+  })
+
+  it('extends visible jobs too, and keeps templates out of the job list', () => {
+    const workflow = parseGitlabCi(
+      { '.base': { script: 'make build' }, build: { extends: '.base' }, nightly: { extends: 'build', tags: ['big'] } },
+      '.gitlab-ci.yml',
+    )
+    expect(workflow?.jobs).toEqual([
+      { id: 'build', tasks: ['build'], runsOn: [] },
+      { id: 'nightly', tasks: ['build'], runsOn: ['big'] },
+    ])
+  })
+
+  it('skips cycles and unknown names', () => {
+    const resolved = resolveGitlabExtends({
+      a: { extends: 'b', script: 'a' },
+      b: { extends: ['a', '.missing', 42], stage: 'test' },
+    })
+    expect(resolved.get('a')).toEqual({ stage: 'test', script: 'a' })
+    expect(resolved.get('b')).toEqual({ stage: 'test' })
+  })
+
+  it(`follows at most ${MAX_GITLAB_EXTENDS_DEPTH} levels from a job declared before its templates`, () => {
+    // Templates declared after the job, deepest last, so resolving the job walks the whole chain.
+    const templates = (count: number) => {
+      const doc: Record<string, unknown> = {}
+      for (let i = count; i >= 1; i--) doc[`.t${i}`] = { extends: `.t${i - 1}` }
+      doc['.t0'] = { image: 'deep' }
+      return doc
+    }
+    const within = { job: { extends: `.t${MAX_GITLAB_EXTENDS_DEPTH - 1}` }, ...templates(MAX_GITLAB_EXTENDS_DEPTH - 1) }
+    expect(resolveGitlabExtends(within).get('job')).toEqual({ image: 'deep' })
+    const beyond = { job: { extends: `.t${MAX_GITLAB_EXTENDS_DEPTH}` }, ...templates(MAX_GITLAB_EXTENDS_DEPTH) }
+    expect(resolveGitlabExtends(beyond).get('job')).toEqual({})
+  })
+
+  it('handles a very long chain without deep recursion', () => {
+    const doc: Record<string, unknown> = { '.t0': { script: 'pnpm test' } }
+    for (let i = 1; i < 50_000; i++) doc[`.t${i}`] = { extends: `.t${i - 1}` }
+    doc.job = { extends: '.t49999' }
+    expect(resolveGitlabExtends(doc).get('job')).toEqual({ script: 'pnpm test' })
+  })
+
+  it('stays fast when templates extend each other many times over', () => {
+    const doc: Record<string, unknown> = { '.t0': { script: 'pnpm test' }, '.t1': { image: 'node' } }
+    for (let i = 2; i < 300; i++) doc[`.t${i}`] = { extends: [`.t${i - 1}`, `.t${i - 2}`] }
+    for (let i = 0; i < 300; i++) doc[`job${i}`] = { extends: `.t${299 - (i % 9)}` }
+    const started = performance.now()
+    const workflow = parseGitlabCi(doc, '.gitlab-ci.yml')
+    expect(performance.now() - started).toBeLessThan(timeBudget(1000))
+    expect(workflow?.jobs).toHaveLength(300)
   })
 })

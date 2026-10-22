@@ -228,7 +228,9 @@ where `tasks` is inferred from job names, commands and actions: `lint`, `format`
 `typecheck`, `test`, `e2e`, `build`, `deploy`, `release`, `security`, `docs`. For GitLab
 CI, `includes` lists the local files `include` brings in (wildcards expanded, nested
 includes followed, at most 150), whose jobs are merged into the workflow the way GitLab
-does; remote, project, template and component includes are not read.
+does; remote, project, template and component includes are not read. Jobs are listed
+with their `extends` applied, so a job's tasks and `runsOn` include what it inherits from
+its templates; hidden templates (`.name`) are not listed.
 
 ### `git`
 
