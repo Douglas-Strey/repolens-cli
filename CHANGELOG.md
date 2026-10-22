@@ -26,6 +26,14 @@ All notable changes to RepoLens are documented here. The format follows
   the global file protect only your machine (`FileIndex.isIgnored` takes `shared: true`
   for that).
   ([#14](https://github.com/Douglas-Strey/repolens-cli/issues/14))
+- Docker Compose `include` and `extends`: services from included files join the project
+  of the file that includes them (port conflicts, `docker compose up` and missing
+  `env_file` checks see them), and a service that extends another one inherits its image,
+  ports, environment, env files and build, with paths resolved as Compose does. In JSON,
+  an included service has `includedFrom`. GitLab CI local `include` (wildcards and nested
+  includes too): included jobs are merged into the pipeline the way GitLab merges them,
+  and the workflow lists them under `includes`. Only files inside the scanned directory
+  are read, never URLs. ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12))
 
 ## [0.3.0] - 2026-10-21
 

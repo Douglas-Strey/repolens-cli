@@ -2,7 +2,7 @@ import { getString, isRecord } from '../core/parse.ts'
 import type { CiJob, CiProvider, CiTask, CiWorkflow, Detector, FileIndex, ProjectContext } from '../types.ts'
 import { compareText } from '../utils/compare.ts'
 import { matchGlob } from '../utils/glob.ts'
-import { depthOf } from '../utils/paths.ts'
+import { depthOf, normalizeRelative } from '../utils/paths.ts'
 import { redactCommand } from '../utils/redact.ts'
 
 // ---------------------------------------------------------------------------
@@ -359,6 +359,115 @@ const GITLAB_RESERVED = new Set([
   'spec',
 ])
 
+// ---------------------------------------------------------------------------
+// GitLab CI include
+// ---------------------------------------------------------------------------
+
+/** Most files followed through `include`, nested ones included: GitLab's own default limit per pipeline. */
+export const MAX_GITLAB_INCLUDES = 150
+/** Most wildcards, and most of them "**", in one include path; other patterns are skipped. */
+const MAX_INCLUDE_WILDCARDS = 4
+const MAX_INCLUDE_GLOBSTARS = 2
+
+/**
+ * A GitLab wildcard as a regular expression: `*` stays within a directory,
+ * `**` crosses them. So "configs/*.yml" matches only files directly in
+ * configs, "configs/**.yml" also nested ones, and "configs/**\/*.yml" only
+ * nested ones.
+ */
+function gitlabWildcard(pattern: string): RegExp {
+  let source = ''
+  for (let i = 0; i < pattern.length; i++) {
+    const ch = pattern[i] as string
+    if (ch === '*' && pattern[i + 1] === '*') {
+      source += '.*'
+      i++
+    } else if (ch === '*') {
+      source += '[^/]*'
+    } else {
+      source += ch.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    }
+  }
+  return new RegExp(`^${source}$`)
+}
+
+/**
+ * Local files an `include` value names, relative to the repository root, in
+ * order: plain strings that are not URLs, and `local:` entries. Wildcards are
+ * expanded against `files` (sorted). Remote, project, template and component
+ * includes, and paths with variables, can't be read statically and are
+ * skipped. Entries with `rules:` are followed whatever their conditions.
+ */
+export function gitlabLocalIncludes(include: unknown, files: readonly string[]): string[] {
+  const entries = Array.isArray(include) ? include : include === undefined || include === null ? [] : [include]
+  const out: string[] = []
+  for (const entry of entries) {
+    const raw = typeof entry === 'string' ? (entry.includes('://') ? undefined : entry) : getString(entry, 'local')
+    if (!raw || raw.includes('$')) continue
+    const relative = normalizeRelative(raw.trim().replace(/^\/+/, ''))
+    if (!relative || relative === '.' || !/\.ya?ml$/.test(relative)) continue
+    let matches = [relative]
+    if (relative.includes('*')) {
+      // Each wildcard multiplies the backtracking on a path that doesn't match ("**" the most); real patterns use one.
+      const globstars = relative.match(/\*\*/g)?.length ?? 0
+      if ((relative.match(/\*+/g)?.length ?? 0) > MAX_INCLUDE_WILDCARDS || globstars > MAX_INCLUDE_GLOBSTARS) continue
+      const pattern = gitlabWildcard(relative)
+      matches = files.filter((file) => /\.ya?ml$/.test(file) && pattern.test(file))
+    }
+    for (const match of matches) if (!out.includes(match)) out.push(match)
+  }
+  return out
+}
+
+/**
+ * GitLab's merge of included configuration: mappings merge key by key,
+ * anything else (arrays such as `script` included) is replaced by the later
+ * value. Built with Object.fromEntries, so a "__proto__" key stays a key.
+ */
+export function mergeGitlabConfig(base: unknown, override: unknown): unknown {
+  if (!isRecord(base) || !isRecord(override)) return override
+  const merged = new Map<string, unknown>(Object.entries(base))
+  for (const [key, value] of Object.entries(override)) {
+    merged.set(key, merged.has(key) ? mergeGitlabConfig(merged.get(key), value) : value)
+  }
+  return Object.fromEntries(merged)
+}
+
+/**
+ * The pipeline configuration with its local includes merged in, the way
+ * GitLab builds it: included files in order (a nested include before the
+ * file that includes it), later ones winning, then the file itself on top.
+ * Files are read one at a time, so the include budget is spent
+ * deterministically.
+ */
+async function loadGitlabCi(ctx: ProjectContext, file: string): Promise<{ doc: unknown; includes: string[] } | null> {
+  const root = await ctx.readYaml(file)
+  if (root === null) return null
+  const includes: string[] = []
+  let budget = MAX_GITLAB_INCLUDES
+  const resolve = async (doc: unknown, chain: readonly string[]): Promise<unknown> => {
+    if (!isRecord(doc)) return doc
+    let merged: unknown = {}
+    for (const target of gitlabLocalIncludes(doc.include, ctx.files.files)) {
+      if (chain.includes(target)) {
+        ctx.debug(`ci: include cycle at ${target}`)
+        continue
+      }
+      if (budget <= 0) {
+        ctx.debug(`ci: more than ${MAX_GITLAB_INCLUDES} GitLab CI includes; the rest are not read`)
+        break
+      }
+      budget--
+      const included = await ctx.readYaml(target)
+      if (!isRecord(included)) continue
+      if (!includes.includes(target)) includes.push(target)
+      merged = mergeGitlabConfig(merged, await resolve(included, [...chain, target]))
+    }
+    return mergeGitlabConfig(merged, doc)
+  }
+  return { doc: await resolve(root, [file]), includes }
+}
+
 function gitlabImage(value: unknown): string | undefined {
   if (typeof value === 'string') return value
   return getString(value, 'name')
@@ -448,8 +557,18 @@ async function readWorkflow(ctx: ProjectContext, def: ProviderDef, file: string)
   switch (def.format) {
     case 'github':
       return parseGithubWorkflow(doc, file, def.id)
-    case 'gitlab':
-      return parseGitlabCi(doc, file)
+    case 'gitlab': {
+      const loaded = await loadGitlabCi(ctx, file)
+      const workflow = loaded ? parseGitlabCi(loaded.doc, file) : null
+      if (!workflow || !loaded || loaded.includes.length === 0) return workflow
+      return {
+        provider: workflow.provider,
+        file,
+        includes: loaded.includes,
+        triggers: workflow.triggers,
+        jobs: workflow.jobs,
+      }
+    }
     case 'circleci':
       return parseCircleCi(doc, file)
     default:

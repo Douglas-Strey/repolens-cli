@@ -359,6 +359,11 @@ export interface Service {
   name: string
   /** Compose file that defines the service. */
   source: string
+  /**
+   * The project's Compose file whose `include` brings the service in, when
+   * `source` is an included file. The service runs in that file's project.
+   */
+  includedFrom?: string
   image?: string
   /** Build context, when the service is built locally. */
   build?: string
@@ -469,6 +474,8 @@ export interface CiWorkflow {
   /** Provider id, e.g. "github-actions", "gitlab-ci". */
   provider: string
   file: string
+  /** Local files the configuration includes (GitLab CI `include`), in the order they were read. */
+  includes?: string[]
   name?: string
   /** Triggers, e.g. ["push", "pull_request"]. */
   triggers: string[]

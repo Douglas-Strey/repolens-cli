@@ -205,9 +205,12 @@ mascarados, e `category` é um destes: `dev`, `start`, `build`, `test`, `lint`, 
 
 ### `services`
 
-Serviços do Compose: `{ name, source, image?, build?, dockerfile?, technology?: { id, name }, kind, ports: [{ host, container, protocol, hostIp?, raw }], expose[], dependsOn[], volumes[], environment[] (só nomes), envFiles[], profiles[], healthcheck }`.
+Serviços do Compose: `{ name, source, includedFrom?, image?, build?, dockerfile?, technology?: { id, name }, kind, ports: [{ host, container, protocol, hostIp?, raw }], expose[], dependsOn[], volumes[], environment[] (só nomes), envFiles[], profiles[], healthcheck }`.
 Serviços com o mesmo nome em arquivos Compose do mesmo diretório (arquivo base mais
-overrides) são mesclados. `dockerfiles`: `{ path, baseImages[], stages, exposes[], args[] }`
+overrides) são mesclados. `composeFiles` lista os arquivos Compose do próprio projeto; um
+serviço vindo de um arquivo que eles incluem com `include` tem esse arquivo em `source` e
+o arquivo que o inclui em `includedFrom`. Um serviço que usa `extends` aparece com o que
+herda. `dockerfiles`: `{ path, baseImages[], stages, exposes[], args[] }`
 (só os nomes dos `ARG`).
 
 ### `databases`
@@ -226,9 +229,12 @@ esgotou seu orçamento de trabalho.
 
 ### `ci`
 
-`{ providers: [{ id, name, files[] }], workflows: [{ provider, file, name?, triggers[], jobs: [{ id, name?, tasks[], runsOn[] }] }] }`,
+`{ providers: [{ id, name, files[] }], workflows: [{ provider, file, includes?, name?, triggers[], jobs: [{ id, name?, tasks[], runsOn[] }] }] }`,
 onde `tasks` é inferido a partir de nomes de jobs, comandos e actions: `lint`, `format`,
-`typecheck`, `test`, `e2e`, `build`, `deploy`, `release`, `security`, `docs`.
+`typecheck`, `test`, `e2e`, `build`, `deploy`, `release`, `security`, `docs`. No GitLab
+CI, `includes` lista os arquivos locais que o `include` traz (wildcards expandidos,
+includes aninhados seguidos, no máximo 150), cujos jobs são mesclados ao workflow como o
+GitLab faz; includes remotos, de outro projeto, de template e de componente não são lidos.
 
 ### `git`
 

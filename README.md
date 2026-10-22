@@ -234,8 +234,8 @@ them; they never contain secret values.
 | Frameworks | Nuxt, Next.js, Remix, React Router, SvelteKit, Astro, Angular, React, Vue, Svelte, Solid, Preact, Qwik, Express, Fastify, NestJS, Koa, Hono, hapi, Elysia, AdonisJS, tRPC, Electron, React Native, Expo, Gatsby, Docusaurus, VitePress; Go: Gin, Echo, chi, Fiber, Gorilla mux, gRPC, `net/http` |
 | Routes | Nuxt (server routes and pages, `srcDir`), Next.js (App and Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; router prefixes are resolved across files, including Go routers passed to functions |
 | Databases & ORMs | PostgreSQL, MySQL, MariaDB, SQLite/libSQL, MongoDB, Redis/Valkey, CockroachDB, SQL Server, ClickHouse and more; Prisma, Drizzle, TypeORM, Sequelize, MikroORM, Kysely, Knex, Mongoose, GORM, Ent, sqlx, sqlc |
-| Containers | Docker Compose (all file names, overrides and variants, long and short syntax), Dockerfiles (multi-stage, `ARG` substitution) |
-| CI | GitHub Actions, GitLab CI, CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone and Woodpecker are listed |
+| Containers | Docker Compose (all file names, overrides and variants, local `include` and `extends`, long and short syntax), Dockerfiles (multi-stage, `ARG` substitution) |
+| CI | GitHub Actions, GitLab CI (with local `include`), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone and Woodpecker are listed |
 | Tooling | Vitest, Jest, Mocha, AVA, `node:test`, Bun test, Playwright, Cypress, go test, pytest; ESLint, Biome, Oxlint, Prettier, golangci-lint, Ruff; Husky, Lefthook, lint-staged; Vite, webpack, Rollup, esbuild, tsup, tsdown and more |
 
 Other repositories still get languages, Makefile/justfile targets, CI, key config files
@@ -292,7 +292,6 @@ project configuration files, with per-finding ignores and a monorepo root's conf
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (Cargo workspaces), PHP (Laravel, Composer)
 - An MCP server (`repolens mcp`) exposing overview, services, env vars, routes, scripts and diagnostics as tools
 - More routes: SvelteKit, Remix / React Router, Astro endpoints
-- Following Compose `include:`/`extends:` and GitLab `include:`
 - Submitting the formula to `homebrew-core` (so `brew install repolens` works without the tap)
 
 **Later**

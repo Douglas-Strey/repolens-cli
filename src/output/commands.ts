@@ -381,7 +381,7 @@ export function composeUp(result: ScanResult): ComposeUp | null {
   const files = defaults
     ? rootFiles.filter((file) => DEFAULT_COMPOSE_FILE.test(file) || COMPOSE_OVERRIDE_FILE.test(file))
     : [rootFiles[0] ?? composeFiles[0] ?? '']
-  const own = services.filter((service) => files.includes(service.source))
+  const own = services.filter((service) => files.includes(service.includedFrom ?? service.source))
   const all = (own.length > 0 ? own : services).filter((service) => service.profiles.length === 0)
   const backing = all.filter((service) => !isBuilt(service))
   const names = all.some(isBuilt) && backing.length > 0 ? [...new Set(backing.map((service) => service.name))] : []

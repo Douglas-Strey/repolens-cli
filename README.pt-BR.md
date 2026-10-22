@@ -240,8 +240,8 @@ commitá-los; eles nunca contêm valores de segredos.
 | Frameworks | Nuxt, Next.js, Remix, React Router, SvelteKit, Astro, Angular, React, Vue, Svelte, Solid, Preact, Qwik, Express, Fastify, NestJS, Koa, Hono, hapi, Elysia, AdonisJS, tRPC, Electron, React Native, Expo, Gatsby, Docusaurus, VitePress; Go: Gin, Echo, chi, Fiber, Gorilla mux, gRPC, `net/http` |
 | Rotas | Nuxt (rotas de servidor e páginas, `srcDir`), Next.js (App Router e Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; prefixos de router são resolvidos entre arquivos, inclusive routers Go passados para funções |
 | Bancos de dados e ORMs | PostgreSQL, MySQL, MariaDB, SQLite/libSQL, MongoDB, Redis/Valkey, CockroachDB, SQL Server, ClickHouse e outros; Prisma, Drizzle, TypeORM, Sequelize, MikroORM, Kysely, Knex, Mongoose, GORM, Ent, sqlx, sqlc |
-| Containers | Docker Compose (todos os nomes de arquivo, overrides e variantes, sintaxe longa e curta), Dockerfiles (multi-stage, substituição de `ARG`) |
-| CI | GitHub Actions, GitLab CI, CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone e Woodpecker são listados |
+| Containers | Docker Compose (todos os nomes de arquivo, overrides e variantes, `include` e `extends` locais, sintaxe longa e curta), Dockerfiles (multi-stage, substituição de `ARG`) |
+| CI | GitHub Actions, GitLab CI (com `include` local), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone e Woodpecker são listados |
 | Ferramentas | Vitest, Jest, Mocha, AVA, `node:test`, Bun test, Playwright, Cypress, go test, pytest; ESLint, Biome, Oxlint, Prettier, golangci-lint, Ruff; Husky, Lefthook, lint-staged; Vite, webpack, Rollup, esbuild, tsup, tsdown e outras |
 
 Outros repositórios continuam recebendo linguagens, targets de Makefile/justfile, CI, os
@@ -305,7 +305,6 @@ configuração da raiz de um monorepo.
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (workspaces do Cargo), PHP (Laravel, Composer)
 - Um servidor MCP (`repolens mcp`) que expõe visão geral, serviços, variáveis de ambiente, rotas, scripts e diagnósticos como ferramentas
 - Mais rotas: SvelteKit, Remix / React Router, endpoints do Astro
-- Seguir `include:`/`extends:` do Compose e `include:` do GitLab
 - Enviar a fórmula para o `homebrew-core` (para que `brew install repolens` funcione sem o tap)
 
 **Mais adiante**

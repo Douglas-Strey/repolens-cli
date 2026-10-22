@@ -562,7 +562,10 @@ These checks read the project's Compose files: `compose.yaml`, `compose.yml`,
 (`docker-compose.override.yml`) and variants (`compose.prod.yaml`), at the root and up to
 two directories deep (`docker/`, `deploy/local/`). Files in test, fixture, example,
 template, playground and benchmark directories are not part of the project and are left
-out. `COMPOSE_ENV_FILE_MISSING` and `COMPOSE_VERSION_OBSOLETE` find and read these files
+out. Files they `include` are read too, and services that `extends` another one get its
+settings, as `docker compose` resolves them: only paths inside the scanned directory are
+followed (no URLs or interpolation), at most 64 such files per scan, and `extends` chains
+up to 16 levels. `COMPOSE_ENV_FILE_MISSING` and `COMPOSE_VERSION_OBSOLETE` find and read these files
 themselves, so they work even when the services section is empty; `DOCKER_PORT_CONFLICT`
 and `ENV_PORT_MISMATCH` use the services section, which is built from the same files. A
 file that fails to parse is left out (`CONFIG_PARSE_ERROR` reports it), and a check is
@@ -577,7 +580,8 @@ skipped when none of the Compose files could be parsed.
   every address). Only services that run together are compared: a directory's default
   Compose file and its override file form one project; other files
   (`docker-compose.prod.yml`) and other directories are separate projects. The same
-  service defined in a base file and its override is one service. Ports that use
+  service defined in a base file and its override is one service, and services a file
+  brings in with `include` belong to its project. Ports that use
   interpolation (`${PORT}`), ranges or port `0` (an ephemeral port) are skipped. One
   diagnostic per port and Compose project, listing the services involved (the first eight,
   then a count).
