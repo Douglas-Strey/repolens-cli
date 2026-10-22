@@ -4,9 +4,9 @@ import {
   type ComposeFile,
   type ComposeFiles,
   composeFiles,
-  composeProjectOf,
   type EnvFileReference,
   findComposeFiles,
+  serviceProject,
 } from '../../facts/compose.ts'
 import type {
   Diagnostic,
@@ -110,7 +110,7 @@ export function findPortConflicts(services: readonly Service[]): Diagnostic[] {
       const port = numericPort(mapping.host)
       if (port === null) continue
       const protocol = (mapping.protocol || 'tcp').toLowerCase()
-      const project = composeProjectOf(service.source)
+      const project = serviceProject(service)
       const key = `${project}\0${port}\0${protocol}`
       const group = groups.get(key) ?? { project, port, protocol, bindings: [] }
       group.bindings.push({ service, hostIp: mapping.hostIp, container: mapping.container })
@@ -358,7 +358,8 @@ export const composeVersionObsolete: DoctorRule = {
   title: 'Compose files omit the obsolete version key',
   applies: (_scan, ctx) => hasReadableComposeFile(ctx),
   async check(_scan, ctx) {
-    return findObsoleteVersionKeys((await parsedComposeFiles(ctx)).files)
+    const { files, included } = await parsedComposeFiles(ctx)
+    return findObsoleteVersionKeys([...files, ...included.filter((file) => file.doc !== null)])
   },
 }
 

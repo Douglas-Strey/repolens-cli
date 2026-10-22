@@ -201,9 +201,11 @@ redacted, and `category` is one of `dev`, `start`, `build`, `test`, `lint`, `for
 
 ### `services`
 
-Compose services: `{ name, source, image?, build?, dockerfile?, technology?: { id, name }, kind, ports: [{ host, container, protocol, hostIp?, raw }], expose[], dependsOn[], volumes[], environment[] (names only), envFiles[], profiles[], healthcheck }`.
+Compose services: `{ name, source, includedFrom?, image?, build?, dockerfile?, technology?: { id, name }, kind, ports: [{ host, container, protocol, hostIp?, raw }], expose[], dependsOn[], volumes[], environment[] (names only), envFiles[], profiles[], healthcheck }`.
 Services with the same name in Compose files of the same directory (base file plus
-overrides) are merged. `dockerfiles`: `{ path, baseImages[], stages, exposes[], args[] }`
+overrides) are merged. `composeFiles` lists the project's own Compose files; a service
+from a file they `include` has that file as `source` and the including file as
+`includedFrom`. A service that `extends` another one is listed with what it inherits. `dockerfiles`: `{ path, baseImages[], stages, exposes[], args[] }`
 (`ARG` names only).
 
 ### `databases`
@@ -221,9 +223,12 @@ scanning stopped at its file limit or prefix resolution hit its work budget.
 
 ### `ci`
 
-`{ providers: [{ id, name, files[] }], workflows: [{ provider, file, name?, triggers[], jobs: [{ id, name?, tasks[], runsOn[] }] }] }`,
+`{ providers: [{ id, name, files[] }], workflows: [{ provider, file, includes?, name?, triggers[], jobs: [{ id, name?, tasks[], runsOn[] }] }] }`,
 where `tasks` is inferred from job names, commands and actions: `lint`, `format`,
-`typecheck`, `test`, `e2e`, `build`, `deploy`, `release`, `security`, `docs`.
+`typecheck`, `test`, `e2e`, `build`, `deploy`, `release`, `security`, `docs`. For GitLab
+CI, `includes` lists the local files `include` brings in (wildcards expanded, nested
+includes followed, at most 150), whose jobs are merged into the workflow the way GitLab
+does; remote, project, template and component includes are not read.
 
 ### `git`
 

@@ -74,9 +74,6 @@ JSON-RPC implementation before starting.
 
 ### Smaller improvements (S–M)
 
-- **Compose `include:` and `extends:`, GitLab CI `include:` ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12)).** Follow local includes
-  (never URLs) so services and CI jobs defined in other files show up.
-  `src/facts/compose.ts`, `src/detectors/ci.ts`.
 - **homebrew-core ([#15](https://github.com/Douglas-Strey/repolens-cli/issues/15)).** Submit the formula so `brew install repolens` works without the tap,
   once the project meets Homebrew's notability requirements.
 

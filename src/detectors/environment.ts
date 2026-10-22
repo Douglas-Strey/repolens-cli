@@ -933,7 +933,7 @@ export interface EnvironmentAnalysis {
   configProvided: ReadonlySet<string>
 }
 
-const NO_COMPOSE: ComposeFiles = { files: [], envFiles: [] }
+const NO_COMPOSE: ComposeFiles = { files: [], included: [], services: [], envFiles: [] }
 
 /**
  * Everything the environment section is built from, plus facts doctor rules
@@ -949,7 +949,8 @@ export const environmentAnalysis: Analyzer<EnvironmentAnalysis> = {
       ctx.use(sourceFiles),
       useOr(ctx, composeFiles, NO_COMPOSE),
     ])
-    const composePaths = compose.files.map((file) => file.path)
+    // Included files read ${VAR}s and sit next to env files like the project's own.
+    const composePaths = [...compose.files, ...compose.included].map((file) => file.path)
     const serviceFiles = new Set(compose.envFiles.map((reference) => reference.path))
     const dirs = envFileDirectories(project, composePaths, [...serviceFiles])
     // Gitignored env files are exactly the ones that matter most, so ignored files are included.

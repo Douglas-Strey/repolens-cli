@@ -5,7 +5,7 @@ import {
   compareComposeFiles,
   compareDirectories,
   composeFiles,
-  composeProjectOf,
+  serviceProject,
 } from '../facts/compose.ts'
 import { cleanEchoedText, type Dockerfiles, dockerfiles, redactInterpolation } from '../facts/docker.ts'
 import type { Detector, Dockerfile, PortMapping, Service, ServiceKind } from '../types.ts'
@@ -247,6 +247,7 @@ function makeService(fields: ServiceFields): Service {
   return {
     name: fields.name,
     source: fields.source,
+    ...(fields.includedFrom !== undefined ? { includedFrom: fields.includedFrom } : {}),
     ...(fields.image !== undefined ? { image: fields.image } : {}),
     ...(fields.build !== undefined ? { build: fields.build } : {}),
     ...(fields.dockerfile !== undefined ? { dockerfile: fields.dockerfile } : {}),
@@ -264,13 +265,19 @@ function makeService(fields: ServiceFields): Service {
 }
 
 /** Parse one service definition. Environment values are dropped; only names are kept. */
-export function parseComposeService(name: string, definition: Record<string, unknown>, source: string): Service {
+export function parseComposeService(
+  name: string,
+  definition: Record<string, unknown>,
+  source: string,
+  includedFrom?: string,
+): Service {
   const image = getString(definition, 'image')
   const build = definition.build === undefined ? {} : readBuild(definition.build)
   const ports = Array.isArray(definition.ports) ? definition.ports.flatMap(parsePort) : []
   const fields: ServiceFields = {
     name: cleanName(name),
     source,
+    ...(includedFrom !== undefined ? { includedFrom } : {}),
     ports: unique(ports, (port) => port.raw),
     expose: unique(scalarStrings(definition.expose).map(cleanEchoedText)),
     dependsOn: readDependsOn(definition.depends_on),
@@ -308,6 +315,7 @@ function mergeService(base: Service, other: Service): Service {
   return makeService({
     name: base.name,
     source: base.source,
+    ...(base.includedFrom !== undefined ? { includedFrom: base.includedFrom } : {}),
     ...(base.image !== undefined || other.image !== undefined ? { image: base.image ?? other.image } : {}),
     ...(base.build !== undefined || other.build !== undefined ? { build: base.build ?? other.build } : {}),
     ...(base.dockerfile !== undefined || other.dockerfile !== undefined
@@ -330,21 +338,25 @@ function mergeService(base: Service, other: Service): Service {
  * docker-compose.override.yml), the way `docker compose` combines them.
  * Variant files (compose.prod.yaml) are used on their own with `-f`, so their
  * services stay separate, with their own source: a production-only `app`
- * must not change what the development `app` looks like. Input must be in
- * compose-file order; the first file that declares a service becomes its
- * `source`. Output is sorted by directory (root first), service name, then
- * Compose file.
+ * must not change what the development `app` looks like. Included services
+ * belong to the project of the file that includes them; one whose name the
+ * project already declares is dropped, since Compose doesn't merge those.
+ * Input must be in compose-file order; the first file that declares a service
+ * becomes its `source`. Output is sorted by project directory (root first),
+ * service name, then Compose file.
  */
 export function mergeServices(services: readonly Service[]): Service[] {
   const merged = new Map<string, Service>()
   for (const service of services) {
-    const key = `${composeProjectOf(service.source)}\0${service.name}`
+    const key = `${serviceProject(service)}\0${service.name}`
     const existing = merged.get(key)
+    if (existing && service.includedFrom !== undefined) continue
     merged.set(key, existing ? mergeService(existing, service) : service)
   }
+  const projectDir = (service: Service) => dirOf(service.includedFrom ?? service.source)
   return [...merged.values()].sort(
     (a, b) =>
-      compareDirectories(dirOf(a.source), dirOf(b.source)) ||
+      compareDirectories(projectDir(a), projectDir(b)) ||
       compareText(a.name, b.name) ||
       compareComposeFiles(a.source, b.source),
   )
@@ -365,7 +377,7 @@ export function listDockerfiles(found: Dockerfiles): Dockerfile[] {
 // Detector
 // ---------------------------------------------------------------------------
 
-const NO_COMPOSE: ComposeFiles = { files: [], envFiles: [] }
+const NO_COMPOSE: ComposeFiles = { files: [], included: [], services: [], envFiles: [] }
 const NO_DOCKERFILES: Dockerfiles = { files: [], truncated: false }
 
 export const servicesDetector: Detector<'services'> = {
@@ -376,10 +388,12 @@ export const servicesDetector: Detector<'services'> = {
       useOr(ctx, composeFiles, NO_COMPOSE),
       useOr(ctx, dockerfiles, NO_DOCKERFILES),
     ])
-    const declared = compose.files.flatMap((file) => {
+    for (const file of compose.files) {
       if (file.doc !== null && !isRecord(file.doc)) ctx.debug(`services: ${file.path} is not a Compose mapping`)
-      return parseComposeServices(file.doc, file.path)
-    })
+    }
+    const declared = compose.services.map((service) =>
+      parseComposeService(service.name, service.definition, service.file, service.includedFrom),
+    )
     return {
       composeFiles: compose.files.map((file) => file.path),
       services: mergeServices(declared),

@@ -592,7 +592,11 @@ Estas verificações leem os arquivos Compose do projeto: `compose.yaml`, `compo
 (`docker-compose.override.yml`) e variantes (`compose.prod.yaml`), na raiz e até dois
 diretórios de profundidade (`docker/`, `deploy/local/`). Arquivos em diretórios de testes,
 fixtures, exemplos, templates, playgrounds e benchmarks não fazem parte do projeto e ficam
-de fora. `COMPOSE_ENV_FILE_MISSING` e `COMPOSE_VERSION_OBSOLETE` encontram e leem esses
+de fora. Os arquivos que eles incluem com `include` também são lidos, e serviços que usam
+`extends` herdam as configurações do serviço estendido, como o `docker compose` resolve:
+só são seguidos caminhos dentro do diretório analisado (sem URLs nem interpolação), no
+máximo 64 desses arquivos por análise, e cadeias de `extends` de até 16 níveis.
+`COMPOSE_ENV_FILE_MISSING` e `COMPOSE_VERSION_OBSOLETE` encontram e leem esses
 arquivos por conta própria, então funcionam mesmo quando a seção de serviços está vazia;
 `DOCKER_PORT_CONFLICT` e `ENV_PORT_MISMATCH` usam a seção de serviços, que é montada a
 partir dos mesmos arquivos. Um arquivo com erro de parse fica de fora (`CONFIG_PARSE_ERROR`
@@ -608,7 +612,8 @@ parseado.
   `::` se sobrepõe a qualquer endereço). Só são comparados serviços que rodam juntos: o
   arquivo Compose padrão de um diretório e o arquivo de override dele formam um projeto;
   outros arquivos (`docker-compose.prod.yml`) e outros diretórios são projetos separados. O
-  mesmo serviço definido em um arquivo base e no override dele é um serviço só. Portas que
+  mesmo serviço definido em um arquivo base e no override dele é um serviço só, e os
+  serviços que um arquivo traz com `include` pertencem ao projeto dele. Portas que
   usam interpolação (`${PORT}`), intervalos ou a porta `0` (uma porta efêmera) são puladas.
   Um diagnóstico por porta e projeto Compose, listando os serviços envolvidos (os oito
   primeiros e depois uma contagem).
