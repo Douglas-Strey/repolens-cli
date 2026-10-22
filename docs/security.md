@@ -103,7 +103,8 @@ A scanned repository can ship a `repolens.config.json` (see
 limits what it can do:
 
 - It can't turn off or lower the **security** checks (`ENV_PUBLIC_SECRET`,
-  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`). Only your user
+  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`).
+  Only your user
   config or a file you pass with `--config` can.
 - Its `ignore` patterns leave paths out of the analysis, but don't change what RepoLens
   considers ignored by Git: a local `.env` it lists is still reported if Git would commit it.

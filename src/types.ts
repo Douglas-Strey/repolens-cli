@@ -88,7 +88,7 @@ export interface VersionSource {
 }
 
 export interface Runtime {
-  /** "node" | "go" | "bun" | "deno" | … */
+  /** "node" | "go" | "php" | "bun" | "deno" | … */
   id: string
   /** Display name, e.g. "Node.js". */
   name: string

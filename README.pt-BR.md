@@ -91,7 +91,7 @@ todas as variáveis, rotas e scripts.
 
 ## `repolens doctor`
 
-O `doctor` roda 34 verificações de problemas que fazem equipes perderem tempo. Cada achado
+O `doctor` roda 35 verificações de problemas que fazem equipes perderem tempo. Cada achado
 tem um código estável, uma explicação de uma linha e uma correção sugerida:
 
 <p align="center">
@@ -105,6 +105,7 @@ Algumas das coisas que ele detecta:
 - uma **credencial real commitada no `.env.example`** (chaves da AWS, tokens do GitHub, chaves live do Stripe, …), reportada só pelo nome da variável
 - segredos expostos ao navegador (`NEXT_PUBLIC_…SECRET`, `VITE_…PASSWORD`)
 - **`package-lock.json` ao lado de `pnpm-lock.yaml`**, ou um lockfile que contradiz o `packageManager`
+- **versões de runtime com vulnerabilidades conhecidas**: um PHP, Node.js ou Go fixado numa release mais antiga que a última release de segurança da sua linha
 - **versões do Node que não batem** entre `.nvmrc`, `.node-version`, `engines`, Dockerfiles e CI, e versões em fim de vida
 - um `go.mod` que pede um Go mais novo do que a imagem Docker ou o CI fornecem
 - **dois serviços do Compose publicando a mesma porta**, e `DATABASE_URL` apontando para 5433 enquanto o Postgres está publicado na 5432
@@ -126,6 +127,33 @@ então colocá-la no log do CI nunca quebra um build. Para barrar o build, use o
 ```yaml
 - run: npx --yes @douglas-strey/repolens doctor --fail-on error
 ```
+
+### Vulnerabilidades conhecidas nos seus runtimes
+
+Uma release de segurança só protege os projetos que atualizam. O `doctor` lê todos os
+lugares em que um projeto fixa o seu runtime, de Dockerfiles a passos de CI e arquivos de
+versão, e avisa quando essa versão tem vulnerabilidades conhecidas. A imagem do PHP que
+ficou esquecida num Dockerfile aparece no mesmo dia em que a correção sai:
+
+<p align="center">
+  <img src="assets/demo-vulnerabilities.svg" alt="Saída do repolens doctor: um erro para o PHP 8.3.10, fixado no workflow de CI e no Dockerfile, que perdeu 10 releases de segurança classificadas até crítica, com os CVEs corrigidos no PHP 8.3.36 e o link do anúncio, e um aviso para uma imagem do Go 1.26.2 que perdeu 6 releases de segurança" width="760">
+</p>
+
+- **PHP, Node.js e Go.** Uma versão exata mais antiga que a última release de segurança da
+  sua linha é reportada com quantas correções ela perdeu, a severidade que o projeto deu a
+  elas, os CVEs e a versão para a qual atualizar.
+- **Uma correção crítica reprova a execução.** Perder uma correção classificada como
+  crítica é um erro, então o `repolens doctor` sai com 1 no CI; as outras correções
+  perdidas são avisos. A configuração do próprio repositório não pode desativar nem
+  rebaixar a verificação.
+- **Direto da fonte, e continua offline.** As releases de segurança vêm do php.net, dos
+  posts de segurança do Node.js e do histórico de releases do Go, numa tabela que vem com o
+  RepoLens e é atualizada a cada release. A análise não faz nenhuma requisição de rede,
+  então atualizar o RepoLens é o jeito de receber os avisos mais recentes.
+- **Só versões realmente fixadas.** `php:8.3-fpm`, `^8.3` e as faixas de `engines`
+  acompanham o patch mais recente e não são reportadas; `php:8.3.10-fpm` é.
+
+Detalhes em [docs/pt-BR/diagnostics.md](docs/pt-BR/diagnostics.md#runtime_vulnerable).
 
 ## `repolens setup`
 
@@ -288,7 +316,7 @@ commitá-los; eles nunca contêm valores de segredos.
 | --- | --- |
 | Linguagens | JavaScript, TypeScript e Go em profundidade. Contagem de arquivos para Python, Rust, Ruby, PHP, Java, Kotlin, Swift, C/C++, C#, Shell e outras |
 | Gerenciadores de pacotes | npm, pnpm (incluindo catalogs), Yarn Classic e Berry, Bun, Go modules; `packageManager` e `devEngines` |
-| Runtimes | Node.js (`.nvmrc`, `.node-version`, `.tool-versions`, mise, `engines`, Volta, `devEngines`, Dockerfiles, CI), Go, Bun, Deno |
+| Runtimes | Node.js (`.nvmrc`, `.node-version`, `.tool-versions`, mise, `engines`, Volta, `devEngines`, Dockerfiles, CI), Go, PHP (`composer.json`, `.php-version`, Dockerfiles, `setup-php`), Bun, Deno |
 | Monorepos | Workspaces do pnpm, npm, Yarn e Bun, Turborepo, Nx, Lerna, `go.work` |
 | Frameworks | Nuxt, Next.js, Remix, React Router, SvelteKit, Astro, Angular, React, Vue, Svelte, Solid, Preact, Qwik, Express, Fastify, NestJS, Koa, Hono, hapi, Elysia, AdonisJS, tRPC, Electron, React Native, Expo, Gatsby, Docusaurus, VitePress; Go: Gin, Echo, chi, Fiber, Gorilla mux, gRPC, `net/http` |
 | Rotas | Nuxt (rotas de servidor e páginas, `srcDir`), Next.js (App Router e Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; prefixos de router são resolvidos entre arquivos, inclusive routers Go passados para funções |

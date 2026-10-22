@@ -42,7 +42,7 @@ repolens doctor --json | jq '.diagnostics[].code'
   "tool": { "name": "repolens", "version": "0.4.0" },
   "project": { … },          // name, type, license, manifests, entrypoints, structure
   "languages": [ … ],        // { name, kind, files, share }
-  "runtimes": [ … ],         // Node.js, Go, Bun, Deno with every version source
+  "runtimes": [ … ],         // Node.js, Go, PHP, Bun, Deno with every version source
   "packageManagers": { … },  // primary + detected, lockfiles, declarations
   "workspace": { … } | null, // monorepo tools, patterns, packages
   "dependencies": { … },     // direct dependencies per package

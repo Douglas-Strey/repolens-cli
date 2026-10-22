@@ -71,6 +71,7 @@ describe('doctor rule registry', () => {
         'PACKAGE_MANAGER_MISMATCH',
         'PACKAGE_MANAGER_UNDECLARED',
         'RUNTIME_EOL',
+        'RUNTIME_VULNERABLE',
         'SCRIPT_MISSING_LINT',
         'SCRIPT_MISSING_TEST',
         'SCRIPT_TEST_PLACEHOLDER',

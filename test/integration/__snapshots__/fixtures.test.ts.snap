@@ -689,17 +689,25 @@ Potential issues
   ⚠ RUNTIME_EOL                Node.js 18 reached end-of-life on 2025-04-30 (pinned in
                                .node-version)
   ⚠ RUNTIME_EOL                Node.js 20 reached end-of-life on 2026-04-30 (pinned in .nvmrc)
+  ⚠ RUNTIME_VULNERABLE         Node.js 18.20.4 (pinned in .node-version) misses 1 security release,
+                               rated up to medium; the latest is 18.20.6 (2025-01-21)
   ⚠ ESLINT_LEGACY_CONFIG       .eslintrc.json is a legacy ESLint config, but ESLint 9 only reads
                                eslint.config.js by default
 
 Summary
-  ⚠ 7 warnings   ✓ 6 checks passed
+  ⚠ 8 warnings   ✓ 6 checks passed
   Run repolens doctor for details and fixes.
 
 ────────────────────────────────────────
 
 RepoLens Doctor · mixed-lockfiles
 
+⚠ Security
+    ⚠ RUNTIME_VULNERABLE         Node.js 18.20.4 (pinned in .node-version) misses 1 security
+                                 release, rated up to medium; the latest is 18.20.6 (2025-01-21)
+                                 → Upgrade to Node.js 18.20.6 or later:
+                                   https://nodejs.org/en/blog/vulnerability/january-2025-security-re
+                                   leases
 ⚠ Runtime
     ⚠ NODE_VERSION_CONFLICT      Node.js versions disagree (.node-version: 18.20.4, .nvmrc: 20)
                                  → Pin the same Node.js major version in every file, e.g. 22
@@ -728,7 +736,7 @@ RepoLens Doctor · mixed-lockfiles
                                    \`npx @eslint/migrate-config .eslintrc.json\`
 ✓ Configuration
 
-Summary  ⚠ 7 warnings · ✓ 6 passed
+Summary  ⚠ 8 warnings · ✓ 6 passed
 Run with --json for machine-readable output.
 "
 `;
@@ -952,17 +960,24 @@ Tooling
   Types            TypeScript
 
 Potential issues
-  ⚠ ENV_UNDOCUMENTED  AUTH_SECRET is used in code but missing from .env.example
+  ⚠ ENV_UNDOCUMENTED    AUTH_SECRET is used in code but missing from .env.example
+  ⚠ RUNTIME_VULNERABLE  Node.js 22.20.0 (pinned in .node-version) misses 5 security releases, rated
+                        up to high; the latest is 22.23.4 (2026-10-21)
 
 Summary
-  ⚠ 1 warning   ℹ 2 info   ✓ 17 checks passed
+  ⚠ 2 warnings   ℹ 2 info   ✓ 17 checks passed
   Run repolens doctor for details and fixes.
 
 ────────────────────────────────────────
 
 RepoLens Doctor · next-dashboard
 
-✓ Security
+⚠ Security
+    ⚠ RUNTIME_VULNERABLE          Node.js 22.20.0 (pinned in .node-version) misses 5 security
+                                  releases, rated up to high; the latest is 22.23.4 (2026-10-21)
+                                  → Upgrade to Node.js 22.23.4 or later:
+                                    https://nodejs.org/en/blog/vulnerability/october-2026-security-r
+                                    eleases
 ✓ Runtime
 ℹ Package manager
     ℹ PACKAGE_MANAGER_UNDECLARED  package.json does not declare which package manager to use (found
@@ -982,7 +997,7 @@ RepoLens Doctor · next-dashboard
                                     function to proxy
 ✓ Configuration
 
-Summary  ⚠ 1 warning · ℹ 2 info · ✓ 17 passed
+Summary  ⚠ 2 warnings · ℹ 2 info · ✓ 17 passed
 Run with --json for machine-readable output.
 "
 `;

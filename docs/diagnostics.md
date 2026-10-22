@@ -66,8 +66,8 @@ A [configuration file](configuration.md) can turn a check off or change its seve
 
 A project's own config (`repolens.config.json`, or the `"repolens"` key in its
 `package.json`) can't turn off or lower the security checks (`ENV_EXAMPLE_REAL_SECRET`,
-`TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `ENV_PUBLIC_SECRET`): a repository must not be
-able to hide its own security findings. It may raise them to `"error"`. Your user config or
+`TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `ENV_PUBLIC_SECRET`, `RUNTIME_VULNERABLE`): a
+repository must not be able to hide its own security findings. It may raise them to `"error"`. Your user config or
 a file passed with `--config` can turn them off. See
 [configuration.md](configuration.md#doctorrules) for the details.
 
@@ -81,6 +81,7 @@ a file passed with `--config` can turn them off. See
 | [`TRACKED_ENV_FILE`](#tracked_env_file) | error / warning | security | Local env files are not committed |
 | [`ENV_FILE_NOT_IGNORED`](#env_file_not_ignored) | warning | security | Local env files are ignored by Git |
 | [`ENV_PUBLIC_SECRET`](#env_public_secret) | warning | security | No secret is exposed to the browser |
+| [`RUNTIME_VULNERABLE`](#runtime_vulnerable) | error / warning | security | Pinned runtimes have no known vulnerabilities |
 | [`ENV_UNDOCUMENTED`](#env_undocumented) | warning / info | environment | Environment variables used in code are documented |
 | [`ENV_LOCAL_ONLY`](#env_local_only) | warning | environment | Local environment variables are documented |
 | [`ENV_EXAMPLE_MISSING`](#env_example_missing) | warning / info | environment | An example env file documents the environment |
@@ -237,6 +238,35 @@ deep. Env files ignored by Git are read too.
 - **How to fix:** rename the variable without the prefix (e.g. `JWT_SECRET`), read it only
   in server code, and rotate the value if it was ever deployed.
 - **Example:** `NEXT_PUBLIC_JWT_SECRET is exposed to the browser bundle but looks like a secret`
+
+### `RUNTIME_VULNERABLE`
+
+**Severity:** error when a missed release fixes a critical vulnerability, otherwise warning
+· **Category:** security
+
+- **What it checks:** an exact Node.js, Go or PHP version, pinned in a version file
+  (`.nvmrc`, `.node-version`, `.php-version`, `.tool-versions`, mise), `volta.node`, a
+  Dockerfile or GitLab CI image, or a CI setup step (`setup-node`, `setup-go`,
+  `setup-php`), that is older than a security release of its line. A line is the major for
+  Node.js (22) and the minor for Go and PHP (1.26, 8.3). RepoLens compares the pin with a
+  table of security releases since 2024 that ships with it, taken from each project's own
+  announcements: the Node.js security release posts, php.net news and the Go release
+  history. The scan stays offline, and the table is as current as your RepoLens version
+  (last updated 2026-10-22). One diagnostic per runtime version names the files, how many
+  security releases the pin misses, the highest severity the project gave them (Go doesn't
+  rate its fixes) and the latest fixed version.
+- **Not counted:** partial pins, which follow their line's latest patch (`php:8.3-fpm`,
+  `22`), ranges (`engines.node`, `require.php`), go.mod's `go` and `toolchain` lines
+  (minimum versions) and Composer's `config.platform.php`. A line that reached end of life
+  gets no new security releases, so a pin on its last release isn't reported here
+  (`RUNTIME_EOL` covers Node.js).
+- **Why it matters:** the vulnerabilities are public, and so is how to exploit many of
+  them. In October 2026, PHP 8.2.35, 8.3.36, 8.4.27 and 8.5.12 fixed two critical
+  remote-code-execution flaws in every supported line.
+- **How to fix:** upgrade to the latest release of the line (the hint names it and links
+  the announcement), or pin the line instead of a patch (`php:8.3-fpm`) when images are
+  rebuilt regularly.
+- **Example:** `PHP 8.3.10 (pinned in Dockerfile) misses 10 security releases, rated up to critical; the latest is 8.3.36 (2026-10-21)`
 
 ## Environment
 

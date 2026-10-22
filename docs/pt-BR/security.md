@@ -111,7 +111,8 @@ Um repositório analisado pode trazer um `repolens.config.json` (veja
 executa, e limita o que ele pode fazer:
 
 - Ele não pode desativar nem rebaixar as verificações de **segurança** (`ENV_PUBLIC_SECRET`,
-  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`). Só a sua
+  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`).
+  Só a sua
   configuração do usuário ou um arquivo que você passar com `--config` podem fazer isso.
 - Os padrões de `ignore` dele deixam caminhos de fora da análise, mas não mudam o que o
   RepoLens considera ignorado pelo Git: um `.env` local listado ali continua sendo
