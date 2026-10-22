@@ -10,6 +10,7 @@ repolens report [path] [options]   Generate a Markdown report
 repolens setup [path] [options]    Set up the project: env file, services, dependencies
 repolens agent [init] [path] [options]  Generate context for coding agents (experimental)
 repolens config [path] [options]   Show the configuration files and settings in effect
+repolens mcp [path] [options]      Serve the scan to AI assistants over MCP (stdio)
 repolens help [command]            Show help for a command
 ```
 
@@ -211,6 +212,95 @@ repolens config --json            # { files, settings, output }
 
 Todo comando imprime problemas de configuração (uma configuração desconhecida, um código de
 verificação que não existe) em stderr, para que nunca se misturem com a saída `--json`.
+
+## `repolens mcp`
+
+Roda um servidor [Model Context Protocol](https://modelcontextprotocol.io) pela entrada e
+saída padrão, para que um assistente de IA possa perguntar sobre o projeto. O seu cliente
+MCP o inicia; você não o roda à mão.
+
+```sh
+repolens mcp                  # the current directory, or $CLAUDE_PROJECT_DIR
+repolens mcp ../my-project
+repolens mcp --no-config      # ignore every config file
+```
+
+| Ferramenta | Responde com |
+| --- | --- |
+| `get_project_overview` | Visão geral, início rápido, arquitetura, linguagens, frameworks, CI, ferramentas e Git |
+| `get_services` | Serviços do Docker Compose, Dockerfiles, bancos de dados e ORMs |
+| `get_environment_variables` | Nomes das variáveis, onde cada uma é documentada ou definida, e quais são secretas |
+| `get_routes` | Rotas de API e páginas |
+| `get_scripts` | O início rápido, scripts do package.json, alvos de Makefile e justfile |
+| `get_diagnostics` | Todo achado do `doctor`, com os arquivos e a correção sugerida |
+
+Toda ferramenta aceita dois argumentos opcionais:
+
+- `path`: um diretório dentro do projeto, relativo a ele (`apps/web`). Caminhos fora do
+  projeto, e links que levam para fora dele, são recusados.
+- `format`: `markdown` (o padrão, a parte correspondente do `repolens report`) ou `json` (a
+  parte correspondente do `repolens --json`).
+
+Cada chamada analisa os arquivos como estão, com os arquivos de configuração daquele
+diretório, como `repolens <dir>`. Achados de baixa confiança ficam de fora, como na
+visualização padrão do terminal. `--max-files`, `--config` e `--no-config` valem para todas
+as chamadas.
+
+Sem um caminho, o servidor usa o diretório atual, ou `$CLAUDE_PROJECT_DIR` quando ela está
+definida: o Claude Code a define com a raiz do projeto porque não garante iniciar os
+servidores lá.
+
+O servidor fala a revisão 2026-07-28 do MCP, em que toda requisição carrega a sua versão, e
+as revisões anteriores que começam com `initialize` (da 2025-11-25 até a 2024-11-05). Ele
+implementa o protocolo por conta própria, sem o SDK do MCP e as dependências dele. A saída
+padrão leva apenas mensagens do protocolo: avisos de configuração e a saída do
+`REPOLENS_DEBUG` vão para stderr. O servidor para quando a entrada padrão é fechada.
+
+Claude Code:
+
+```sh
+claude mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+Codex:
+
+```sh
+codex mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+ou no `~/.codex/config.toml` (ou no `.codex/config.toml` de um projeto confiável):
+
+```toml
+[mcp_servers.repolens]
+command = "npx"
+args = ["-y", "@douglas-strey/repolens", "mcp"]
+startup_timeout_sec = 30
+```
+
+A primeira execução do `npx` baixa o RepoLens, o que pode levar mais que o tempo limite
+padrão de 10 segundos do Codex para iniciar um servidor, daí o `startup_timeout_sec`. Com o
+RepoLens instalado, use `command = "repolens"` e `args = ["mcp"]`. O Codex não informa aos
+servidores onde fica o projeto: se ele os iniciar em outro lugar, passe o projeto como
+argumento ou defina `cwd`.
+
+Cursor (`.cursor/mcp.json` no projeto, ou `~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+Outros clientes usam o mesmo comando: `npx -y @douglas-strey/repolens mcp <project>`, ou
+`repolens mcp <project>` com o RepoLens instalado. Prefira o comando instalado para
+repositórios em que você não confia (veja
+[security.md](security.md#rodando-o-próprio-repolens-com-segurança)).
 
 ## Códigos de saída
 

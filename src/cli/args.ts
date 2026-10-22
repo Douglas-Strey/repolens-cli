@@ -6,7 +6,7 @@ import { closestWord } from '../utils/suggest.ts'
 export { closestWord, editDistance } from '../utils/suggest.ts'
 export type { FailOn }
 
-export const COMMANDS = ['scan', 'doctor', 'report', 'setup', 'agent', 'config', 'help'] as const
+export const COMMANDS = ['scan', 'doctor', 'report', 'setup', 'agent', 'config', 'mcp', 'help'] as const
 export type Command = (typeof COMMANDS)[number]
 
 const FAIL_ON_VALUES: readonly FailOn[] = ['error', 'warning', 'info', 'never']
@@ -103,6 +103,17 @@ function checkFlagsApply(args: CliArgs, values: { strict?: boolean; 'fail-on'?: 
       ['--verbose', args.verbose],
     ] as const) {
       if (given) throw invalid(`${flag} does not apply to config, which prints the settings in effect`)
+    }
+  }
+  if (command === 'mcp') {
+    for (const [flag, given] of [
+      ['--json', args.json],
+      ['--markdown', args.markdown],
+      ['--output', args.output !== undefined],
+      ['--quiet', args.quiet],
+      ['--verbose', args.verbose],
+    ] as const) {
+      if (given) throw invalid(`${flag} does not apply to mcp, which answers an MCP client over stdin and stdout`)
     }
   }
   if (command !== 'doctor') {

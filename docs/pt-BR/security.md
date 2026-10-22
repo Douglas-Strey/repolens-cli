@@ -84,6 +84,11 @@ próprias ([7](#7-o-repolens-setup-executa-só-o-que-mostra-para-você)).
   sua máquina. Todos eles têm os limites dos arquivos `.gitignore` (§4) e, quando
   ignorariam o próprio diretório analisado, ficam de fora, para que a análise continue
   mostrando o que há nele.
+- **As ferramentas do `repolens mcp`** recebem um `path` que precisa ficar dentro do
+  diretório para o qual o servidor foi iniciado: caminhos absolutos, `..` e links que levam
+  para fora dele são recusados, então um assistente (ou instruções injetadas nele) não
+  consegue apontar o RepoLens para outros diretórios da sua máquina. As respostas seguem
+  todas as regras desta página: variáveis de ambiente só pelo nome, sem caminhos absolutos.
 
 ### 4. Entradas hostis não conseguem travar nem esgotar o RepoLens
 

@@ -62,16 +62,6 @@ with detection (package manager, runtime, frameworks) and add routes after.
 - **PHP ([#9](https://github.com/Douglas-Strey/repolens-cli/issues/9)):** `composer.json` and `composer.lock`; Laravel (`routes/web.php`,
   `routes/api.php`) and Symfony.
 
-### `repolens mcp`: an MCP server (M)
-
-Issue [#10](https://github.com/Douglas-Strey/repolens-cli/issues/10).
-
-Expose the scan to AI assistants as MCP tools over stdio. The internal API already maps
-onto the tools (see "Ready for MCP" in [docs/architecture.md](docs/architecture.md)), so
-the command is a thin adapter over `scan()`. RepoLens has three runtime dependencies and
-adding one needs discussion: open an issue on whether to use the official SDK or a small
-JSON-RPC implementation before starting.
-
 ### Smaller improvements (S–M)
 
 - **homebrew-core ([#15](https://github.com/Douglas-Strey/repolens-cli/issues/15)).** Submit the formula so `brew install repolens` works without the tap,

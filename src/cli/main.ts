@@ -9,6 +9,8 @@ import { RepoLensError } from '../core/errors.ts'
 import { scan } from '../core/scan.ts'
 import { doctorRules } from '../doctor/rules/index.ts'
 import { gitExcludesFile } from '../facts/git-ignore.ts'
+import { createMcpServer, serveLines } from '../mcp/protocol.ts'
+import { callRepoLensTool, REPOLENS_TOOLS, SERVER_INSTRUCTIONS } from '../mcp/tools.ts'
 import { renderDoctorJson, renderJson } from '../output/json.ts'
 import { renderMarkdown } from '../output/markdown.ts'
 import { createStyle, type RenderOptions, type Style, supportsColor, supportsUnicode } from '../output/style.ts'
@@ -36,6 +38,8 @@ export interface OutputStream {
 export interface CliIO {
   stdout: OutputStream
   stderr: OutputStream
+  /** Where `repolens mcp` reads requests from. */
+  stdin?: NodeJS.ReadableStream
   env: Record<string, string | undefined>
   cwd: string
   platform: NodeJS.Platform
@@ -356,8 +360,18 @@ interface Scanned {
 }
 
 /** Check the directory to scan, naming it in errors the way the user typed it. */
+/**
+ * The directory `repolens mcp` serves without a path: Claude Code sets
+ * CLAUDE_PROJECT_DIR to the project root because it doesn't promise to start
+ * servers there; anything else starts in the project.
+ */
+function mcpDefaultRoot(io: CliIO): string | undefined {
+  const dir = io.env.CLAUDE_PROJECT_DIR
+  return dir && path.isAbsolute(dir) ? dir : undefined
+}
+
 async function resolveScanRoot(args: CliArgs, io: CliIO): Promise<Scanned> {
-  const typed = args.cwd ?? '.'
+  const typed = args.cwd ?? (args.command === 'mcp' ? mcpDefaultRoot(io) : undefined) ?? '.'
   const root = path.resolve(io.cwd, typed)
   let stat: Stats
   try {
@@ -428,6 +442,45 @@ async function loadCliConfig(args: CliArgs, io: CliIO, scanned: Scanned): Promis
   }
 }
 
+/**
+ * `repolens mcp`: answer an MCP client on stdin and stdout until stdin
+ * closes. Every tool call scans afresh and reads the configuration files of
+ * the directory it looks at, the way `repolens <dir>` would.
+ */
+async function runMcpServer(args: CliArgs, io: CliIO, scanned: Scanned, err: Style): Promise<number> {
+  if (!io.stdin) throw new RepoLensError('INVALID_ARGUMENT', 'repolens mcp reads requests from standard input')
+  const debug = debugWriter(io, err)
+  const gitExcludes = await gitExcludesFile(io.env, io.platform)
+  const server = createMcpServer({
+    name: 'repolens',
+    title: 'RepoLens',
+    version: VERSION,
+    instructions: SERVER_INSTRUCTIONS,
+    tools: REPOLENS_TOOLS.map((tool) => tool.definition),
+    callTool: (name, toolArgs) =>
+      callRepoLensTool(name, toolArgs, {
+        root: scanned.realRoot,
+        scanOptions: async (dir) => ({
+          cwd: dir,
+          config: (await loadCliConfig(args, io, { root: dir, realRoot: dir })).layers,
+          ...(gitExcludes !== undefined ? { gitExcludesFile: gitExcludes } : {}),
+          ...(args.maxFiles !== undefined ? { maxFiles: args.maxFiles } : {}),
+          ...(io.now ? { now: io.now } : {}),
+          ...(debug ? { debug } : {}),
+        }),
+        scan: async (options) => {
+          const result = await scan(options)
+          printConfigWarnings(result.meta.warnings, io, err)
+          return result
+        },
+      }),
+    log: (message) => io.stderr.write(`${safeText(message)}\n`),
+  })
+  // Protocol messages only on stdout; everything else goes to stderr.
+  await serveLines(io.stdin, (line) => io.stdout.write(line), server)
+  return EXIT_OK
+}
+
 /** Configuration problems go to stderr, whatever the output format: stdout may be JSON for a script. */
 function printConfigWarnings(warnings: readonly ScanWarning[], io: CliIO, style: Style): void {
   for (const warning of warnings) {
@@ -472,6 +525,10 @@ export async function main(argv: readonly string[], io: CliIO): Promise<number> 
     const preferences = config.user?.config.output
     out = makeStyle(args, io.stdout, io, preferences)
     const err = makeStyle(args, io.stderr, io, preferences)
+
+    if (args.command === 'mcp') {
+      return await runMcpServer(args, io, scanned, err)
+    }
 
     if (args.command === 'config') {
       const resolved = resolveConfig(config.layers, doctorRules)
