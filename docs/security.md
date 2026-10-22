@@ -65,6 +65,17 @@ Breaking any of them is a security bug; please [report it privately](../SECURITY
   only at the root of the enclosing repository, with the same protections as any project
   file: the path must resolve inside the repository (a link leading out is refused), and the
   file is held to the limits of a project config (§5).
+- **A third exception:** Git's ignore rules come from outside the scanned directory too, so
+  RepoLens reads them where Git does: the `.gitignore` of each directory between the
+  repository root and the scanned directory, and the repository's `info/exclude`. A
+  `.gitignore` there must be a regular file (Git doesn't follow a symlinked one either), and
+  `info/exclude` must not lead out of the Git directory. The CLI also applies your global
+  excludes file: `core.excludesFile` from your own Git config (`~/.gitconfig`,
+  `$XDG_CONFIG_HOME/git/config`, or `$GIT_CONFIG_GLOBAL`), else `~/.config/git/ignore`. A
+  repository's own `.git/config` can't choose that file: it could name any file on your
+  machine. All of these are held to the limits of `.gitignore` files (§4), and when they
+  would ignore the scanned directory itself they are left out, so the scan still shows what
+  is in it.
 
 ### 4. Hostile input can't hang or exhaust RepoLens
 
@@ -173,5 +184,6 @@ committing them.
   unusual format inside a `package.json` script could still be displayed, because it is
   already in the repository. Environment variable values are different: they are never
   displayed in any format.
-- Parent `.gitignore` files above the scanned directory are not applied, and neither is
-  the global `core.excludesFile`. Matching is case-sensitive, as on Linux.
+- Ignore matching is case-sensitive, as on Linux. `[include]` sections of your Git config
+  are not followed when looking for `core.excludesFile`, and the system Git config is not
+  read.

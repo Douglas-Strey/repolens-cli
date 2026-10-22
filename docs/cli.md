@@ -252,3 +252,13 @@ const user = await loadUserConfig(process.env, process.platform, process.cwd())
 const project = await loadProjectConfig(dir)
 const result = await scan({ cwd: dir, config: [user, project].filter((c) => c !== null) })
 ```
+
+`scan()` applies the repository's `.gitignore` files and `info/exclude`, but not your
+global Git excludes file unless you pass it, so the result doesn't depend on the machine's
+Git configuration. The CLI passes it:
+
+```ts
+import { gitExcludesFile, scan } from '@douglas-strey/repolens'
+
+const result = await scan({ cwd: dir, gitExcludesFile: await gitExcludesFile(process.env, process.platform) })
+```

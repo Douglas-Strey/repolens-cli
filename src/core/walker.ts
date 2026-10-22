@@ -4,7 +4,7 @@ import path from 'node:path'
 import ignore, { type Ignore } from 'ignore'
 import { createLimiter } from '../utils/limit.ts'
 import { isWithin, normalizeRelative } from '../utils/paths.ts'
-import { readRegularFile, readTextWithin } from './fs.ts'
+import { readRegularFile } from './fs.ts'
 
 /**
  * Directories that are never traversed, whether or not .gitignore mentions
@@ -54,12 +54,13 @@ export const ALWAYS_IGNORED_DIRS: ReadonlySet<string> = new Set([
   '.devenv',
 ])
 
-const GITIGNORE_MAX_BYTES = 512 * 1024
+export const GITIGNORE_MAX_BYTES = 512 * 1024
 const DIRECTORY_CONCURRENCY = 32
 
 /**
  * Most ignore rules that apply to any one path (all .gitignore files on the
- * way down, plus .git/info/exclude), counted by cost (see ignoreRuleCost).
+ * way down, plus the ignore files from outside the root), counted by cost
+ * (see ignoreRuleCost).
  * Matching costs one regex test per rule per file, so an unbounded count
  * would let a hostile repository stall the walk. Real repositories stay far
  * below this.
@@ -90,12 +91,28 @@ export interface WalkOptions {
    * directory, put in front of each path before matching.
    */
   rootExclude?: { prefix: string; patterns: readonly string[] }
+  /**
+   * Git ignore files from outside the root, lowest precedence first (see
+   * outerIgnoreFiles): the global excludes file, info/exclude, then the
+   * .gitignore files of the directories above the root.
+   */
+  outerIgnores?: readonly OuterIgnore[]
   debug?: (message: string) => void
+}
+
+export interface OuterIgnore {
+  /** The root's path from the directory the rules are relative to. */
+  prefix: string
+  text: string
+  /** Name used in warnings: "../.gitignore", ".git/info/exclude", "core.excludesFile". */
+  file: string
+  /** Rules for this machine only (info/exclude, the global excludes file), not shared through the repository. */
+  personal?: boolean
 }
 
 export interface WalkWarning {
   kind: 'limit'
-  /** File that caused the warning, relative to the root. */
+  /** File that caused the warning, relative to the root ("../.gitignore"), or "core.excludesFile". */
   file: string
   message: string
 }
@@ -105,25 +122,40 @@ export interface WalkResult {
   ignoredFiles: string[]
   directories: Set<string>
   truncated: boolean
-  /** Is a path (file or directory, existing or not) ignored by the loaded .gitignore rules? */
-  isIgnored: (relative: string, isDirectory?: boolean) => boolean
+  /**
+   * Is a path (file or directory, existing or not) ignored by the loaded
+   * ignore rules? With `sharedOnly`, by the repository's .gitignore files alone.
+   */
+  isIgnored: (relative: string, isDirectory?: boolean, sharedOnly?: boolean) => boolean
   /** Problems worth surfacing as scan warnings (sorted by file). */
   warnings?: WalkWarning[]
+  /** The root itself is ignored by the `outerIgnores` rules, so they were not applied. */
+  rootIgnored?: boolean
 }
 
 interface IgnoreLayer {
   /** Directory of the .gitignore, relative to root ("" for the root). */
   base: string
+  /** Put in front of paths before matching, for rules from above the root (see OuterIgnore). */
+  prefix: string
+  personal: boolean
   matcher: Ignore
   /** Rule cost (see ignoreRuleCost) of this layer plus all layers above it. */
   total: number
 }
 
-function testLayers(layers: readonly IgnoreLayer[], relative: string, isDirectory: boolean): boolean {
+function testLayers(
+  layers: readonly IgnoreLayer[],
+  relative: string,
+  isDirectory: boolean,
+  sharedOnly = false,
+): boolean {
   // Deeper .gitignore files take precedence; within a file the last match wins (handled by `ignore`).
   for (let i = layers.length - 1; i >= 0; i--) {
     const layer = layers[i] as IgnoreLayer
-    const local = layer.base === '' ? relative : relative.slice(layer.base.length + 1)
+    if (sharedOnly && layer.personal) continue
+    let local = layer.base === '' ? relative : relative.slice(layer.base.length + 1)
+    if (layer.prefix !== '') local = local === '' ? layer.prefix : `${layer.prefix}/${local}`
     if (local === '') continue
     const result = layer.matcher.test(isDirectory ? `${local}/` : local)
     if (result.ignored) return true
@@ -200,6 +232,8 @@ function rulesText(count: number): string {
 
 function createLayer(
   base: string,
+  prefix: string,
+  personal: boolean,
   text: string,
   parentTotal: number,
   maxRules: number,
@@ -222,7 +256,7 @@ function createLayer(
   try {
     // Case-sensitive like Git's default (core.ignoreCase=false), so results don't depend on the platform.
     const matcher = ignore({ allowRelativePaths: true, ignorecase: false }).add(limited.text)
-    return { layer: { base, matcher, total: parentTotal + limited.cost }, kept: limited.kept }
+    return { layer: { base, prefix, personal, matcher, total: parentTotal + limited.cost }, kept: limited.kept }
   } catch {
     return { layer: null, kept: limited.kept }
   }
@@ -231,7 +265,7 @@ function createLayer(
 /**
  * Walk the repository and build the file list.
  *
- * - Respects .gitignore files (root and nested) and .git/info/exclude,
+ * - Respects .gitignore files (root and nested) and `outerIgnores`,
  *   case-sensitively, within a budget of MAX_IGNORE_RULES_PER_PATH per path
  *   and MAX_IGNORE_RULES_TOTAL rules in all, plus the configured `exclude`
  *   patterns, which no .gitignore negation can bring back.
@@ -269,13 +303,32 @@ export async function walk(root: string, options: WalkOptions): Promise<WalkResu
     return rootExcluder?.ignores(`${rootPrefix}/${relative}${suffix}`) === true
   }
 
-  const rootLayers: IgnoreLayer[] = []
-  // Read through the root-contained reader: a planted .git (or info/exclude) symlink must not be followed out.
-  const exclude = await readTextWithin(root, '.git/info/exclude', GITIGNORE_MAX_BYTES)
-  if (exclude.ok) {
-    const { layer, kept } = createLayer('', exclude.text, 0, MAX_IGNORE_RULES_TOTAL, '.git/info/exclude', warnings)
+  let rootLayers: IgnoreLayer[] = []
+  const outerWarnings: WalkWarning[] = []
+  for (const outer of options.outerIgnores ?? []) {
+    const parentTotal = rootLayers[rootLayers.length - 1]?.total ?? 0
+    const maxRules = MAX_IGNORE_RULES_TOTAL - compiledRules
+    const { layer, kept } = createLayer(
+      '',
+      outer.prefix,
+      outer.personal === true,
+      outer.text,
+      parentTotal,
+      maxRules,
+      outer.file,
+      outerWarnings,
+    )
     compiledRules += kept
     if (layer) rootLayers.push(layer)
+  }
+  const rootIgnored = testLayers(rootLayers, '', true)
+  if (rootIgnored) {
+    // Git would ignore everything here, but the directory was chosen explicitly: show what is in it.
+    options.debug?.('walk: the scanned directory is ignored by Git; ignore files above it are not applied')
+    rootLayers = []
+    compiledRules = 0
+  } else {
+    warnings.push(...outerWarnings)
   }
 
   type Pending = { dir: string; layers: IgnoreLayer[] }
@@ -311,7 +364,7 @@ export async function walk(root: string, options: WalkOptions): Promise<WalkResu
       if (result.ok) {
         const parentTotal = layers[layers.length - 1]?.total ?? 0
         const maxRules = MAX_IGNORE_RULES_TOTAL - compiledRules
-        const { layer, kept } = createLayer(dir, result.text, parentTotal, maxRules, file, warnings)
+        const { layer, kept } = createLayer(dir, '', false, result.text, parentTotal, maxRules, file, warnings)
         compiledRules += kept
         if (layer) {
           layersByDir.set(dir, layer)
@@ -451,7 +504,7 @@ export async function walk(root: string, options: WalkOptions): Promise<WalkResu
   ignoredFiles.sort()
   warnings.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0))
 
-  const isIgnored = (input: string, isDirectory = false): boolean => {
+  const isIgnored = (input: string, isDirectory = false, sharedOnly = false): boolean => {
     const relative = normalizeRelative(input)
     if (relative === null || relative === '.') return false
     const directory = isDirectory || input.trimEnd().endsWith('/')
@@ -462,12 +515,12 @@ export async function walk(root: string, options: WalkOptions): Promise<WalkResu
     for (let i = 0; i < segments.length; i++) {
       const current = segments.slice(0, i + 1).join('/')
       const isLast = i === segments.length - 1
-      if (testLayers(layers, current, isLast ? directory : true)) return true
+      if (testLayers(layers, current, isLast ? directory : true, sharedOnly)) return true
       const nested = layersByDir.get(current)
       if (nested && !isLast) layers.push(nested)
     }
     return false
   }
 
-  return { files, ignoredFiles, directories, truncated, isIgnored, warnings }
+  return { files, ignoredFiles, directories, truncated, isIgnored, warnings, ...(rootIgnored ? { rootIgnored } : {}) }
 }

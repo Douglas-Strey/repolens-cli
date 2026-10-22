@@ -5,6 +5,7 @@ import { NO_CONFIG, resolveConfig } from '../config/resolve.ts'
 import { type DetectorRegistry, detectors } from '../detectors/index.ts'
 import { runDoctor } from '../doctor/index.ts'
 import { doctorRules } from '../doctor/rules/index.ts'
+import { outerIgnoreFiles } from '../facts/git-ignore.ts'
 import type {
   Detector,
   LoadedConfig,
@@ -87,6 +88,7 @@ export async function createContext(options: ScanOptions = {}): Promise<Context>
     maxDepth: resolved.maxDepth,
     ...(config.settings.ignore ? { exclude: config.settings.ignore } : {}),
     ...(config.rootIgnore ? { rootExclude: config.rootIgnore } : {}),
+    outerIgnores: await outerIgnoreFiles(root, options.gitExcludesFile),
     debug: resolved.debug,
   })
   resolved.debug(

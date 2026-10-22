@@ -793,6 +793,13 @@ export interface ScanOptions {
    * `maxFiles` above takes precedence over the files' setting.
    */
   config?: 'project' | false | readonly LoadedConfig[]
+  /**
+   * Git's global excludes file (core.excludesFile) to apply along with the
+   * repository's ignore files, as an absolute path. Find it with
+   * gitExcludesFile(env, platform). Default: none, so a scan doesn't depend
+   * on the machine's Git configuration. The CLI passes it.
+   */
+  gitExcludesFile?: string
 }
 
 export interface ResolvedScanOptions {
@@ -825,10 +832,18 @@ export interface FileIndex {
   /** Files matching a glob (supports *, **, ?, {a,b}). */
   glob(pattern: string, options?: { includeIgnored?: boolean }): string[]
   /**
-   * Whether a path (existing or not) is matched by the repository's .gitignore
-   * rules. Pass `{ directory: true }` to test a directory (e.g. "node_modules").
+   * Whether a path (existing or not) is ignored by Git. Pass `{ directory: true }`
+   * to test a directory (e.g. "node_modules"), and `{ shared: true }` to leave
+   * out the rules that apply to this machine only (info/exclude, the global
+   * excludes file): the repository's .gitignore files alone.
    */
-  isIgnored(path: string, options?: { directory?: boolean }): boolean
+  isIgnored(path: string, options?: { directory?: boolean; shared?: boolean }): boolean
+  /**
+   * The scanned directory is itself ignored by Git (a .gitignore above it
+   * matches it). Those rules are then left out so the scan shows what is in
+   * it, and `isIgnored` only answers for the ignore files inside it.
+   */
+  readonly rootIgnored?: boolean
 }
 
 /**

@@ -1,6 +1,5 @@
 import { envTextHasCredential } from '../../core/dotenv.ts'
 import { isPublicName, PUBLIC_PREFIXES } from '../../detectors/environment.ts'
-import { gitLayout } from '../../facts/git.ts'
 import type {
   Diagnostic,
   DoctorRule,
@@ -239,11 +238,10 @@ export const envFileNotIgnored: DoctorRule = {
   code: 'ENV_FILE_NOT_IGNORED',
   category: 'security',
   title: 'Local env files are ignored by Git',
-  // When scanning a subdirectory, .gitignore files above it were not loaded, so "not ignored" is unreliable.
-  applies: async (scan, ctx) =>
-    scan.git !== null && scan.environment.files.some(mayHoldValues) && (await ctx.use(gitLayout))?.prefix === '',
+  // In a directory Git ignores as a whole, nothing in it is committed; its own rules don't show that.
+  applies: (scan, ctx) => scan.git !== null && scan.environment.files.some(mayHoldValues) && !ctx.files.rootIgnored,
   async check(scan, ctx) {
-    if ((await ctx.use(gitLayout))?.prefix !== '') return []
+    if (ctx.files.rootIgnored) return []
     const exposed = scan.environment.files.filter((file) => file.ignored === false && file.tracked !== true)
     return findUnignoredEnvFiles(scan.environment, await credentialCheck(ctx, exposed))
   },

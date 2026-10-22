@@ -110,6 +110,40 @@ describe('GITIGNORE_NODE_MODULES', () => {
     expect(await runCheck(gitignoreNodeModules, sections, await projectContext({ 'package.json': '{}' }))).toEqual([])
   })
 
+  it('uses the .gitignore files above a scanned subdirectory', async () => {
+    const covered = await makeProject({
+      '.gitignore': 'node_modules/\n',
+      'app/package.json': '{}',
+      'app/.gitignore': 'dist\n',
+    })
+    gitInit(covered)
+    expect(await runCheck(gitignoreNodeModules, sections, await contextFor(path.join(covered, 'app')))).toEqual([])
+
+    const exposed = await makeProject({ '.gitignore': '.env\n', 'app/package.json': '{}', 'app/.gitignore': 'dist\n' })
+    gitInit(exposed)
+    const found = await runCheck(gitignoreNodeModules, sections, await contextFor(path.join(exposed, 'app')))
+    expect(found.map((d) => d.code)).toEqual(['GITIGNORE_NODE_MODULES'])
+  })
+
+  it('still reports when only the global excludes file ignores node_modules', async () => {
+    const dir = await makeProject({
+      'package.json': '{}',
+      '.gitignore': 'dist\n',
+      '.git/HEAD': 'ref: refs/heads/main\n',
+    })
+    const global = path.join(await makeProject({ ignore: 'node_modules/\n' }), 'ignore')
+    const ctx = await contextFor(dir, { gitExcludesFile: global })
+    expect(ctx.files.isIgnored('node_modules', { directory: true })).toBe(true)
+    const found = await runCheck(gitignoreNodeModules, sections, ctx)
+    expect(found.map((d) => d.code)).toEqual(['GITIGNORE_NODE_MODULES'])
+  })
+
+  it('does not report a directory Git ignores as a whole', async () => {
+    const repo = await makeProject({ '.gitignore': 'app/\n', 'app/package.json': '{}', 'app/.gitignore': 'dist\n' })
+    gitInit(repo, ['.gitignore'])
+    expect(await runCheck(gitignoreNodeModules, sections, await contextFor(path.join(repo, 'app')))).toEqual([])
+  })
+
   it('is skipped without package.json or .gitignore', async () => {
     const goOnly = makeSections({ project: { ...makeSections().project, manifests: ['go.mod'] } })
     expect((await runRule(gitignoreNodeModules, goOnly)).checks[0]?.status).toBe('skipped')

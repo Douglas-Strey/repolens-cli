@@ -208,13 +208,13 @@ deep. Env files ignored by Git are read too.
 
 **Severity:** warning · **Category:** security
 
-- **What it checks:** an env file exists, is not tracked by Git and is not matched by
-  `.gitignore`. Every local file is reported except `.envrc`. Mode, service and other env
+- **What it checks:** an env file exists, is not tracked by Git and is not ignored by Git
+  (its `.gitignore` files, `info/exclude` or your global excludes file). Every local file is reported except `.envrc`. Mode, service and other env
   files are only reported when one of their values (commented-out assignments included)
   matches a known credential format; without one, they may be meant to be committed. Files
   Git already tracks are reported by `TRACKED_ENV_FILE` instead. Only runs in Git
-  repositories, and is skipped when scanning a subdirectory of a repository (the
-  `.gitignore` files above it are not visible to the scan).
+  repositories. When you scan a subdirectory, the `.gitignore` files above it count too;
+  the check is skipped when Git ignores the scanned directory as a whole.
 - **Why it matters:** the next `git add .` commits it.
 - **How to fix:** add the file name to `.gitignore`, or `.env*` together with
   `!.env.example`.
@@ -645,7 +645,9 @@ skipped when none of the Compose files could be parsed.
   not ignore `node_modules`. Rules that only match its contents (`node_modules/*`,
   `**/node_modules/**`) count as ignoring it. Not reported for Yarn Plug'n'Play installs,
   which create no `node_modules` (a `.pnp.cjs` loader, or `.yarnrc.yml` without a
-  `nodeLinker` other than `pnp` in a Yarn project).
+  `nodeLinker` other than `pnp` in a Yarn project). In a scanned subdirectory, the
+  `.gitignore` files above it count too. `info/exclude` and your global excludes file
+  don't: they protect only your machine.
 - **Why it matters:** one `git add .` commits thousands of files, often platform-specific
   binaries.
 - **How to fix:** add `node_modules/` to `.gitignore`.

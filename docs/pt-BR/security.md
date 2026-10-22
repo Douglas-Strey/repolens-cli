@@ -72,6 +72,18 @@ próprias ([7](#7-o-repolens-setup-executa-só-o-que-mostra-para-você)).
   proteções de qualquer arquivo do projeto: o caminho precisa ficar dentro do repositório
   (um link que leve para fora é recusado), e o arquivo tem os limites de uma configuração do
   projeto (§5).
+- **Uma terceira exceção:** as regras de ignore do Git também vêm de fora do diretório
+  analisado, então o RepoLens as lê onde o Git lê: o `.gitignore` de cada diretório entre a
+  raiz do repositório e o diretório analisado, e o `info/exclude` do repositório. Um
+  `.gitignore` ali precisa ser um arquivo regular (o Git também não segue um que seja link
+  simbólico), e o `info/exclude` não pode levar para fora do diretório Git. A CLI também
+  aplica o seu arquivo global de exclusões: o `core.excludesFile` da sua própria
+  configuração do Git (`~/.gitconfig`, `$XDG_CONFIG_HOME/git/config` ou
+  `$GIT_CONFIG_GLOBAL`), ou então `~/.config/git/ignore`. O próprio `.git/config` de um
+  repositório não pode escolher esse arquivo: ele poderia apontar para qualquer arquivo da
+  sua máquina. Todos eles têm os limites dos arquivos `.gitignore` (§4) e, quando
+  ignorariam o próprio diretório analisado, ficam de fora, para que a análise continue
+  mostrando o que há nele.
 
 ### 4. Entradas hostis não conseguem travar nem esgotar o RepoLens
 
@@ -190,6 +202,6 @@ commitá-los.
   segredo commitado em um formato incomum dentro de um script do `package.json` ainda pode
   ser exibido, porque ele já está no repositório. Com valores de variáveis de ambiente é
   diferente: eles nunca são exibidos, em nenhum formato.
-- Arquivos `.gitignore` de diretórios pais acima do diretório analisado não são aplicados,
-  e o `core.excludesFile` global também não. O casamento de padrões diferencia maiúsculas
-  de minúsculas, como no Linux.
+- O casamento de padrões de ignore diferencia maiúsculas de minúsculas, como no Linux.
+  Seções `[include]` da sua configuração do Git não são seguidas na busca pelo
+  `core.excludesFile`, e a configuração de sistema do Git não é lida.

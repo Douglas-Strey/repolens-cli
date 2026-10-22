@@ -321,25 +321,40 @@ describe('ENV_FILE_NOT_IGNORED', () => {
     expectWellFormed(found, [GITHUB_TOKEN])
   })
 
-  it('is skipped, not passed, when scanning a subdirectory of a repository', async () => {
-    const repo = await makeProject({ '.gitignore': '.env\n', 'app/package.json': '{}\n' })
-    gitInit(repo)
+  it('uses the .gitignore files above a scanned subdirectory', async () => {
+    const covered = await makeProject({ '.gitignore': '.env\n', 'app/package.json': '{}\n', 'app/.env': 'A=1\n' })
+    gitInit(covered, ['.gitignore', 'app/package.json'])
+    const ignored = await contextFor(path.join(covered, 'app'))
+    expect(ignored.files.isIgnored('.env')).toBe(true)
+
+    const exposed = await makeProject({ '.gitignore': 'dist/\n', 'app/package.json': '{}\n', 'app/.env': 'A=1\n' })
+    gitInit(exposed, ['.gitignore', 'app/package.json'])
     const sections = makeSections({
       git: GIT,
       environment: environment([envFile('.env', 'local', { ignored: false, tracked: false })], []),
     })
-    const result = await runRule(envFileNotIgnored, sections, await contextFor(path.join(repo, 'app')))
-    expect(result.checks[0]?.status).toBe('skipped')
+    const found = await runCheck(envFileNotIgnored, sections, await contextFor(path.join(exposed, 'app')))
+    expect(found.map((d) => d.subject)).toEqual(['.env'])
   })
 
-  it('does not trust "not ignored" when scanning a subdirectory of a repository', async () => {
-    const repo = await makeProject({ '.gitignore': '.env\n', 'app/package.json': '{}\n' })
-    gitInit(repo)
+  it('counts your global excludes file: Git on this machine would not commit the file', async () => {
+    const repo = await makeProject({ '.gitignore': 'dist/\n', '.env': 'A=1\n' })
+    gitInit(repo, ['.gitignore'])
+    const global = path.join(await makeProject({ ignore: '.env\n' }), 'ignore')
+    expect((await contextFor(repo)).files.isIgnored('.env')).toBe(false)
+    expect((await contextFor(repo, { gitExcludesFile: global })).files.isIgnored('.env')).toBe(true)
+  })
+
+  it('is skipped, not passed, when the scanned directory is itself ignored by Git', async () => {
+    const repo = await makeProject({ '.gitignore': 'app/\n', 'app/package.json': '{}\n', 'app/.env': 'A=1\n' })
+    gitInit(repo, ['.gitignore'])
     const sections = makeSections({
       git: GIT,
       environment: environment([envFile('.env', 'local', { ignored: false, tracked: false })], []),
     })
-    expect(await runCheck(envFileNotIgnored, sections, await contextFor(path.join(repo, 'app')))).toEqual([])
-    expect(await runCheck(envFileNotIgnored, sections, await contextFor(repo))).toHaveLength(1)
+    const ctx = await contextFor(path.join(repo, 'app'))
+    expect(ctx.files.rootIgnored).toBe(true)
+    expect((await runRule(envFileNotIgnored, sections, ctx)).checks[0]?.status).toBe('skipped')
+    expect(await runCheck(envFileNotIgnored, sections, ctx)).toEqual([])
   })
 })

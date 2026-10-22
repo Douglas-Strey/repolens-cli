@@ -83,9 +83,6 @@ implementação pequena de JSON-RPC.
 - **`include:` e `extends:` do Compose, `include:` do GitLab CI ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12)).** Seguir os includes locais
   (nunca URLs) para que serviços e jobs de CI definidos em outros arquivos apareçam.
   `src/facts/compose.ts`, `src/detectors/ci.ts`.
-- **`.gitignore` dos diretórios pai e `core.excludesFile` ([#14](https://github.com/Douglas-Strey/repolens-cli/issues/14)).** Ao analisar um subdiretório de
-  um repositório, aplicar os arquivos de ignore acima dele, ainda sem rodar o `git`.
-  `src/core/walker.ts`.
 - **homebrew-core ([#15](https://github.com/Douglas-Strey/repolens-cli/issues/15)).** Enviar a fórmula para que `brew install repolens` funcione sem o tap,
   quando o projeto atender aos requisitos de notoriedade do Homebrew.
 

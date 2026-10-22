@@ -306,7 +306,8 @@ export const lockfileMissing: DoctorRule = {
     if (layout && layout.prefix !== '') return []
     const names = [...Object.keys(JS_LOCKFILES), ...OTHER_LOCKFILES]
     const anyLockfile = names.some((name) => ctx.files.has(name, { includeIgnored: true }))
-    let deliberatelyUnlocked = names.some((name) => ctx.files.isIgnored(name))
+    // Only the repository's own .gitignore says the project goes without a lockfile.
+    let deliberatelyUnlocked = names.some((name) => ctx.files.isIgnored(name, { shared: true }))
     if (!anyLockfile && !deliberatelyUnlocked && ctx.files.has('.npmrc', { includeIgnored: true })) {
       // Only a boolean is derived from .npmrc; it may hold auth tokens, so it is neither cached nor kept.
       const npmrc = await ctx.readText('.npmrc', { cache: false })

@@ -14,6 +14,18 @@ All notable changes to RepoLens are documented here. The format follows
   names, Coolify, Koyeb, App Engine, Cloud Run and Deno Deploy), so they are not reported
   as missing from `.env.example`. User-set Amplify `AMPLIFY_*` names and `HEROKU_API_KEY`
   stay reportable.
+- Git's ignore rules from outside the scanned directory now apply: when you scan a
+  subdirectory, the `.gitignore` files of the directories above it up to the repository
+  root, and in every repository its `info/exclude` (also from a linked worktree) and your
+  global excludes file (`core.excludesFile` from your own Git config, else
+  `~/.config/git/ignore`). Still without running `git`. The programmatic `scan()` applies
+  the global file only when you pass `gitExcludesFile` (see `gitExcludesFile()`).
+  `ENV_FILE_NOT_IGNORED` and `GITIGNORE_NODE_MODULES` now run when you scan a subdirectory
+  too, unless Git ignores that directory as a whole. `GITIGNORE_NODE_MODULES` and the
+  lockfile check count only the repository's `.gitignore` files, since `info/exclude` and
+  the global file protect only your machine (`FileIndex.isIgnored` takes `shared: true`
+  for that).
+  ([#14](https://github.com/Douglas-Strey/repolens-cli/issues/14))
 
 ## [0.3.0] - 2026-10-21
 
