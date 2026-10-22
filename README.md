@@ -335,9 +335,10 @@ takes around 35 ms, a synthetic 500-package monorepo (3,000 files) around 250 ms
 
 ## Roadmap
 
-**v0.3 (now)**: everything above. JavaScript/TypeScript and Go in depth; terminal, JSON,
-Markdown and agent output; 34 doctor checks; `repolens setup` for a fresh clone; user and
-project configuration files, with per-finding ignores and a monorepo root's config.
+**v0.4 (now)**: everything above. JavaScript/TypeScript and Go in depth; terminal, JSON,
+Markdown and agent output; an MCP server for AI assistants; 34 doctor checks; `repolens
+setup` for a fresh clone; user and project configuration files, with per-finding ignores
+and a monorepo root's config.
 
 **Next**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (Cargo workspaces), PHP (Laravel, Composer)
