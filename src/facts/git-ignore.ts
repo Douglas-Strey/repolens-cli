@@ -6,7 +6,7 @@
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { readRegularFile } from '../core/fs.ts'
+import { type ReadResult, readRegularFile } from '../core/fs.ts'
 import { GITIGNORE_MAX_BYTES, type OuterIgnore } from '../core/walker.ts'
 import { findRepository, gitConfigValues, parseGitConfig, readGitFile } from './git.ts'
 
@@ -79,6 +79,19 @@ export async function gitExcludesFile(env: Env, platform: NodeJS.Platform): Prom
 }
 
 /**
+ * A .gitignore that is a regular file. Checked with lstat because Windows has
+ * no O_NOFOLLOW: readRegularFile alone would follow a link out of the repository.
+ */
+async function readGitignore(file: string): Promise<ReadResult | null> {
+  try {
+    if (!(await fs.lstat(file)).isFile()) return null
+  } catch {
+    return null
+  }
+  return readRegularFile(file, GITIGNORE_MAX_BYTES)
+}
+
+/**
  * The ignore files outside `root` (a real path) that Git applies inside it,
  * lowest precedence first: the global excludes file `excludesFile`, the
  * repository's info/exclude, then the .gitignore of each directory from the
@@ -108,8 +121,8 @@ export async function outerIgnoreFiles(root: string, excludesFile?: string): Pro
   for (let i = 0; i < segments.length; i++) {
     // The directories between the repository root and the root are ancestors of a real path, so real too.
     const dir = path.join(repository.workTree, ...segments.slice(0, i))
-    const result = await readRegularFile(path.join(dir, '.gitignore'), GITIGNORE_MAX_BYTES)
-    if (result.ok) {
+    const result = await readGitignore(path.join(dir, '.gitignore'))
+    if (result?.ok) {
       out.push({
         prefix: segments.slice(i).join('/'),
         text: result.text,
