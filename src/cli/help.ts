@@ -14,6 +14,7 @@ ${s.bold('Usage')}
   repolens setup [path] [options]          Set up the project: env file, services, dependencies
   repolens agent [init] [path] [options]   Generate context for coding agents ${s.dim('(experimental)')}
   repolens config [path]                   Show the configuration files and settings in effect
+  repolens mcp [path] [options]            Serve the scan to AI assistants over MCP (stdio)
   repolens help [command]                  Show help for a command
 
 ${s.bold('Options')}
@@ -154,9 +155,31 @@ ${s.bold('Options')}
 
 Docs: https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/configuration.md
 `,
+  mcp: (s) => `${s.bold('repolens mcp')} [path] [options]
+
+Run a Model Context Protocol server over stdin and stdout, so an AI assistant
+(Claude Code, Codex, Cursor, and others) can ask about the project directly.
+Your MCP client starts this command; you don't run it by hand.
+
+Tools: get_project_overview, get_services, get_environment_variables,
+get_routes, get_scripts, get_diagnostics. Each one scans the files as they are
+when it is called, optionally in a subdirectory of [path], and never returns
+environment variable values.
+
+${s.bold('Options')}
+      --max-files <n>    Stop indexing after n files ${s.dim('(default: 100000)')}
+      --config <file>    Use this config file instead of the project's own
+      --no-config        Ignore every config file
+
+${s.bold('Examples')}
+  ${s.cyan('claude mcp add repolens -- npx -y @douglas-strey/repolens mcp')}
+  ${s.cyan('codex mcp add repolens -- npx -y @douglas-strey/repolens mcp')}
+
+Docs: https://github.com/Douglas-Strey/repolens-cli/blob/main/docs/cli.md#repolens-mcp
+`,
   help: (s) => `${s.bold('repolens help')} [command]
 
-Show help for a command: scan, doctor, report, setup, agent, config.
+Show help for a command: scan, doctor, report, setup, agent, config, mcp.
 `,
 }
 

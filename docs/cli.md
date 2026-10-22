@@ -10,6 +10,7 @@ repolens report [path] [options]   Generate a Markdown report
 repolens setup [path] [options]    Set up the project: env file, services, dependencies
 repolens agent [init] [path] [options]  Generate context for coding agents (experimental)
 repolens config [path] [options]   Show the configuration files and settings in effect
+repolens mcp [path] [options]      Serve the scan to AI assistants over MCP (stdio)
 repolens help [command]            Show help for a command
 ```
 
@@ -208,6 +209,92 @@ repolens config --json            # { files, settings, output }
 
 Every command prints configuration problems (an unknown setting, a check code that doesn't
 exist) on stderr, so they never mix with `--json` output.
+
+## `repolens mcp`
+
+Runs a [Model Context Protocol](https://modelcontextprotocol.io) server over standard input
+and output, so an AI assistant can ask about the project. Your MCP client starts it; you
+don't run it by hand.
+
+```sh
+repolens mcp                  # the current directory, or $CLAUDE_PROJECT_DIR
+repolens mcp ../my-project
+repolens mcp --no-config      # ignore every config file
+```
+
+| Tool | Answers with |
+| --- | --- |
+| `get_project_overview` | Overview, quick start, architecture, languages, frameworks, CI, tooling and Git |
+| `get_services` | Docker Compose services, Dockerfiles, databases and ORMs |
+| `get_environment_variables` | Variable names, where each one is documented or set, and which are secret |
+| `get_routes` | API routes and pages |
+| `get_scripts` | The quick start, package.json scripts, Makefile and justfile targets |
+| `get_diagnostics` | Every `doctor` finding, with its files and suggested fix |
+
+Every tool takes two optional arguments:
+
+- `path`: a directory inside the project, relative to it (`apps/web`). Paths outside the
+  project, and links that lead out of it, are refused.
+- `format`: `markdown` (the default, the matching part of `repolens report`) or `json` (the
+  matching part of `repolens --json`).
+
+Each call scans the files as they are, with that directory's configuration files, like
+`repolens <dir>`. Low-confidence findings are left out, as in the default terminal view.
+`--max-files`, `--config` and `--no-config` apply to every call.
+
+Without a path, the server uses the current directory, or `$CLAUDE_PROJECT_DIR` when it is
+set: Claude Code sets it to the project root because it doesn't promise to start servers
+there.
+
+The server speaks MCP revision 2026-07-28, in which every request carries its version, and
+the earlier revisions that open with `initialize` (2025-11-25 back to 2024-11-05). It
+implements the protocol itself, without the MCP SDK and its dependencies. Standard output
+carries protocol messages only: configuration warnings and `REPOLENS_DEBUG` output go to
+stderr. The server stops when its standard input closes.
+
+Claude Code:
+
+```sh
+claude mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+Codex:
+
+```sh
+codex mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+or in `~/.codex/config.toml` (or a trusted project's `.codex/config.toml`):
+
+```toml
+[mcp_servers.repolens]
+command = "npx"
+args = ["-y", "@douglas-strey/repolens", "mcp"]
+startup_timeout_sec = 30
+```
+
+The first `npx` run downloads RepoLens, which can take longer than Codex's default
+10-second startup timeout, hence `startup_timeout_sec`. With RepoLens installed, use
+`command = "repolens"` and `args = ["mcp"]` instead. Codex doesn't tell servers where the
+project is: if it starts them elsewhere, add the project as an argument or set `cwd`.
+
+Cursor (`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+Other clients take the same command: `npx -y @douglas-strey/repolens mcp <project>`, or
+`repolens mcp <project>` with RepoLens installed. Prefer the installed command for
+repositories you don't trust (see [security.md](security.md#running-repolens-itself-safely)).
 
 ## Exit codes
 

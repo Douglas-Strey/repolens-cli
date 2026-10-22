@@ -199,14 +199,22 @@ e os inicia sem shell; os testes o substituem por um `SetupHost` falso. O
   mesmo commit é idêntico byte a byte, então os arquivos em `.repolens/` geram diffs limpos.
   O RepoLens nunca indexa a própria saída em `.repolens/`.
 
-## Pronto para MCP
+## Servidor MCP (`src/mcp/`)
 
-A API interna se mapeia diretamente nas ferramentas que um servidor MCP exporia. Um futuro
-comando `repolens mcp` seria um adaptador fino:
+O `repolens mcp` é um adaptador fino sobre o `scan()`:
 
-| Possível ferramenta MCP | Implementação |
+- `protocol.ts` implementa o Model Context Protocol por conta própria, sem o SDK: JSON-RPC
+  2.0, uma mensagem por linha no stdin e no stdout. Um só processo atende as duas eras do
+  protocolo, clientes modernos que mandam a versão em toda requisição (`server/discover`)
+  e os legados que começam com `initialize`.
+- `tools.ts` define as ferramentas. Cada uma analisa o diretório pedido, filtra por
+  confiança como a visualização do terminal e devolve as seções correspondentes do
+  relatório em Markdown (`renderMarkdown` com `sections`) ou a parte correspondente da
+  saída JSON.
+
+| Ferramenta MCP | Implementação |
 | --- | --- |
-| `get_project_overview` | `scan()` → `project`, `languages`, `runtimes`, `frameworks`, `workspace` |
+| `get_project_overview` | `scan()` → `project`, `languages`, `runtimes`, `frameworks`, `workspace`, CI, ferramentas, Git |
 | `get_services` | `scan()` → `services`, `databases` |
 | `get_environment_variables` | `scan()` → `environment` (apenas nomes e flags) |
 | `get_routes` | `scan()` → `routes` |

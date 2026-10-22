@@ -12,6 +12,7 @@ process.stdout.on('error', (error: NodeJS.ErrnoException) => {
 const code = await main(process.argv.slice(2), {
   stdout: process.stdout,
   stderr: process.stderr,
+  stdin: process.stdin,
   env: process.env,
   cwd: process.cwd(),
   platform: process.platform,

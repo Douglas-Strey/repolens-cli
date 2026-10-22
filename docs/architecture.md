@@ -184,14 +184,21 @@ a fake `SetupHost`. `src/cli/setup.ts` prints the plan, checks it, asks, and run
   byte-identical, so `.repolens/` files diff cleanly. RepoLens never indexes its own
   `.repolens/` output.
 
-## Ready for MCP
+## MCP server (`src/mcp/`)
 
-The internal API maps directly onto the tools an MCP server would expose. A future
-`repolens mcp` command would be a thin adapter:
+`repolens mcp` is a thin adapter over `scan()`:
 
-| Potential MCP tool | Implementation |
+- `protocol.ts` implements the Model Context Protocol itself, without the SDK: JSON-RPC
+  2.0, one message per line on stdin and stdout. One process serves both protocol eras,
+  modern clients that send their version with every request (`server/discover`) and
+  legacy ones that open with `initialize`.
+- `tools.ts` defines the tools. Each one scans the directory it is asked about, filters
+  by confidence like the terminal view, and returns the matching sections of the Markdown
+  report (`renderMarkdown` with `sections`) or the matching part of the JSON output.
+
+| MCP tool | Implementation |
 | --- | --- |
-| `get_project_overview` | `scan()` → `project`, `languages`, `runtimes`, `frameworks`, `workspace` |
+| `get_project_overview` | `scan()` → `project`, `languages`, `runtimes`, `frameworks`, `workspace`, CI, tooling, Git |
 | `get_services` | `scan()` → `services`, `databases` |
 | `get_environment_variables` | `scan()` → `environment` (names and flags only) |
 | `get_routes` | `scan()` → `routes` |

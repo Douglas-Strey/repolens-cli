@@ -76,6 +76,11 @@ Breaking any of them is a security bug; please [report it privately](../SECURITY
   machine. All of these are held to the limits of `.gitignore` files (§4), and when they
   would ignore the scanned directory itself they are left out, so the scan still shows what
   is in it.
+- **`repolens mcp`** tools take a `path` that must stay inside the directory the server was
+  started for: absolute paths, `..` and links that lead out of it are refused, so an
+  assistant (or instructions injected into one) can't point RepoLens at other directories
+  on your machine. Its answers follow every rule on this page: environment variables by
+  name only, no absolute paths.
 
 ### 4. Hostile input can't hang or exhaust RepoLens
 

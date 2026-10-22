@@ -8,12 +8,15 @@
  * and converts the ANSI output to SVG. Nothing is mocked: the images show
  * exactly what this version of RepoLens prints. The one exception is setup's
  * view of the machine (which programs are installed, the active Node.js), kept
- * fixed so the image doesn't depend on where it was generated.
+ * fixed so the image doesn't depend on where it was generated. The MCP image
+ * shows one real tool call answered by `repolens mcp`, and the text the
+ * assistant receives.
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { PassThrough } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 import { main } from '../src/cli/main.ts'
 import type { SetupHost } from '../src/setup/host.ts'
@@ -143,6 +146,31 @@ async function capture(argv: string[], cwd: string): Promise<string> {
   return stdout
 }
 
+/** One tool call to `repolens mcp`, as an assistant makes it, and the answer it gets. */
+async function captureMcp(cwd: string, tool: string): Promise<string> {
+  const stdin = new PassThrough()
+  let stdout = ''
+  const running = main(['mcp'], {
+    stdin,
+    stdout: { write: (chunk: string) => (stdout += chunk), isTTY: false },
+    stderr: { write: () => true, isTTY: false },
+    env: {},
+    cwd,
+    platform: 'linux',
+  })
+  stdin.end(`${JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: tool } })}\n`)
+  await running
+  const text: string = JSON.parse(stdout).result.content[0].text
+  const esc = '\u001b['
+  return [
+    `${esc}2m# Started by your MCP client. The assistant calls a tool:${esc}0m`,
+    `${esc}36m→${esc}0m tools/call ${esc}1m${tool}${esc}0m`,
+    `${esc}36m←${esc}0m ${esc}2mand reads the answer:${esc}0m`,
+    '',
+    text,
+  ].join('\n')
+}
+
 const workDir = await fs.mkdtemp(path.join(os.tmpdir(), 'repolens-screenshot-'))
 const project = path.join(workDir, 'acme')
 try {
@@ -168,11 +196,12 @@ try {
   for (const [name, argv] of [
     ['scan', []],
     ['doctor', ['doctor']],
+    ['mcp', ['mcp']],
     ['setup', ['setup', '--dry-run']],
   ] as const) {
     // Setup is for a fresh clone, which has no local .env yet (the fixture keeps one for the other images).
     if (name === 'setup') await fs.rm(path.join(project, '.env'), { force: true })
-    const output = await capture([...argv], project)
+    const output = name === 'mcp' ? await captureMcp(project, 'get_services') : await capture([...argv], project)
     const command = ['repolens', ...argv].join(' ')
     await fs.writeFile(path.join(ROOT, 'assets', `demo-${name}.svg`), toSvg(command, output))
     console.log(`wrote assets/demo-${name}.svg (${output.split('\n').length} lines)`)

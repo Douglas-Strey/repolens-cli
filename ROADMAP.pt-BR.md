@@ -67,17 +67,6 @@ runtime, frameworks) e adicione as rotas depois.
 - **PHP ([#9](https://github.com/Douglas-Strey/repolens-cli/issues/9)):** `composer.json` e `composer.lock`; Laravel (`routes/web.php`, `routes/api.php`) e
   Symfony.
 
-### `repolens mcp`: um servidor MCP (M)
-
-Issue [#10](https://github.com/Douglas-Strey/repolens-cli/issues/10).
-
-Expor a análise para assistentes de IA como ferramentas MCP via stdio. A API interna já se
-encaixa nas ferramentas (veja "Pronto para MCP" em
-[docs/pt-BR/architecture.md](docs/pt-BR/architecture.md)), então o comando é um adaptador
-fino sobre o `scan()`. O RepoLens tem três dependências de runtime, e adicionar uma precisa
-de discussão: antes de começar, abra uma issue sobre usar o SDK oficial ou uma
-implementação pequena de JSON-RPC.
-
 ### Melhorias menores (P–M)
 
 - **homebrew-core ([#15](https://github.com/Douglas-Strey/repolens-cli/issues/15)).** Enviar a fórmula para que `brew install repolens` funcione sem o tap,

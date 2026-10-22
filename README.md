@@ -160,6 +160,57 @@ When it finishes, setup tells you whether `repolens doctor` still finds problems
 start the project. Details in [docs/cli.md](docs/cli.md#repolens-setup) and
 [docs/security.md](docs/security.md#7-repolens-setup-runs-only-what-it-shows-you).
 
+## `repolens mcp`
+
+Let your AI assistant ask RepoLens about the project. `repolens mcp` is a
+[Model Context Protocol](https://modelcontextprotocol.io) server: Claude Code, Codex,
+Cursor and other MCP clients start it and call its tools whenever they need to know how the project
+fits together, instead of reading dozens of files to find out:
+
+<p align="center">
+  <img src="assets/demo-mcp.svg" alt="repolens mcp answering a get_services tool call: the Docker Compose services with their images and ports, the command that starts them, the databases and the ORM, as the Markdown text the assistant receives" width="760">
+</p>
+
+- **Six tools:** `get_project_overview`, `get_services`, `get_environment_variables`,
+  `get_routes`, `get_scripts` and `get_diagnostics`. Each answers with the matching part of
+  the Markdown report (or JSON, on request), for the whole project or one package
+  (`path: "apps/web"`).
+- **Always current.** Every call scans the files as they are, so answers follow your edits.
+- **Same guarantees as the CLI.** It only reads files, reports environment variables by name
+  and never their values, and doesn't look outside the project.
+- **No extra dependencies.** The protocol is built into RepoLens and speaks both the current
+  MCP revision and the earlier ones.
+
+Add it to Claude Code:
+
+```sh
+claude mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+To Codex:
+
+```sh
+codex mcp add repolens -- npx -y @douglas-strey/repolens mcp
+```
+
+Or to Cursor, in `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+For repositories you don't trust, install RepoLens once (`npm install -g
+@douglas-strey/repolens`) and use `repolens mcp` as the command: `npx` run inside a
+repository honors its `.npmrc`. Details in [docs/cli.md](docs/cli.md#repolens-mcp).
+
 ## Configuration
 
 RepoLens needs no configuration. To adjust it, add a `repolens.config.json` to the project
@@ -290,7 +341,6 @@ project configuration files, with per-finding ignores and a monorepo root's conf
 
 **Next**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (Cargo workspaces), PHP (Laravel, Composer)
-- An MCP server (`repolens mcp`) exposing overview, services, env vars, routes, scripts and diagnostics as tools
 - More routes: SvelteKit, Remix / React Router, Astro endpoints
 - Submitting the formula to `homebrew-core` (so `brew install repolens` works without the tap)
 

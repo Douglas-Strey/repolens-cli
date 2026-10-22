@@ -37,6 +37,14 @@ All notable changes to RepoLens are documented here. The format follows
 - GitLab CI job `extends`: a job gets the script, image and tags of the templates it
   extends (one or a list, later ones winning), so its tasks and `runsOn` reflect them.
   ([#31](https://github.com/Douglas-Strey/repolens-cli/issues/31))
+- `repolens mcp`: a Model Context Protocol server over stdio, so AI assistants (Claude
+  Code, Codex, Cursor, …) can ask about the project. Six tools (`get_project_overview`,
+  `get_services`, `get_environment_variables`, `get_routes`, `get_scripts`,
+  `get_diagnostics`) answer with the matching part of the Markdown report, or JSON on
+  request, for the project or a subdirectory inside it, scanning the files fresh on every
+  call. The protocol is implemented in RepoLens, with no new dependency, for both the
+  2026-07-28 revision and the earlier `initialize` ones. Without a path it serves
+  `$CLAUDE_PROJECT_DIR` when set. ([#10](https://github.com/Douglas-Strey/repolens-cli/issues/10))
 
 ## [0.3.0] - 2026-10-21
 
