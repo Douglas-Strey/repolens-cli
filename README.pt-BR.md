@@ -385,10 +385,12 @@ máquina.
 
 ## Roadmap
 
-**v0.4 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
-para terminal, JSON, Markdown e agentes; um servidor MCP para assistentes de IA; 34
-verificações no doctor; `repolens setup` para um clone novo; arquivos de configuração do
-usuário e do projeto, com exceções por achado e a configuração da raiz de um monorepo.
+**v0.5 (atual)**: tudo o que está acima. JavaScript/TypeScript e Go em profundidade; saída
+para terminal, JSON, Markdown e agentes; um servidor MCP para assistentes de IA; 36
+verificações no doctor, incluindo vulnerabilidades conhecidas nos runtimes fixados e, com
+`--online`, nas dependências travadas; `repolens setup` para um clone novo; arquivos de
+configuração do usuário e do projeto, com exceções por achado e a configuração da raiz de
+um monorepo.
 
 **A seguir**
 - Python (Django, Flask, FastAPI, uv/Poetry), Rust (workspaces do Cargo), PHP (Laravel, Composer)

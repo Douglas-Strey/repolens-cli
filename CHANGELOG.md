@@ -7,6 +7,8 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-22
+
 ### Added
 
 - `RUNTIME_VULNERABLE`: `repolens doctor` reports an exact PHP, Node.js or Go version that
