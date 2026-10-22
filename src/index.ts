@@ -6,7 +6,9 @@
  *
  * scan() applies the repository's own repolens.config.json; pass
  * `config: false` to ignore it, or a list from loadUserConfig /
- * loadProjectConfigs / loadConfigFile to choose the files yourself.
+ * loadProjectConfigs / loadConfigFile to choose the files yourself. Git's
+ * global excludes file is only applied when you pass it:
+ * `gitExcludesFile: await gitExcludesFile(process.env, process.platform)`.
  *
  * The result has the same shape as `repolens --json` (see docs/json-schema.md).
  */
@@ -32,6 +34,7 @@ export { createContext, detect, scan } from './core/scan.ts'
 export { detectors } from './detectors/index.ts'
 export { runDoctor } from './doctor/index.ts'
 export { doctorRules } from './doctor/rules/index.ts'
+export { gitExcludesFile } from './facts/git-ignore.ts'
 export { renderDoctorJson, renderJson } from './output/json.ts'
 export { type MarkdownOptions, renderMarkdown } from './output/markdown.ts'
 export { createStyle, defaultRenderOptions, type RenderOptions, type Style, type Symbols } from './output/style.ts'

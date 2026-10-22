@@ -89,25 +89,99 @@ describe('walk: .gitignore', () => {
     expect(result.files).toEqual(['.gitignore', 'src/cache'])
   })
 
-  it('reads .git/info/exclude with lower precedence than .gitignore', async () => {
+  it('applies outer ignore files with lower precedence than .gitignore', async () => {
     const root = await makeProject({
-      '.git/info/exclude': 'secret.txt\n*.tmp\n',
       '.gitignore': '!keep.tmp\n',
       'secret.txt': '',
       'a.tmp': '',
       'keep.tmp': '',
     })
-    const result = await walk(root, OPTIONS)
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [{ prefix: '', text: 'secret.txt\n*.tmp\n', file: '.git/info/exclude' }],
+    })
     expect(result.files).toEqual(['.gitignore', 'keep.tmp'])
     expect(result.ignoredFiles).toEqual(['a.tmp', 'secret.txt'])
   })
 
-  posixOnly('does not follow a .git/info/exclude symlink out of the root', async () => {
-    const outside = await makeProject({ rules: '*\n' })
-    const root = await makeProject({ 'a.txt': '' })
-    await fs.mkdir(path.join(root, '.git', 'info'), { recursive: true })
-    await fs.symlink(path.join(outside, 'rules'), path.join(root, '.git', 'info', 'exclude'))
-    expect((await walk(root, OPTIONS)).files).toEqual(['a.txt'])
+  it('matches outer ignore files against the path from their own directory', async () => {
+    // The root is apps/web: "/web/dist" in apps/.gitignore and "/apps/web/*.log" in the repository's
+    // .gitignore apply, "/dist" (anchored to the repository root) does not.
+    const root = await makeProject({ 'dist/a.js': '', 'debug.log': '', 'src/b.log': '', 'src/c.ts': '' })
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [
+        { prefix: 'apps/web', text: '/dist\n/apps/web/*.log\n', file: '../../.gitignore' },
+        { prefix: 'web', text: '/web/dist\n', file: '../.gitignore' },
+      ],
+    })
+    expect(result.files).toEqual(['src/b.log', 'src/c.ts'])
+    expect(result.ignoredFiles).toEqual(['debug.log'])
+    expect(result.directories.has('dist')).toBe(false)
+    expect(result.isIgnored('dist/a.js')).toBe(true)
+    expect(result.isIgnored('src/b.log')).toBe(false)
+  })
+
+  it('lets nearer outer files and the root .gitignore override farther ones', async () => {
+    const root = await makeProject({ '.gitignore': '!b.log\n', 'a.log': '', 'b.log': '', 'c.txt': '', 'd.txt': '' })
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [
+        { prefix: 'web', text: '*.log\n*.txt\n', file: 'core.excludesFile' },
+        { prefix: 'web', text: '!c.txt\n', file: '../.gitignore' },
+      ],
+    })
+    expect(result.files).toEqual(['.gitignore', 'b.log', 'c.txt'])
+    expect(result.ignoredFiles).toEqual(['a.log', 'd.txt'])
+  })
+
+  it('leaves out personal rules when asked for the shared ones only', async () => {
+    const root = await makeProject({ '.gitignore': '*.log\n', 'a.log': '', 'b.tmp': '' })
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [
+        { prefix: '', text: '*.tmp\nnode_modules/\n', file: 'core.excludesFile', personal: true },
+        { prefix: '', text: '!a.log\n', file: '.git/info/exclude', personal: true },
+      ],
+    })
+    expect(result.ignoredFiles).toEqual(['a.log', 'b.tmp'])
+    expect(result.isIgnored('b.tmp')).toBe(true)
+    expect(result.isIgnored('b.tmp', false, true)).toBe(false)
+    expect(result.isIgnored('node_modules', true, true)).toBe(false)
+    expect(result.isIgnored('a.log', false, true)).toBe(true)
+  })
+
+  it('does not apply outer ignore files that ignore the scanned directory itself', async () => {
+    const root = await makeProject({ '.gitignore': '*.log\n', 'a.ts': '', 'b.log': '' })
+    const messages: string[] = []
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [{ prefix: 'build/tool', text: 'build/\n*.ts\n', file: '../../.gitignore' }],
+      debug: (message) => messages.push(message),
+    })
+    expect(result.files).toEqual(['.gitignore', 'a.ts'])
+    expect(result.ignoredFiles).toEqual(['b.log'])
+    expect(result.isIgnored('a.ts')).toBe(false)
+    expect(messages).toContain('walk: the scanned directory is ignored by Git; ignore files above it are not applied')
+  })
+
+  it('counts outer ignore files against the rule budget and names them in warnings', async () => {
+    const rules = Array.from({ length: MAX_IGNORE_RULES_PER_PATH }, (_, i) => `rule-${i}`).join('\n')
+    const root = await makeProject({ '.gitignore': 'extra\n', extra: '', 'rule-0': '' })
+    const result = await walk(root, {
+      ...OPTIONS,
+      outerIgnores: [{ prefix: 'web', text: rules, file: '../.gitignore' }],
+    })
+    // The outer file fills the budget, so the root .gitignore's rule is dropped.
+    expect(result.files).toEqual(['.gitignore', 'extra'])
+    expect(result.ignoredFiles).toEqual(['rule-0'])
+    expect(result.warnings).toEqual([
+      {
+        kind: 'limit',
+        file: '.gitignore',
+        message: `Ignored 1 rule in .gitignore: the ignore rules for one directory exceed the limit of ${MAX_IGNORE_RULES_PER_PATH} (a rule with several "**" counts as more than one)`,
+      },
+    ])
   })
 
   it('matches case-sensitively, like Git by default', async () => {

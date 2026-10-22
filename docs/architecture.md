@@ -25,7 +25,10 @@ flowchart LR
 The walker lists the repository breadth-first with bounded concurrency:
 
 - It applies the root `.gitignore`, nested `.gitignore` files (relative to their own
-  directory, deeper files taking precedence) and `.git/info/exclude`.
+  directory, deeper files taking precedence) and the Git ignore files from outside the root
+  (`src/facts/git-ignore.ts`): the `.gitignore` files between the repository root and a
+  scanned subdirectory, the repository's `info/exclude` and, when the caller passes it,
+  the global `core.excludesFile`.
 - It never enters `node_modules`, `vendor`, `.git`, or framework and tool caches
   (`.next`, `.nuxt`, `.turbo`, `coverage`, …), even when they are not gitignored.
 - Gitignored **directories** are skipped. Gitignored **files** in visited directories are

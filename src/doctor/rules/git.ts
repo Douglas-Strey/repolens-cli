@@ -11,12 +11,6 @@ function isYarnProject(files: FileIndex): boolean {
   )
 }
 
-/** When the scan root is a subdirectory of a repository, .gitignore files above it are not visible. */
-async function scansSubdirectory(ctx: ProjectContext): Promise<boolean> {
-  const layout = await ctx.use(gitLayout)
-  return layout !== null && layout.prefix !== ''
-}
-
 /** The scan root is the top of a Git working tree. */
 async function isRepositoryRoot(ctx: ProjectContext): Promise<boolean> {
   const layout = await ctx.use(gitLayout)
@@ -84,8 +78,12 @@ export function yarnrcUsesPnp(yarnrc: unknown): boolean {
  * `node_modules/**` with a leading double-star directory) ignore everything
  * inside it, which keeps the install out of Git just as well.
  */
+/** Ignored by the repository's .gitignore files: a global ignore protects only this machine. */
 export function ignoresNodeModules(files: FileIndex): boolean {
-  return files.isIgnored('node_modules', { directory: true }) || files.isIgnored('node_modules/x')
+  return (
+    files.isIgnored('node_modules', { directory: true, shared: true }) ||
+    files.isIgnored('node_modules/x', { shared: true })
+  )
 }
 
 export const gitignoreNodeModules: DoctorRule = {
@@ -96,7 +94,8 @@ export const gitignoreNodeModules: DoctorRule = {
   applies: (_scan, ctx) => ctx.files.has('package.json') && ctx.files.has('.gitignore') && !hasPnpLoader(ctx.files),
   async check(_scan, ctx) {
     if (!ctx.files.has('package.json') || !ctx.files.has('.gitignore')) return []
-    if (ignoresNodeModules(ctx.files) || (await scansSubdirectory(ctx))) return []
+    // In a directory Git ignores as a whole, its node_modules is ignored too.
+    if (ignoresNodeModules(ctx.files) || ctx.files.rootIgnored) return []
     // Yarn Plug'n'Play creates no node_modules directory to ignore.
     if (hasPnpLoader(ctx.files)) return []
     if (ctx.files.has('.yarnrc.yml', { includeIgnored: true }) && isYarnProject(ctx.files)) {

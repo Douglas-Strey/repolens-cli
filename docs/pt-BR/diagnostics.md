@@ -218,14 +218,15 @@ três diretórios de profundidade. Arquivos env ignorados pelo Git também são 
 
 **Severidade:** warning · **Categoria:** security
 
-- **O que verifica:** um arquivo env existe, não está rastreado pelo Git e não é coberto
-  pelo `.gitignore`. Todo arquivo local é reportado, exceto o `.envrc`. Arquivos env de
+- **O que verifica:** um arquivo env existe, não está rastreado pelo Git e não é ignorado
+  pelo Git (pelos arquivos `.gitignore`, pelo `info/exclude` ou pelo seu arquivo global de
+  exclusões). Todo arquivo local é reportado, exceto o `.envrc`. Arquivos env de
   modo, de serviço e de outro tipo só são reportados quando um dos valores deles (incluindo
   atribuições comentadas) corresponde a um formato conhecido de credencial; sem isso, pode
   ser que eles devam mesmo ser commitados. Arquivos que o Git já rastreia são reportados por
-  `TRACKED_ENV_FILE` em vez disso. Só roda em repositórios Git, e é pulada quando a análise é
-  de um subdiretório de um repositório (os arquivos `.gitignore` acima dele não ficam
-  visíveis para a análise).
+  `TRACKED_ENV_FILE` em vez disso. Só roda em repositórios Git. Quando você analisa um
+  subdiretório, os arquivos `.gitignore` acima dele também contam; a verificação é pulada
+  quando o Git ignora o diretório analisado inteiro.
 - **Por que importa:** o próximo `git add .` vai commitá-lo.
 - **Como corrigir:** adicione o nome do arquivo ao `.gitignore`, ou `.env*` junto com
   `!.env.example`.
@@ -680,7 +681,9 @@ parseado.
   ignora `node_modules`. Regras que só correspondem ao conteúdo dele (`node_modules/*`,
   `**/node_modules/**`) contam como ignorá-lo. Não é reportado para instalações do Yarn
   Plug'n'Play, que não criam `node_modules` (um loader `.pnp.cjs`, ou um `.yarnrc.yml` sem
-  um `nodeLinker` diferente de `pnp` em um projeto Yarn).
+  um `nodeLinker` diferente de `pnp` em um projeto Yarn). Em um subdiretório analisado, os
+  arquivos `.gitignore` acima dele também contam. O `info/exclude` e o seu arquivo global de
+  exclusões não contam: eles protegem só a sua máquina.
 - **Por que importa:** um único `git add .` commita milhares de arquivos, muitas vezes
   binários específicos de plataforma.
 - **Como corrigir:** adicione `node_modules/` ao `.gitignore`.

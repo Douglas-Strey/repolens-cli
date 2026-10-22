@@ -38,6 +38,7 @@ export function createFileIndex(walk: WalkResult): FileIndex {
     ignoredFiles: walk.ignoredFiles,
     directories: walk.directories,
     truncated: walk.truncated,
+    ...(walk.rootIgnored ? { rootIgnored: true } : {}),
 
     has(path, options) {
       const key = clean(path)
@@ -82,7 +83,7 @@ export function createFileIndex(walk: WalkResult): FileIndex {
     },
 
     isIgnored(path, options) {
-      return walk.isIgnored(path, options?.directory === true)
+      return walk.isIgnored(path, options?.directory === true, options?.shared === true)
     },
   }
 }

@@ -264,23 +264,33 @@ async function resolveDotGit(workTree: string): Promise<DotGit> {
   return (await followGitFile(workTree, dotGit)) ?? 'invalid'
 }
 
+export interface GitRepository extends GitLayout {
+  /** Absolute real path of the repository's working tree. */
+  workTree: string
+}
+
 /**
- * The working tree of the Git repository containing `start` (a real path):
- * the first directory upward with a `.git`, found the same way as
- * `gitLayout`. Null outside a repository, or when that `.git` is unusable.
- * Works before a scan starts, to find the repository root's configuration.
+ * The Git repository containing `start` (a real path): the first directory
+ * upward with a `.git`, found the same way as `gitLayout`. Null outside a
+ * repository, or when that `.git` is unusable. Works before a scan starts,
+ * to find the repository root's configuration and ignore files.
  */
-export async function repositoryRoot(start: string): Promise<string | null> {
+export async function findRepository(start: string): Promise<GitRepository | null> {
   let current = start
   for (let level = 0; level < MAX_PARENT_LEVELS; level++) {
     const found = await resolveDotGit(current)
     if (found === 'invalid') return null
-    if (found !== 'absent') return current
+    if (found !== 'absent') return { ...found, prefix: toPosix(path.relative(current, start)), workTree: current }
     const parent = path.dirname(current)
     if (parent === current) return null
     current = parent
   }
   return null
+}
+
+/** The working tree of the Git repository containing `start` (see findRepository). */
+export async function repositoryRoot(start: string): Promise<string | null> {
+  return (await findRepository(start))?.workTree ?? null
 }
 
 /**
@@ -326,9 +336,10 @@ export async function readGitFile(
   layout: GitLayout,
   relative: string,
   location: 'worktree' | 'common' = 'worktree',
+  maxBytes = METADATA_MAX_BYTES,
 ): Promise<string | null> {
   const base = location === 'common' ? layout.commonDir : layout.gitDir
-  return readMetadata(base, relative, METADATA_MAX_BYTES)
+  return readMetadata(base, relative, maxBytes)
 }
 
 // ---------------------------------------------------------------------------

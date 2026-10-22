@@ -27,7 +27,10 @@ O walker (que percorre os arquivos) lista o repositório em largura (breadth-fir
 concorrência limitada:
 
 - Ele aplica o `.gitignore` da raiz, os arquivos `.gitignore` aninhados (relativos ao próprio
-  diretório, com os mais profundos tendo precedência) e o `.git/info/exclude`.
+  diretório, com os mais profundos tendo precedência) e os arquivos de ignore do Git que
+  ficam fora da raiz (`src/facts/git-ignore.ts`): os `.gitignore` entre a raiz do
+  repositório e um subdiretório analisado, o `info/exclude` do repositório e, quando quem
+  chama o passa, o `core.excludesFile` global.
 - Ele nunca entra em `node_modules`, `vendor`, `.git` nem em caches de frameworks e
   ferramentas (`.next`, `.nuxt`, `.turbo`, `coverage`, …), mesmo quando eles não estão no
   gitignore.

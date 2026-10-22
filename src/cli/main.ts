@@ -8,6 +8,7 @@ import { filterByConfidence } from '../core/confidence.ts'
 import { RepoLensError } from '../core/errors.ts'
 import { scan } from '../core/scan.ts'
 import { doctorRules } from '../doctor/rules/index.ts'
+import { gitExcludesFile } from '../facts/git-ignore.ts'
 import { renderDoctorJson, renderJson } from '../output/json.ts'
 import { renderMarkdown } from '../output/markdown.ts'
 import { createStyle, type RenderOptions, type Style, supportsColor, supportsUnicode } from '../output/style.ts'
@@ -489,10 +490,12 @@ export async function main(argv: readonly string[], io: CliIO): Promise<number> 
     const debug = debugWriter(io, err)
     const output = args.output && args.subcommand !== 'init' ? await resolveOutputFile(args.output, args, io) : null
 
+    const gitExcludes = await gitExcludesFile(io.env, io.platform)
     const runScan = () =>
       scan({
         cwd: scanned.root,
         config: config.layers,
+        ...(gitExcludes !== undefined ? { gitExcludesFile: gitExcludes } : {}),
         ...(args?.maxFiles !== undefined ? { maxFiles: args.maxFiles } : {}),
         ...(io.now ? { now: io.now } : {}),
         ...(debug ? { debug } : {}),
