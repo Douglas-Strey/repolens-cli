@@ -553,6 +553,7 @@ export async function main(argv: readonly string[], io: CliIO): Promise<number> 
         cwd: scanned.root,
         config: config.layers,
         ...(gitExcludes !== undefined ? { gitExcludesFile: gitExcludes } : {}),
+        ...(args?.online ? { online: true } : {}),
         ...(args?.maxFiles !== undefined ? { maxFiles: args.maxFiles } : {}),
         ...(io.now ? { now: io.now } : {}),
         ...(debug ? { debug } : {}),

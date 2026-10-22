@@ -1,5 +1,15 @@
 import { gt, valid } from 'semver'
-import type { Diagnostic, DoctorRule, Runtime, Severity } from '../../types.ts'
+import { type LockedPackages, lockedPackages, type PackageEcosystem } from '../../facts/lockfiles.ts'
+import {
+  MAX_ADVISORIES,
+  type OsvAdvisory,
+  OsvError,
+  type OsvSeverity,
+  packageKey,
+  queryOsv,
+  versionFixingAll,
+} from '../../facts/osv.ts'
+import type { Analyzer, Diagnostic, DoctorRule, Runtime, Severity } from '../../types.ts'
 import { compareText } from '../../utils/compare.ts'
 import {
   type AdvisorySeverity,
@@ -139,4 +149,107 @@ export const runtimeVulnerable: DoctorRule = {
   title: 'Pinned runtimes have no known vulnerabilities',
   applies: (scan) => runtimePins(scan.runtimes).length > 0,
   check: (scan) => findVulnerableRuntimes(runtimePins(scan.runtimes)),
+}
+
+// ---------------------------------------------------------------------------
+// Dependencies (repolens doctor --online)
+// ---------------------------------------------------------------------------
+
+const ECOSYSTEM_LABELS: Readonly<Record<PackageEcosystem, string>> = {
+  npm: 'npm',
+  Packagist: 'Composer',
+  Go: 'Go module',
+}
+const OSV_RANK: Readonly<Record<OsvSeverity, number>> = { low: 0, medium: 1, high: 2, critical: 3 }
+/** Advisory ids named in one diagnostic; the rest are counted. */
+const MAX_LISTED_ADVISORIES = 4
+
+export type DependencyAdvisories =
+  | { status: 'off' | 'failed' }
+  | { status: 'ok'; locked: LockedPackages; advisories: Map<string, OsvAdvisory[]> }
+
+/**
+ * OSV.dev advisories for the locked packages, looked up once per scan and
+ * only with `online`. A failure is a scan warning, and the check is skipped.
+ */
+export const dependencyAdvisories: Analyzer<DependencyAdvisories> = {
+  id: 'dependency-advisories',
+  async run(ctx) {
+    if (!ctx.options.online) return { status: 'off' }
+    const locked = await ctx.use(lockedPackages)
+    if (locked.packages.length === 0) return { status: 'ok', locked, advisories: new Map() }
+    try {
+      const result = await queryOsv(locked.packages, { debug: (message) => ctx.debug(message) })
+      if (result.skipped > 0) {
+        ctx.warn({
+          kind: 'limit',
+          message: `${result.skipped} OSV.dev advisories were not fetched: one run fetches at most ${MAX_ADVISORIES}`,
+        })
+      }
+      return { status: 'ok', locked, advisories: result.advisories }
+    } catch (error) {
+      if (!(error instanceof OsvError)) throw error
+      ctx.warn({ kind: 'error', message: `Couldn't check dependencies for known vulnerabilities: ${error.message}` })
+      return { status: 'failed' }
+    }
+  },
+}
+
+function advisoryList(advisories: readonly OsvAdvisory[]): string {
+  const names = advisories.map((advisory) => (advisory.cves[0] ? `${advisory.id} (${advisory.cves[0]})` : advisory.id))
+  const shown = names.slice(0, MAX_LISTED_ADVISORIES)
+  const hidden = names.length - shown.length
+  return hidden > 0 ? `${shown.join(', ')} and ${hidden} more` : formatList(shown)
+}
+
+/**
+ * One diagnostic per locked package version with known vulnerabilities. An
+ * error when one is rated critical, info when all are rated low, a warning
+ * otherwise (unrated advisories included).
+ */
+export function findVulnerableDependencies(
+  locked: LockedPackages,
+  advisories: ReadonlyMap<string, readonly OsvAdvisory[]>,
+): Diagnostic[] {
+  const out: Diagnostic[] = []
+  for (const pkg of locked.packages) {
+    const found = advisories.get(packageKey(pkg))
+    if (!found || found.length === 0) continue
+    const rated = found.map((advisory) => advisory.severity)
+    const highest = rated.reduce<OsvSeverity | undefined>(
+      (best, severity) => (severity && (!best || OSV_RANK[severity] > OSV_RANK[best]) ? severity : best),
+      undefined,
+    )
+    const unrated = rated.some((severity) => !severity)
+    const severity: Severity = highest === 'critical' ? 'error' : highest === 'low' && !unrated ? 'info' : 'warning'
+    const name = safeText(pkg.name, 100)
+    const version = safeText(pkg.version, 40)
+    const count = found.length === 1 ? '1 known vulnerability' : `${found.length} known vulnerabilities`
+    const fix = versionFixingAll(found)
+    const first = found[0] as OsvAdvisory
+    out.push({
+      code: 'DEPENDENCY_VULNERABLE',
+      severity,
+      category: 'security',
+      message: `${name} ${version} (${ECOSYSTEM_LABELS[pkg.ecosystem]}, ${formatList(pkg.lockfiles)}) has ${count}${highest ? `, rated up to ${highest}` : ''}: ${advisoryList(found)}`,
+      hint: fix
+        ? `Upgrade ${name} to ${fix} or later`
+        : `No release of ${name} fixes all of them yet: https://osv.dev/vulnerability/${first.id}`,
+      files: pkg.lockfiles,
+      subject: `${pkg.ecosystem}:${name}@${version}`,
+    })
+  }
+  return out
+}
+
+export const dependencyVulnerable: DoctorRule = {
+  code: 'DEPENDENCY_VULNERABLE',
+  category: 'security',
+  title: 'Locked dependencies have no known vulnerabilities',
+  // Skipped unless `--online`, and when OSV.dev couldn't be reached.
+  applies: async (_scan, ctx) => (await ctx.use(dependencyAdvisories)).status === 'ok',
+  async check(_scan, ctx) {
+    const result = await ctx.use(dependencyAdvisories)
+    return result.status === 'ok' ? findVulnerableDependencies(result.locked, result.advisories) : []
+  },
 }

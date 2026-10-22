@@ -115,6 +115,7 @@ See every check in [docs/diagnostics.md](docs/diagnostics.md).
 ```sh
 repolens doctor              # exits 1 on errors
 repolens doctor --strict     # also fails on warnings
+repolens doctor --online     # also check dependencies against OSV.dev
 repolens doctor --json       # for scripts and CI
 ```
 
@@ -148,6 +149,11 @@ up the day the fix ships:
   upgrading RepoLens is how you get the latest advisories.
 - **Only versions that are really pinned.** `php:8.3-fpm`, `^8.3` and `engines` ranges
   follow the latest patch and aren't reported; `php:8.3.10-fpm` is.
+- **Your dependencies too, when you ask.** `repolens doctor --online` looks every exact
+  version in your lockfiles (npm, pnpm, Yarn, Bun, Composer, Go modules) up in
+  [OSV.dev](https://osv.dev) and reports the advisories with the version that fixes them.
+  It is the only thing in RepoLens that uses the network, and it sends package names and
+  versions, nothing else.
 
 Details in [docs/diagnostics.md](docs/diagnostics.md#runtime_vulnerable).
 
@@ -334,7 +340,8 @@ RepoLens is built to be the first thing you run in a repository you don't know y
   redacted. The test suite checks that sentinel secrets never show up in any output format.
 - **It only reads inside the directory you point it at.** Symlinks are resolved and checked,
   directory symlinks are never followed, and FIFOs, binaries and huge files are skipped.
-- **No telemetry, no network.** RepoLens makes no network requests at all.
+- **No telemetry, no network by default.** RepoLens makes no network requests unless you
+  run `repolens doctor --online`, which sends package names and versions to OSV.dev.
 
 The full model is in [docs/security.md](docs/security.md). Found a hole? Please
 [report it privately](SECURITY.md).
@@ -389,8 +396,9 @@ The unscoped `repolens` names on npm were already taken or too close to existing
 The command you run is still `repolens`.
 
 **Does it upload my code or use an AI model?**
-No. Everything happens locally with static analysis. There is no network access, account
-or API key.
+No. Everything happens locally with static analysis. There is no account or API key, and
+no network access unless you run `repolens doctor --online`, which sends package names and
+versions (never code) to OSV.dev.
 
 **Is it safe on a repository I don't trust?**
 That's the main design goal: it never executes project code, config files, hooks or `git`,

@@ -45,6 +45,7 @@ export function resolveOptions(options: ScanOptions = {}): ResolvedScanOptions {
     maxFileSize: limitOption('maxFileSize', options.maxFileSize, DEFAULT_MAX_FILE_SIZE, 0),
     now: options.now ?? new Date(),
     debug: options.debug ?? (() => {}),
+    online: options.online === true,
     config: NO_CONFIG,
   }
 }

@@ -125,7 +125,7 @@ Um código digitado errado é reportado com uma sugestão (`Unknown check "ENV_U
 did you mean ENV_UNDOCUMENTED?`), e a configuração é ignorada.
 
 **Verificações de segurança** (`ENV_PUBLIC_SECRET`, `ENV_EXAMPLE_REAL_SECRET`,
-`TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`) não podem ser desativadas nem rebaixadas por
+`TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`, `DEPENDENCY_VULNERABLE`) não podem ser desativadas nem rebaixadas por
 uma configuração do projeto: o RepoLens costuma rodar em repositórios que ninguém revisou
 ainda, e esses repositórios não podem ter como esconder os próprios achados de segurança.
 Uma configuração do projeto pode elevá-las para `"error"`. Para desativar uma delas, use a

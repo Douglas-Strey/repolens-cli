@@ -47,6 +47,7 @@ describe('doctor rule registry', () => {
         'COMPOSE_ENV_FILE_MISSING',
         'COMPOSE_VERSION_OBSOLETE',
         'CONFIG_PARSE_ERROR',
+        'DEPENDENCY_VULNERABLE',
         'DOCKER_PORT_CONFLICT',
         'ENV_EXAMPLE_MISSING',
         'ENV_EXAMPLE_REAL_SECRET',

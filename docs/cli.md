@@ -69,12 +69,14 @@ each finding. Every finding has a stable code such as `ENV_UNDOCUMENTED` or
 | --- | --- |
 | `--fail-on <level>` | Exit with 1 when a finding is at least this severe: `error` (default, or `doctor.failOn` from a [config file](configuration.md)), `warning`, `info`, or `never`. |
 | `--strict` | Shorthand for `--fail-on warning`. |
+| `--online` | Also look the exact versions in your lockfiles up in [OSV.dev](https://osv.dev) (`DEPENDENCY_VULNERABLE`). The only option that uses the network: it sends package names and versions, nothing else ([security](security.md#8-the-network-is-used-only-with-repolens-doctor---online)). |
 | `--json` | Print checks and diagnostics as JSON. |
 | `-q, --quiet` | Hide passing categories and hints. |
 
 ```sh
 repolens doctor                   # fails (exit 1) only on errors
 repolens doctor --strict          # also fails on warnings
+repolens doctor --online          # also check dependencies against OSV.dev
 repolens doctor --json | jq '.diagnostics[] | select(.code == "ENV_UNDOCUMENTED")'
 ```
 

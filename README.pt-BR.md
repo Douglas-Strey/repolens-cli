@@ -118,6 +118,7 @@ Veja todas as verificações em [docs/pt-BR/diagnostics.md](docs/pt-BR/diagnosti
 ```sh
 repolens doctor              # código de saída 1 se houver erros
 repolens doctor --strict     # também falha com avisos
+repolens doctor --online     # também verifica as dependências no OSV.dev
 repolens doctor --json       # para scripts e CI
 ```
 
@@ -152,6 +153,11 @@ ficou esquecida num Dockerfile aparece no mesmo dia em que a correção sai:
   então atualizar o RepoLens é o jeito de receber os avisos mais recentes.
 - **Só versões realmente fixadas.** `php:8.3-fpm`, `^8.3` e as faixas de `engines`
   acompanham o patch mais recente e não são reportadas; `php:8.3.10-fpm` é.
+- **As suas dependências também, quando você pede.** O `repolens doctor --online` consulta
+  no [OSV.dev](https://osv.dev) cada versão exata dos seus lockfiles (npm, pnpm, Yarn,
+  Bun, Composer, módulos Go) e reporta os advisories com a versão que os corrige. É a
+  única parte do RepoLens que usa a rede, e ela envia nomes e versões de pacotes, mais
+  nada.
 
 Detalhes em [docs/pt-BR/diagnostics.md](docs/pt-BR/diagnostics.md#runtime_vulnerable).
 
@@ -348,7 +354,9 @@ conhece.
 - **Ele só lê dentro do diretório que você indicar.** Links simbólicos são resolvidos e
   verificados, links simbólicos de diretório nunca são seguidos, e FIFOs, binários e
   arquivos enormes são pulados.
-- **Sem telemetria, sem rede.** O RepoLens não faz nenhuma requisição de rede.
+- **Sem telemetria, sem rede por padrão.** O RepoLens não faz nenhuma requisição de rede, a
+  menos que você rode o `repolens doctor --online`, que envia nomes e versões de pacotes
+  ao OSV.dev.
 
 O modelo completo está em [docs/pt-BR/security.md](docs/pt-BR/security.md). Achou uma
 brecha? Por favor, [reporte de forma privada](SECURITY.pt-BR.md).
@@ -405,8 +413,9 @@ Os nomes `repolens` sem escopo no npm já estavam em uso ou eram parecidos demai
 existentes. O comando que você roda continua sendo `repolens`.
 
 **Ele faz upload do meu código ou usa um modelo de IA?**
-Não. Tudo acontece localmente, com análise estática. Não há acesso à rede, conta nem chave
-de API.
+Não. Tudo acontece localmente, com análise estática. Não há conta nem chave de API, e não
+há acesso à rede a menos que você rode o `repolens doctor --online`, que envia nomes e
+versões de pacotes (nunca código) ao OSV.dev.
 
 **É seguro usar em um repositório em que eu não confio?**
 Esse é o principal objetivo do design: ele nunca executa código do projeto, arquivos de

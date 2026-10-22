@@ -41,6 +41,8 @@ export interface CliArgs {
   dryRun: boolean
   /** setup --ignore-scripts: install without lifecycle scripts. */
   ignoreScripts: boolean
+  /** doctor --online: look dependencies up in OSV.dev. */
+  online: boolean
 }
 
 export interface ParseOptions {
@@ -70,6 +72,7 @@ const OPTIONS = {
   yes: { type: 'boolean', short: 'y' },
   'dry-run': { type: 'boolean' },
   'ignore-scripts': { type: 'boolean' },
+  online: { type: 'boolean' },
   help: { type: 'boolean', short: 'h' },
   version: { type: 'boolean', short: 'V' },
 } as const
@@ -115,6 +118,9 @@ function checkFlagsApply(args: CliArgs, values: { strict?: boolean; 'fail-on'?: 
     ] as const) {
       if (given) throw invalid(`${flag} does not apply to mcp, which answers an MCP client over stdin and stdout`)
     }
+  }
+  if (args.online && command !== 'doctor') {
+    throw invalid('--online only applies to doctor (repolens doctor --online)')
   }
   if (command !== 'doctor') {
     if (values.strict) throw invalid('--strict only applies to doctor (repolens doctor --strict)')
@@ -188,6 +194,7 @@ export function parseCliArgs(argv: readonly string[], options: ParseOptions = {}
     yes: values.yes === true,
     dryRun: values['dry-run'] === true,
     ignoreScripts: values['ignore-scripts'] === true,
+    online: values.online === true,
   }
 
   // `repolens doctor --help` shows doctor's help; a bare `repolens --help` shows the overview.

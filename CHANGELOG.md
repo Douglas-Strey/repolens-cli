@@ -21,6 +21,14 @@ All notable changes to RepoLens are documented here. The format follows
 - PHP runtime detection: `composer.json` (`require.php`, `config.platform.php`),
   `.php-version`, `.tool-versions`, mise, official `php` Docker images and
   `shivammathur/setup-php` in GitHub Actions.
+- `repolens doctor --online` (`DEPENDENCY_VULNERABLE`): looks the exact versions in the
+  project's lockfiles up in OSV.dev and reports each package version with known
+  vulnerabilities, with the highest rating, the advisory and CVE ids and the version that
+  fixes them. It reads `package-lock.json`, `npm-shrinkwrap.json`, `pnpm-lock.yaml`,
+  `yarn.lock` (classic and Berry), `bun.lock`, `composer.lock` and `go.mod`. It is the
+  only feature that uses the network, and only with the flag: it sends package names and
+  versions, nothing else. Without `--online` RepoLens stays fully offline.
+  ([#36](https://github.com/Douglas-Strey/repolens-cli/issues/36))
 
 ## [0.4.0] - 2026-10-22
 
