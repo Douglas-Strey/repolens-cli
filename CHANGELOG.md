@@ -7,13 +7,23 @@ All notable changes to RepoLens are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-22
+
 ### Added
 
+- `repolens mcp`: a Model Context Protocol server over stdio, so AI assistants (Claude
+  Code, Codex, Cursor, …) can ask about the project. Six tools (`get_project_overview`,
+  `get_services`, `get_environment_variables`, `get_routes`, `get_scripts`,
+  `get_diagnostics`) answer with the matching part of the Markdown report, or JSON on
+  request, for the project or a subdirectory inside it, scanning the files fresh on every
+  call. The protocol is implemented in RepoLens, with no new dependency, for both the
+  2026-07-28 revision and the earlier `initialize` ones. Without a path it serves
+  `$CLAUDE_PROJECT_DIR` when set. ([#10](https://github.com/Douglas-Strey/repolens-cli/issues/10))
 - `ENV_UNDOCUMENTED` treats more host-injected variables as platform-provided (Heroku
   dyno metadata, AWS Lambda, GitLab CI, CircleCI, Travis, Buildkite, Amplify-managed
   names, Coolify, Koyeb, App Engine, Cloud Run and Deno Deploy), so they are not reported
   as missing from `.env.example`. User-set Amplify `AMPLIFY_*` names and `HEROKU_API_KEY`
-  stay reportable.
+  stay reportable. ([#2](https://github.com/Douglas-Strey/repolens-cli/issues/2))
 - Git's ignore rules from outside the scanned directory now apply: when you scan a
   subdirectory, the `.gitignore` files of the directories above it up to the repository
   root, and in every repository its `info/exclude` (also from a linked worktree) and your
@@ -37,14 +47,6 @@ All notable changes to RepoLens are documented here. The format follows
 - GitLab CI job `extends`: a job gets the script, image and tags of the templates it
   extends (one or a list, later ones winning), so its tasks and `runsOn` reflect them.
   ([#31](https://github.com/Douglas-Strey/repolens-cli/issues/31))
-- `repolens mcp`: a Model Context Protocol server over stdio, so AI assistants (Claude
-  Code, Codex, Cursor, …) can ask about the project. Six tools (`get_project_overview`,
-  `get_services`, `get_environment_variables`, `get_routes`, `get_scripts`,
-  `get_diagnostics`) answer with the matching part of the Markdown report, or JSON on
-  request, for the project or a subdirectory inside it, scanning the files fresh on every
-  call. The protocol is implemented in RepoLens, with no new dependency, for both the
-  2026-07-28 revision and the earlier `initialize` ones. Without a path it serves
-  `$CLAUDE_PROJECT_DIR` when set. ([#10](https://github.com/Douglas-Strey/repolens-cli/issues/10))
 
 ## [0.3.0] - 2026-10-21
 

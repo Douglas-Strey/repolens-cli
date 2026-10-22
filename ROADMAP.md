@@ -2,10 +2,11 @@
 
 **English** | [Português (Brasil)](ROADMAP.pt-BR.md)
 
-RepoLens 0.3 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
-`repolens setup`, terminal, JSON, Markdown and agent output, and configuration files
-(including per-finding ignores and a monorepo root's config). This page lists what
-comes next, with enough detail that you can pick an item up and start.
+RepoLens 0.4 covers JavaScript/TypeScript and Go in depth: the overview, 34 doctor checks,
+`repolens setup`, `repolens mcp` for AI assistants, terminal, JSON, Markdown and agent
+output, and configuration files (including per-finding ignores and a monorepo root's
+config). This page lists what comes next, with enough detail that you can pick an item up
+and start.
 
 **Want to work on something?** Every item below links to its issue, and the
 [roadmap board](https://github.com/users/Douglas-Strey/projects/1) shows what's next, in progress and done. Comment on
