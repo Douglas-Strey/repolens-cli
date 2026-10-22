@@ -807,6 +807,12 @@ export interface ScanOptions {
    * on the machine's Git configuration. The CLI passes it.
    */
   gitExcludesFile?: string
+  /**
+   * Look the locked dependency versions up in OSV.dev (DEPENDENCY_VULNERABLE).
+   * The only option that makes RepoLens send network requests: it sends each
+   * package's ecosystem, name and version. Default false.
+   */
+  online?: boolean
 }
 
 export interface ResolvedScanOptions {
@@ -816,6 +822,8 @@ export interface ResolvedScanOptions {
   maxFileSize: number
   now: Date
   debug: (message: string) => void
+  /** Look dependencies up in OSV.dev (see ScanOptions.online). */
+  online: boolean
   /** The merged configuration (empty until the context is created). */
   config: EffectiveConfig
 }

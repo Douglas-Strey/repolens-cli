@@ -69,7 +69,7 @@ severidade dela com `doctor.rules`, por código:
 A configuração do próprio projeto (`repolens.config.json`, ou a chave `"repolens"` no
 `package.json` dele) não pode desativar nem rebaixar as verificações de segurança
 (`ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `ENV_PUBLIC_SECRET`,
-`RUNTIME_VULNERABLE`): um repositório não pode ter como esconder os próprios achados de segurança. Ela pode
+`RUNTIME_VULNERABLE`, `DEPENDENCY_VULNERABLE`): um repositório não pode ter como esconder os próprios achados de segurança. Ela pode
 elevá-las para `"error"`. A sua configuração do usuário ou um arquivo passado com `--config`
 podem desativá-las. Veja [configuration.md](configuration.md#doctorrules) para os detalhes.
 
@@ -84,6 +84,7 @@ podem desativá-las. Veja [configuration.md](configuration.md#doctorrules) para 
 | [`ENV_FILE_NOT_IGNORED`](#env_file_not_ignored) | warning | security | Os arquivos env locais são ignorados pelo Git |
 | [`ENV_PUBLIC_SECRET`](#env_public_secret) | warning | security | Nenhum segredo é exposto ao navegador |
 | [`RUNTIME_VULNERABLE`](#runtime_vulnerable) | error / warning | security | Os runtimes fixados não têm vulnerabilidades conhecidas |
+| [`DEPENDENCY_VULNERABLE`](#dependency_vulnerable) | error / warning / info | security | As dependências travadas não têm vulnerabilidades conhecidas |
 | [`ENV_UNDOCUMENTED`](#env_undocumented) | warning / info | environment | As variáveis de ambiente usadas no código estão documentadas |
 | [`ENV_LOCAL_ONLY`](#env_local_only) | warning | environment | As variáveis de ambiente locais estão documentadas |
 | [`ENV_EXAMPLE_MISSING`](#env_example_missing) | warning / info | environment | Um arquivo env de exemplo documenta o ambiente |
@@ -280,6 +281,36 @@ warning · **Categoria:** security
   traz o link do anúncio), ou fixe a linha em vez do patch (`php:8.3-fpm`) quando as
   imagens são reconstruídas com frequência.
 - **Exemplo:** `PHP 8.3.10 (pinned in Dockerfile) misses 10 security releases, rated up to critical; the latest is 8.3.36 (2026-10-21)`
+
+### `DEPENDENCY_VULNERABLE`
+
+**Severidade:** error quando um advisory é classificado como crítico, info quando todos
+são classificados como baixos; senão, warning · **Categoria:** security
+
+- **Só com o `repolens doctor --online`.** Sem a flag, a verificação é pulada e o RepoLens
+  não faz nenhuma requisição de rede; veja em
+  [security.md](security.md#8-a-rede-só-é-usada-com-o-repolens-doctor---online) o que é
+  enviado.
+- **O que verifica:** as versões exatas dos lockfiles do projeto, na raiz e até dois
+  diretórios de profundidade, consultadas no [OSV.dev](https://osv.dev):
+  - `package-lock.json` e `npm-shrinkwrap.json`;
+  - `pnpm-lock.yaml`;
+  - `yarn.lock` (clássico e Berry);
+  - `bun.lock` (o binário `bun.lockb` não pode ser lido);
+  - `composer.lock`;
+  - as linhas `require` do `go.mod`.
+
+  Um diagnóstico por versão de pacote informa os lockfiles, quantos advisories a afetam, a
+  maior classificação no GitHub Advisory Database (a maioria dos advisories do Go não tem)
+  e os primeiros ids de advisory e CVE, depois a menor versão que corrige todos eles, ou um
+  link quando nenhuma release corrige ainda. Se o OSV.dev não responder, um aviso diz isso
+  e a verificação é pulada.
+- **Por que importa:** a maior parte do código que um projeto entrega são as dependências
+  dele, e as versões de um lockfile continuam instaladas até alguém atualizá-las.
+- **Como corrigir:** atualize o pacote para a versão da dica (`npm install lodash@^4.18.0`,
+  `composer update laravel/framework`, `go get golang.org/x/net@latest`), ou atualize a
+  dependência que o traz.
+- **Exemplo:** `lodash 4.17.20 (npm, package-lock.json) has 5 known vulnerabilities, rated up to high: GHSA-29mw-wpgm-hmr9 (CVE-2020-28500), … and 1 more`
 
 ## Ambiente
 

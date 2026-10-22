@@ -70,12 +70,14 @@ correção sugerida para cada achado. Todo achado tem um código estável, como
 | --- | --- |
 | `--fail-on <level>` | Sai com código 1 quando um achado tem pelo menos esta severidade: `error` (padrão, ou `doctor.failOn` de um [arquivo de configuração](configuration.md)), `warning`, `info` ou `never`. |
 | `--strict` | Atalho para `--fail-on warning`. |
+| `--online` | Também consulta as versões exatas dos seus lockfiles no [OSV.dev](https://osv.dev) (`DEPENDENCY_VULNERABLE`). A única opção que usa a rede: envia nomes e versões de pacotes, mais nada ([segurança](security.md#8-a-rede-só-é-usada-com-o-repolens-doctor---online)). |
 | `--json` | Imprime as verificações e os diagnósticos como JSON. |
 | `-q, --quiet` | Oculta as categorias que passaram e as dicas. |
 
 ```sh
 repolens doctor                   # falha (código 1) só com erros
 repolens doctor --strict          # também falha com avisos
+repolens doctor --online          # também verifica as dependências no OSV.dev
 repolens doctor --json | jq '.diagnostics[] | select(.code == "ENV_UNDOCUMENTED")'
 ```
 

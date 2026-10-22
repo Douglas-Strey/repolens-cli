@@ -53,7 +53,8 @@ ${s.bold('Exit codes')}
   2  Invalid usage, unreadable directory, or an output file that couldn't be written
   3  Unexpected internal error
 
-RepoLens never uploads anything and never prints secret values. Only setup runs commands,
+RepoLens never uploads your code and never prints secret values. Only doctor --online uses
+the network, to look package names and versions up in OSV.dev. Only setup runs commands,
 and only the ones it shows you first; every other command only reads files.
 Docs: ${REPO_URL}#readme
 `
@@ -84,6 +85,8 @@ ${s.bold('Options')}
                          error ${s.dim('(default)')}, warning, info, never
                          ${s.dim('(the default can be set with doctor.failOn in a config file)')}
       --strict           Same as --fail-on warning
+      --online           Also look your locked dependencies up in OSV.dev.
+                         ${s.dim('Sends package names and versions; nothing else.')}
       --json             Print checks and diagnostics as JSON
   -q, --quiet            Hide passing categories and hints
   -o, --output <file>    Write the result to a file

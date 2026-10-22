@@ -21,8 +21,9 @@ Breaking any of them is a security bug; please [report it privately](../SECURITY
   so branch, HEAD, remotes and the list of tracked files are read straight from `.git/HEAD`,
   `.git/config`, `packed-refs` and the binary `.git/index`. There is a test that plants a
   `core.fsmonitor` command and asserts it never runs.
-- No Docker, database or network calls. Compose files and Dockerfiles are parsed; nothing
-  is started or contacted.
+- No Docker or database calls, and no network calls unless you ask for the dependency
+  lookup ([8](#8-the-network-is-used-only-with-repolens-doctor---online)). Compose files and
+  Dockerfiles are parsed; nothing is started or contacted.
 
 ### 2. Secret values never reach the output
 
@@ -103,8 +104,8 @@ A scanned repository can ship a `repolens.config.json` (see
 limits what it can do:
 
 - It can't turn off or lower the **security** checks (`ENV_PUBLIC_SECRET`,
-  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`).
-  Only your user
+  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`,
+  `DEPENDENCY_VULNERABLE`). Only your user
   config or a file you pass with `--config` can.
 - Its `ignore` patterns leave paths out of the analysis, but don't change what RepoLens
   considers ignored by Git: a local `.env` it lists is still reported if Git would commit it.
@@ -152,10 +153,30 @@ does it, on purpose and in the open:
 - **Nothing half-checked.** Missing programs and a Node.js version outside `engines.node`
   are found before the first step runs, and setup stops at the first step that fails.
 
+### 8. The network is used only with `repolens doctor --online`
+
+`repolens doctor --online` looks the exact versions in your lockfiles up in
+[OSV.dev](https://osv.dev), Google's open vulnerability database, and is the only thing
+in RepoLens that makes network requests:
+
+- **Only when you pass the flag.** No config setting or environment variable turns it on,
+  `doctor` without it and every other command stay offline, and `repolens mcp` never
+  uses it.
+- **Only package names and versions.** RepoLens sends each package's ecosystem (`npm`,
+  `Packagist`, `Go`), name and version to `https://api.osv.dev`. No file contents, paths,
+  project name or anything else about your machine.
+- **Read like any project file.** Lockfiles are read with the protections of
+  [3](#3-repolens-only-reads-inside-the-directory-you-point-it-at), up to 32 MiB each; the
+  answers are parsed as data, never executed.
+- **Bounded.** Each request times out after 15 seconds and one run fetches at most 500
+  advisories. If OSV.dev can't be reached, a warning says so and the check is skipped;
+  the rest of the run is unaffected. Nothing is cached or written to disk.
+
 ## Privacy
 
 - **No telemetry.** RepoLens has no analytics, crash reporting or update checks, and makes
-  no network requests at all. If telemetry is ever considered it will be opt-in, off by
+  no network requests unless you run `repolens doctor --online`
+  ([8](#8-the-network-is-used-only-with-repolens-doctor---online)). If telemetry is ever considered it will be opt-in, off by
   default, and announced in the changelog.
 - Output never includes absolute paths from your machine. Paths are relative to the scanned
   directory, and the project is identified by its directory name.

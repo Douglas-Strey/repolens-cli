@@ -24,8 +24,9 @@ próprias ([7](#7-o-repolens-setup-executa-só-o-que-mostra-para-você)).
   rastreados são lidos direto de `.git/HEAD`, `.git/config`, `packed-refs` e do arquivo
   binário `.git/index`. Existe um teste que planta um comando em `core.fsmonitor` e confirma
   que ele nunca roda.
-- Nenhuma chamada a Docker, banco de dados ou rede. Arquivos Compose e Dockerfiles são
-  parseados; nada é iniciado nem contatado.
+- Nenhuma chamada a Docker ou banco de dados, e nenhuma chamada de rede a menos que você
+  peça a consulta de dependências ([8](#8-a-rede-só-é-usada-com-o-repolens-doctor---online)).
+  Arquivos Compose e Dockerfiles são parseados; nada é iniciado nem contatado.
 
 ### 2. Valores de segredos nunca chegam à saída
 
@@ -111,8 +112,8 @@ Um repositório analisado pode trazer um `repolens.config.json` (veja
 executa, e limita o que ele pode fazer:
 
 - Ele não pode desativar nem rebaixar as verificações de **segurança** (`ENV_PUBLIC_SECRET`,
-  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`).
-  Só a sua
+  `ENV_EXAMPLE_REAL_SECRET`, `TRACKED_ENV_FILE`, `ENV_FILE_NOT_IGNORED`, `RUNTIME_VULNERABLE`,
+  `DEPENDENCY_VULNERABLE`). Só a sua
   configuração do usuário ou um arquivo que você passar com `--config` podem fazer isso.
 - Os padrões de `ignore` dele deixam caminhos de fora da análise, mas não mudam o que o
   RepoLens considera ignorado pelo Git: um `.env` local listado ali continua sendo
@@ -169,10 +170,30 @@ isso, de propósito e às claras:
   `engines.node` são detectados antes do primeiro passo, e o setup para no primeiro passo
   que falhar.
 
+### 8. A rede só é usada com o `repolens doctor --online`
+
+O `repolens doctor --online` consulta as versões exatas dos seus lockfiles no
+[OSV.dev](https://osv.dev), o banco aberto de vulnerabilidades do Google, e é a única parte
+do RepoLens que faz requisições de rede:
+
+- **Só quando você passa a flag.** Nenhuma configuração nem variável de ambiente a liga, o
+  `doctor` sem ela e todos os outros comandos continuam offline, e o `repolens mcp` nunca a
+  usa.
+- **Só nomes e versões de pacotes.** O RepoLens envia o ecossistema (`npm`, `Packagist`,
+  `Go`), o nome e a versão de cada pacote para `https://api.osv.dev`. Nenhum conteúdo de
+  arquivo, caminho, nome de projeto ou qualquer outra coisa sobre a sua máquina.
+- **Lidos como qualquer arquivo do projeto.** Os lockfiles são lidos com as proteções do
+  [3](#3-o-repolens-só-lê-dentro-do-diretório-para-o-qual-você-aponta), até 32 MiB cada; as
+  respostas são interpretadas como dados, nunca executadas.
+- **Com limites.** Cada requisição expira em 15 segundos e uma execução busca no máximo 500
+  advisories. Se o OSV.dev não responder, um aviso diz isso e a verificação é pulada; o
+  restante da execução não é afetado. Nada é guardado em cache nem gravado em disco.
+
 ## Privacidade
 
 - **Sem telemetria.** O RepoLens não tem analytics, relatório de falhas nem verificação de
-  atualizações, e não faz nenhuma requisição de rede. Se a telemetria for considerada algum
+  atualizações, e não faz nenhuma requisição de rede a menos que você rode o
+  `repolens doctor --online` ([8](#8-a-rede-só-é-usada-com-o-repolens-doctor---online)). Se a telemetria for considerada algum
   dia, ela será opt-in, desativada por padrão e anunciada no changelog.
 - A saída nunca inclui caminhos absolutos da sua máquina. Os caminhos são relativos ao
   diretório analisado, e o projeto é identificado pelo nome do diretório.

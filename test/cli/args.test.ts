@@ -33,6 +33,7 @@ const DEFAULTS: CliArgs = {
   yes: false,
   dryRun: false,
   ignoreScripts: false,
+  online: false,
 }
 
 describe('parseCliArgs', () => {
