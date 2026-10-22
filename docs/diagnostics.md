@@ -255,23 +255,24 @@ an example file (`# NAME=`) documents the name too. Some variables are treated s
   `GITHUB_SHA`, `GITHUB_TOKEN`, `GITHUB_REF_NAME`, `GITHUB_RUN_ID`, …, but not
   application names such as `GITHUB_CLIENT_ID`), and names starting with `npm_`,
   `RUNNER_`, `VERCEL_`, `NETLIFY`, `RENDER_`, `RAILWAY_`, `FLY_`, `CF_PAGES`,
-  `NEXT_RUNTIME`, `NEXT_PHASE`, `VITEST`, `JEST_WORKER_ID` or `XDG_`, Heroku dyno
-  metadata (`HEROKU_APP_ID`, `HEROKU_APP_NAME`, `HEROKU_DYNO_ID`, `HEROKU_RELEASE_*`,
-  `HEROKU_SLUG_*`, `DYNO`, but not user credentials such as `HEROKU_API_KEY`), AWS
-  Lambda (`AWS_LAMBDA_*`, `AWS_EXECUTION_ENV`, `LAMBDA_TASK_ROOT`,
-  `LAMBDA_RUNTIME_DIR`), GitLab CI (`GITLAB_CI`, `CI_*`), CircleCI (`CIRCLECI`,
-  `CIRCLE_*`), Travis (`TRAVIS`, `TRAVIS_*`), Buildkite (`BUILDKITE`, `BUILDKITE_*`),
-  Amplify-managed names (`AMPLIFY_BACKEND_APP_ID`, `AMPLIFY_BACKEND_PULL_ONLY`,
-  `AWS_APP_ID`, `AWS_BRANCH`, `AWS_BRANCH_ARN`, `AWS_CLONE_URL`, `AWS_COMMIT_ID`,
-  `AWS_JOB_ID`, `AWS_PULL_REQUEST_ID`, `AWS_PULL_REQUEST_SOURCE_BRANCH`,
-  `AWS_PULL_REQUEST_DESTINATION_BRANCH`, not user-set `AMPLIFY_*` names such as
+  `NEXT_RUNTIME`, `NEXT_PHASE`, `VITEST`, `JEST_WORKER_ID` or `XDG_`. These checks also
+  skip what other hosts and CI services set: Heroku dyno metadata (`HEROKU_APP_ID`,
+  `HEROKU_APP_NAME`, `HEROKU_DYNO_ID`, `HEROKU_RELEASE_*`, `HEROKU_SLUG_*`, `DYNO`, but
+  not user credentials such as `HEROKU_API_KEY`), AWS Lambda (`AWS_LAMBDA_*`,
+  `AWS_EXECUTION_ENV`, `LAMBDA_TASK_ROOT`, `LAMBDA_RUNTIME_DIR`), GitLab CI
+  (`GITLAB_CI`, `CI_*`), CircleCI (`CIRCLECI`, `CIRCLE_*`), Travis (`TRAVIS`,
+  `TRAVIS_*`), Buildkite (`BUILDKITE`, `BUILDKITE_*`), Amplify-managed names
+  (`AMPLIFY_BACKEND_APP_ID`, `AMPLIFY_BACKEND_PULL_ONLY`, `AWS_APP_ID`, `AWS_BRANCH`,
+  `AWS_BRANCH_ARN`, `AWS_CLONE_URL`, `AWS_COMMIT_ID`, `AWS_JOB_ID`,
+  `AWS_PULL_REQUEST_ID`, `AWS_PULL_REQUEST_SOURCE_BRANCH`,
+  `AWS_PULL_REQUEST_DESTINATION_BRANCH`, but not user-set `AMPLIFY_*` names such as
   `AMPLIFY_MONOREPO_APP_ROOT` or OAuth secrets), Coolify (`COOLIFY_*`), Koyeb
   (`KOYEB_*`), App Engine (`GAE_*`), Cloud Run (`CLOUD_RUN_*`, `K_SERVICE`,
   `K_REVISION`, `K_CONFIGURATION`) and Deno Deploy (`DENO_DEPLOYMENT_ID`,
-  `DENO_REGION`). `PORT` is not on
-  this list: it is application configuration. Variables listed in `environment.provided`
-  in a [configuration file](configuration.md#environmentprovided) are treated like
-  platform variables by these checks (the security checks still look at them).
+  `DENO_REGION`). `PORT` is not on this list: it is application configuration.
+  Variables listed in `environment.provided` in a
+  [configuration file](configuration.md#environmentprovided) are treated like platform
+  variables by these checks (the security checks still look at them).
 - **Test-only variables** are referenced only from test code: test files (`*.test.ts`,
   `*_test.go`, `test_*.py`, …), test directories (`test/`, `__tests__/`, `e2e/`, …) and
   test-runner configuration (`playwright.config.ts`, `vitest.config.ts`, …). They are not
