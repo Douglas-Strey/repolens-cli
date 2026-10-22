@@ -2,10 +2,10 @@
 
 [English](ROADMAP.md) | **Português (Brasil)**
 
-O RepoLens 0.4 cobre JavaScript/TypeScript e Go em profundidade: a visão geral, 34
-verificações no doctor, o `repolens setup`, o `repolens mcp` para assistentes de IA, saída
-para terminal, JSON, Markdown e agentes, e arquivos de configuração (com exceções por
-achado e a configuração da raiz de um monorepo). Esta página lista o que vem a seguir, com
+O RepoLens 0.5 cobre JavaScript/TypeScript e Go em profundidade: a visão geral, 36
+verificações no doctor (vulnerabilidades conhecidas incluídas), o `repolens setup`, o
+`repolens mcp` para assistentes de IA, saída para terminal, JSON, Markdown e agentes, e
+arquivos de configuração (com exceções por achado e a configuração da raiz de um monorepo). Esta página lista o que vem a seguir, com
 detalhe suficiente para você pegar um item e começar.
 
 **Quer trabalhar em algo?** Cada item abaixo tem um link para a sua issue, e o
