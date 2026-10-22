@@ -268,7 +268,20 @@ variáveis recebem tratamento especial:
   `GITHUB_TOKEN`, `GITHUB_REF_NAME`, `GITHUB_RUN_ID`, …, mas não nomes de aplicação como
   `GITHUB_CLIENT_ID`), e nomes que começam com `npm_`, `RUNNER_`, `VERCEL_`, `NETLIFY`,
   `RENDER_`, `RAILWAY_`, `FLY_`, `CF_PAGES`, `NEXT_RUNTIME`, `NEXT_PHASE`, `VITEST`,
-  `JEST_WORKER_ID` ou `XDG_`. `PORT` não está nesta lista: ela é configuração da
+  `JEST_WORKER_ID` ou `XDG_`, metadados de dyno do Heroku (`HEROKU_APP_ID`,
+  `HEROKU_APP_NAME`, `HEROKU_DYNO_ID`, `HEROKU_RELEASE_*`, `HEROKU_SLUG_*`, `DYNO`,
+  mas não credenciais definidas pelo usuário como `HEROKU_API_KEY`), AWS Lambda
+  (`AWS_LAMBDA_*`, `AWS_EXECUTION_ENV`, `LAMBDA_TASK_ROOT`, `LAMBDA_RUNTIME_DIR`),
+  GitLab CI (`GITLAB_CI`, `CI_*`), CircleCI (`CIRCLECI`, `CIRCLE_*`), Travis
+  (`TRAVIS`, `TRAVIS_*`), Buildkite (`BUILDKITE`, `BUILDKITE_*`), nomes gerenciados
+  pelo Amplify (`AMPLIFY_BACKEND_APP_ID`, `AMPLIFY_BACKEND_PULL_ONLY`, `AWS_APP_ID`,
+  `AWS_BRANCH`, `AWS_BRANCH_ARN`, `AWS_CLONE_URL`, `AWS_COMMIT_ID`, `AWS_JOB_ID`,
+  `AWS_PULL_REQUEST_ID`, `AWS_PULL_REQUEST_SOURCE_BRANCH`,
+  `AWS_PULL_REQUEST_DESTINATION_BRANCH`, não nomes `AMPLIFY_*` definidos pelo usuário
+  como `AMPLIFY_MONOREPO_APP_ROOT` ou segredos OAuth), Coolify (`COOLIFY_*`), Koyeb
+  (`KOYEB_*`), App Engine (`GAE_*`), Cloud Run (`CLOUD_RUN_*`, `K_SERVICE`,
+  `K_REVISION`, `K_CONFIGURATION`) e Deno Deploy (`DENO_DEPLOYMENT_ID`,
+  `DENO_REGION`). `PORT` não está nesta lista: ela é configuração da
   aplicação. Variáveis listadas em `environment.provided` em um
   [arquivo de configuração](configuration.md#environmentprovided) são tratadas como
   variáveis de plataforma por estas verificações (as verificações de segurança continuam

@@ -44,8 +44,59 @@ describe('isPlatformVariable', () => {
     }
   })
 
+  it('ignores host and CI variables the platform injects', () => {
+    for (const name of [
+      'HEROKU_APP_NAME',
+      'HEROKU_RELEASE_VERSION',
+      'HEROKU_SLUG_COMMIT',
+      'DYNO',
+      'AWS_LAMBDA_FUNCTION_NAME',
+      'AWS_EXECUTION_ENV',
+      'LAMBDA_TASK_ROOT',
+      'CI_COMMIT_SHA',
+      'CIRCLECI',
+      'CIRCLE_SHA1',
+      'TRAVIS',
+      'TRAVIS_BUILD_ID',
+      'BUILDKITE',
+      'BUILDKITE_BUILD_NUMBER',
+      'AMPLIFY_BACKEND_APP_ID',
+      'AMPLIFY_BACKEND_PULL_ONLY',
+      'AWS_APP_ID',
+      'AWS_BRANCH',
+      'AWS_COMMIT_ID',
+      'AWS_PULL_REQUEST_SOURCE_BRANCH',
+      'COOLIFY_FQDN',
+      'KOYEB_APP_NAME',
+      'GAE_SERVICE',
+      'CLOUD_RUN_JOB',
+      'K_SERVICE',
+      'DENO_DEPLOYMENT_ID',
+      'DENO_REGION',
+      'GITLAB_CI',
+    ]) {
+      expect(isPlatformVariable(name), name).toBe(true)
+    }
+  })
+
   it('keeps application variables, including PORT', () => {
-    for (const name of ['PORT', 'DATABASE_URL', 'API_KEY', 'NODE_VERSION_OVERRIDE', 'GITHUB', 'NPM_TOKEN']) {
+    for (const name of [
+      'PORT',
+      'DATABASE_URL',
+      'API_KEY',
+      'NODE_VERSION_OVERRIDE',
+      'GITHUB',
+      'NPM_TOKEN',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_REGION',
+      'GITLAB_TOKEN',
+      'HEROKU',
+      'HEROKU_API_KEY',
+      'AMPLIFY_MONOREPO_APP_ROOT',
+      'AMPLIFY_DIFF_DEPLOY',
+      'AMPLIFY_FACEBOOK_CLIENT_SECRET',
+      'AMPLIFY_GOOGLE_CLIENT_SECRET',
+    ]) {
       expect(isPlatformVariable(name), name).toBe(false)
     }
   })
