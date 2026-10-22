@@ -473,16 +473,64 @@ function gitlabImage(value: unknown): string | undefined {
   return getString(value, 'name')
 }
 
-/** Parse .gitlab-ci.yml: every top-level mapping that is not a reserved keyword or a hidden ".job". */
+/** Longest `extends` chain GitLab accepts, and the deepest RepoLens follows in one go. */
+export const MAX_GITLAB_EXTENDS_DEPTH = 11
+
+/**
+ * Every job of a configuration with `extends` applied, the way GitLab does
+ * it: the jobs it names (one, or a list in which later ones win) merged like
+ * includes (see mergeGitlabConfig), then the job's own keys on top. Cycles
+ * and unknown names are skipped. Each job is resolved once, in file order,
+ * so a configuration whose templates extend each other many times over stays
+ * linear. A resolution that starts from a job goes at most
+ * MAX_GITLAB_EXTENDS_DEPTH levels down, which keeps the recursion shallow; a
+ * template resolved earlier counts as one level, whatever its own depth.
+ */
+export function resolveGitlabExtends(doc: Record<string, unknown>): Map<string, Record<string, unknown>> {
+  const resolved = new Map<string, Record<string, unknown>>()
+  const inProgress = new Set<string>()
+  const resolve = (id: string, depth: number): Record<string, unknown> | null => {
+    const done = resolved.get(id)
+    if (done) return done
+    const job = Object.hasOwn(doc, id) ? doc[id] : undefined
+    if (!isRecord(job) || inProgress.has(id)) return null
+    const own = Object.fromEntries(Object.entries(job).filter(([key]) => key !== 'extends'))
+    const parents = stringsOf(job.extends)
+    if (parents.length === 0 || depth >= MAX_GITLAB_EXTENDS_DEPTH) {
+      resolved.set(id, own)
+      return own
+    }
+    inProgress.add(id)
+    let merged: unknown = {}
+    for (const parent of parents) {
+      const base = resolve(parent, depth + 1)
+      if (base) merged = mergeGitlabConfig(merged, base)
+    }
+    inProgress.delete(id)
+    const result = mergeGitlabConfig(merged, own) as Record<string, unknown>
+    resolved.set(id, result)
+    return result
+  }
+  for (const id of Object.keys(doc)) if (!GITLAB_RESERVED.has(id)) resolve(id, 0)
+  return resolved
+}
+
+/**
+ * Parse .gitlab-ci.yml: every top-level mapping that is not a reserved
+ * keyword or a hidden ".job", with `extends` applied. Hidden jobs are only
+ * templates.
+ */
 export function parseGitlabCi(doc: unknown, file: string): CiWorkflow | null {
   if (!isRecord(doc)) return null
   const defaultImage = gitlabImage(doc.image) ?? gitlabImage(isRecord(doc.default) ? doc.default.image : undefined)
+  const resolved = resolveGitlabExtends(doc)
   const jobs: CiJob[] = []
-  for (const [id, job] of Object.entries(doc)) {
-    if (GITLAB_RESERVED.has(id) || id.startsWith('.') || !isRecord(job)) continue
+  for (const id of Object.keys(doc)) {
+    const job = resolved.get(id)
+    if (GITLAB_RESERVED.has(id) || id.startsWith('.') || !job) continue
     const ownImage = gitlabImage(job.image)
     const image = ownImage ?? defaultImage
-    // Only the job's own image says what it does; an inherited default would tag every job alike.
+    // Only the job's own image (or a template's) says what it does; a default would tag every job alike.
     const texts = [
       id,
       getString(job, 'stage') ?? '',

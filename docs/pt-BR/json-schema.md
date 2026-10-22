@@ -235,6 +235,8 @@ onde `tasks` é inferido a partir de nomes de jobs, comandos e actions: `lint`, 
 CI, `includes` lista os arquivos locais que o `include` traz (wildcards expandidos,
 includes aninhados seguidos, no máximo 150), cujos jobs são mesclados ao workflow como o
 GitLab faz; includes remotos, de outro projeto, de template e de componente não são lidos.
+Os jobs aparecem com o `extends` aplicado, então as `tasks` e o `runsOn` de um job incluem
+o que ele herda dos templates; templates ocultos (`.name`) não aparecem.
 
 ### `git`
 

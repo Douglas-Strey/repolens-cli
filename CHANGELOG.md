@@ -34,6 +34,9 @@ All notable changes to RepoLens are documented here. The format follows
   includes too): included jobs are merged into the pipeline the way GitLab merges them,
   and the workflow lists them under `includes`. Only files inside the scanned directory
   are read, never URLs. ([#12](https://github.com/Douglas-Strey/repolens-cli/issues/12))
+- GitLab CI job `extends`: a job gets the script, image and tags of the templates it
+  extends (one or a list, later ones winning), so its tasks and `runsOn` reflect them.
+  ([#31](https://github.com/Douglas-Strey/repolens-cli/issues/31))
 
 ## [0.3.0] - 2026-10-21
 

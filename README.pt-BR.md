@@ -241,7 +241,7 @@ commitá-los; eles nunca contêm valores de segredos.
 | Rotas | Nuxt (rotas de servidor e páginas, `srcDir`), Next.js (App Router e Pages Router, `basePath`, `pageExtensions`), Express, Fastify, NestJS, Hono, Gin, Echo, chi, Fiber, Gorilla mux, `net/http`; prefixos de router são resolvidos entre arquivos, inclusive routers Go passados para funções |
 | Bancos de dados e ORMs | PostgreSQL, MySQL, MariaDB, SQLite/libSQL, MongoDB, Redis/Valkey, CockroachDB, SQL Server, ClickHouse e outros; Prisma, Drizzle, TypeORM, Sequelize, MikroORM, Kysely, Knex, Mongoose, GORM, Ent, sqlx, sqlc |
 | Containers | Docker Compose (todos os nomes de arquivo, overrides e variantes, `include` e `extends` locais, sintaxe longa e curta), Dockerfiles (multi-stage, substituição de `ARG`) |
-| CI | GitHub Actions, GitLab CI (com `include` local), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone e Woodpecker são listados |
+| CI | GitHub Actions, GitLab CI (com `include` local e `extends` de jobs), CircleCI, Forgejo/Gitea Actions; Azure Pipelines, Jenkins, Travis, Bitbucket, Buildkite, Drone e Woodpecker são listados |
 | Ferramentas | Vitest, Jest, Mocha, AVA, `node:test`, Bun test, Playwright, Cypress, go test, pytest; ESLint, Biome, Oxlint, Prettier, golangci-lint, Ruff; Husky, Lefthook, lint-staged; Vite, webpack, Rollup, esbuild, tsup, tsdown e outras |
 
 Outros repositórios continuam recebendo linguagens, targets de Makefile/justfile, CI, os
