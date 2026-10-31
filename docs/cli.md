@@ -294,6 +294,61 @@ Cursor (`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json`):
 }
 ```
 
+VS Code ([GitHub Copilot](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)) (`.vscode/mcp.json` in the workspace, or user settings):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+Windsurf (`~/.codeium/windsurf/mcp_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp"]
+    }
+  }
+}
+```
+
+Cline (`cline_mcp_settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp"]
+    }
+  }
+}
+```
+
+Zed (`~/.config/zed/settings.json`):
+
+```json
+{
+  "context_servers": {
+    "repolens": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@douglas-strey/repolens", "mcp"]
+      }
+    }
+  }
+}
+```
+
 Other clients take the same command: `npx -y @douglas-strey/repolens mcp <project>`, or
 `repolens mcp <project>` with RepoLens installed. Prefer the installed command for
 repositories you don't trust (see [security.md](security.md#running-repolens-itself-safely)).
