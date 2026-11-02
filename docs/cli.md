@@ -308,7 +308,9 @@ VS Code ([GitHub Copilot](https://code.visualstudio.com/docs/copilot/reference/m
 }
 ```
 
-Windsurf (`~/.codeium/windsurf/mcp_config.json`):
+Devin Desktop, formerly Windsurf (`~/.config/devin/mcp_config.json`, or
+`%AppData%\devin\mcp_config.json` on Windows; Windsurf releases before the rename read
+`~/.codeium/windsurf/mcp_config.json`):
 
 ```json
 {
@@ -347,9 +349,8 @@ Zed (`~/.config/zed/settings.json`):
 }
 ```
 
-Windsurf, Cline and Zed configure servers globally and do not document starting them in the
-project directory or expanding workspace variables. Pass the project as an argument (or set `cwd`
-if the client supports it) so RepoLens scans the intended directory. None of these four clients
+Devin Desktop, Cline and Zed don't document the directory they start servers in or a
+variable for the project, so pass the project as an argument. None of these four clients
 documents a startup timeout.
 
 Other clients take the same command: `npx -y @douglas-strey/repolens mcp <project>`, or
