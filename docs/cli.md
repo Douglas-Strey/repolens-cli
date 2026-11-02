@@ -294,6 +294,64 @@ Cursor (`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json`):
 }
 ```
 
+VS Code ([GitHub Copilot](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration)) (`.vscode/mcp.json` in the workspace, or the user-profile `mcp.json` via **MCP: Open User Configuration**):
+
+```json
+{
+  "servers": {
+    "repolens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+Windsurf (`~/.codeium/windsurf/mcp_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "/path/to/project"]
+    }
+  }
+}
+```
+
+Cline (`cline_mcp_settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "repolens": {
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "/path/to/project"]
+    }
+  }
+}
+```
+
+Zed (`~/.config/zed/settings.json`):
+
+```json
+{
+  "context_servers": {
+    "repolens": {
+      "command": "npx",
+      "args": ["-y", "@douglas-strey/repolens", "mcp", "/path/to/project"]
+    }
+  }
+}
+```
+
+Windsurf, Cline and Zed configure servers globally and do not document starting them in the
+project directory or expanding workspace variables. Pass the project as an argument (or set `cwd`
+if the client supports it) so RepoLens scans the intended directory. None of these four clients
+documents a startup timeout.
+
 Other clients take the same command: `npx -y @douglas-strey/repolens mcp <project>`, or
 `repolens mcp <project>` with RepoLens installed. Prefer the installed command for
 repositories you don't trust (see [security.md](security.md#running-repolens-itself-safely)).
